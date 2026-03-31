@@ -43,7 +43,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_RESPONSE_SUCCESS
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class QueueFetchService : Service() {
+class PA2DataFetchService : Service() {
     @Inject lateinit var musicFetcher: MusicFetcher
     @Inject lateinit var applicationCoroutineScope: CoroutineScope
 

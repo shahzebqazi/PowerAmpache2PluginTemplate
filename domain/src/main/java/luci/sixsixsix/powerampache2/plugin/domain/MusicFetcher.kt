@@ -36,4 +36,8 @@ interface MusicFetcher {
     val recentAlbumsFlow: MutableStateFlow<List<Album>>
     val latestAlbumsFlow: MutableStateFlow<List<Album>>
     val highRatedAlbumsFlow: MutableStateFlow<List<Album>>
+
+    fun getSongsFromAlbum(albumId: String): List<Song>
+    fun getSongsFromPlaylist(playlistId: String): List<Song>
+    fun getAlbumsFromArtist(artistId: String): List<Album>
 }

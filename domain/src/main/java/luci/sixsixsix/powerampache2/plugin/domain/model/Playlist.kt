@@ -34,6 +34,7 @@ open class Playlist(
     val preciseRating: Float = 0.0f,
     var rating: Int = 0,
     val averageRating: Float = 0.0f,
+    val songs: List<Song> = emptyList()
 ): AmpacheModel {
     companion object {
         fun empty() = Playlist("", "")

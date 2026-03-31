@@ -39,7 +39,8 @@ data class Album(
     val artUrl: String = "",
     val flag: Int = 0,
     val rating: Int = 0,
-    val averageRating: Float = 0.0f
+    val averageRating: Float = 0.0f,
+    val songs: List<Song> = emptyList()
 ): Comparable<Album>, AmpacheModel {
     override fun compareTo(other: Album): Int = id.compareTo(other.id)
 

@@ -40,4 +40,16 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val recentAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val latestAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
+
+    override fun getSongsFromAlbum(albumId: String): List<Song> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getSongsFromPlaylist(playlistId: String): List<Song> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getAlbumsFromArtist(playlistId: String): List<Album> {
+        TODO("Not yet implemented")
+    }
 }
