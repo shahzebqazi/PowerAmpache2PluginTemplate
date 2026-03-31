@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Auto Plugin for Power Ampache 2</string>
+    <string name="app_name_topBar">Auto Queue - Power Ampache 2</string>
+    <string name="toast_noConnection_warning">Connect to Auto before playing music</string>
+    <string name="mainScreen_emptyQueue_title">Empty Queue</string>
+    <string name="mainScreen_emptyQueue_subtitle">Load a queue in Power Ampache 2 to start casting your music</string>
+</resources>
