@@ -21,11 +21,19 @@
  */
 package luci.sixsixsix.powerampache2.plugin.domain.usecase
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
+import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
+import luci.sixsixsix.powerampache2.plugin.domain.model.mocks.AlbumsMock
+import luci.sixsixsix.powerampache2.plugin.domain.model.mocks.PlaylistsMock
 import javax.inject.Inject
 
 class PlaylistsStateFlow @Inject constructor(private val musicFetcher: MusicFetcher) {
-    operator fun invoke(): StateFlow<List<Playlist>> = musicFetcher.playlistsFlow
+    operator fun invoke(useMock: Boolean = false): StateFlow<List<Playlist>> =
+        if (!useMock)
+            musicFetcher.playlistsFlow
+        else
+            MutableStateFlow(PlaylistsMock.playlists)
 }
