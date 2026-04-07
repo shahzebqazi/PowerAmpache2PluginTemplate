@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Web mockup (npm)
+mockup/node_modules/
