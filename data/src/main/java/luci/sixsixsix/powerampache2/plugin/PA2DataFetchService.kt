@@ -33,41 +33,40 @@ import android.os.RemoteException
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.plugin.data.dto.AlbumsDto
 import luci.sixsixsix.powerampache2.plugin.data.dto.ArtistsDto
 import luci.sixsixsix.powerampache2.plugin.data.dto.PlaylistsDto
 import luci.sixsixsix.powerampache2.plugin.data.dto.SongsDto
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
+import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcherListener
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_ALBUMS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_ARTISTS
+import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ALBUMS
+import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ALBUMS_ARTIST
+import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ARTISTS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_SONGS_ALBUM
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_SONGS_PLAYLIST
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_PLAYLISTS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_SONGS_ALBUM
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_SONGS_PLAYLIST
-
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ACTION
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ALBUM_ID
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ID
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_PLAYLIST_ID
+import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_QUERY
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_REQUEST_JSON
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_RESPONSE_SUCCESS
-import luci.sixsixsix.powerampache2.plugin.domain.common.MSG_DATA
+import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
-import luci.sixsixsix.powerampache2.plugin.domain.model.mocks.SongsMock.Companion.songs
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class PA2DataFetchService : Service() {
+class PA2DataFetchService : Service(), MusicFetcherListener {
     @Inject lateinit var musicFetcher: MusicFetcher
     @Inject lateinit var applicationCoroutineScope: CoroutineScope
     private val gson = Gson()
-    // Store client's messenger for bidirectional communication
-    private var clientMessenger: Messenger? = null
-
+    private var clientMessenger: Messenger? = null // client's messenger for bidirectional communication
 
     private val messenger = Messenger(object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
@@ -91,6 +90,50 @@ class PA2DataFetchService : Service() {
         }
     })
 
+    override fun onCreate() {
+        super.onCreate()
+        musicFetcher.musicFetcherListener = this
+    }
+
+    override fun onDestroy() {
+        musicFetcher.musicFetcherListener = null
+        super.onDestroy()
+    }
+
+    fun requestArtists(query: String = "") {
+        clientMessenger?.let { messenger ->
+            val msg = Message.obtain().apply {
+                data = Bundle().apply {
+                    putString(KEY_ACTION, ACTION_GET_ARTISTS)
+                    putString(KEY_QUERY, query)
+                }
+                println("aaaa sending req ACTION_GET_ARTISTS query: ${query}")
+            }
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                clientMessenger = null
+            }
+        }
+    }
+
+    fun requestAlbums(query: String = "") {
+        clientMessenger?.let { messenger ->
+            val msg = Message.obtain().apply {
+                data = Bundle().apply {
+                    putString(KEY_ACTION, ACTION_GET_ALBUMS)
+                    putString(KEY_QUERY, query)
+                }
+                println("aaaa sending req ACTION_GET_ALBUMS query: ${query}")
+            }
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                clientMessenger = null
+            }
+        }
+    }
+
     /**
      * Request songs for a specific album from the client
      */
@@ -101,7 +144,28 @@ class PA2DataFetchService : Service() {
                     putString(KEY_ACTION, ACTION_GET_SONGS_ALBUM)
                     putString(KEY_ALBUM_ID, albumId)
                 }
-                //println("aaaa requestSongsForAlbum id: ${albumId}")
+                println("aaaa Fetcher.requestSongsForAlbum id: ${albumId}")
+            }
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                clientMessenger = null
+            }
+        }
+    }
+
+    /**
+     * Request songs for a specific album from the client
+     */
+    fun requestAlbumsFromArtist(artistId: String) {
+        // TODO: NOT IMPLEMENTED
+        clientMessenger?.let { messenger ->
+            val msg = Message.obtain().apply {
+                data = Bundle().apply {
+                    putString(KEY_ACTION, ACTION_GET_ALBUMS_ARTIST)
+                    putString(KEY_ID, artistId)
+                }
+                println("aaaa Fetcher.requestAlbumsFromArtist id: ${artistId}")
             }
             try {
                 messenger.send(msg)
@@ -118,7 +182,7 @@ class PA2DataFetchService : Service() {
                     putString(KEY_ACTION, ACTION_GET_SONGS_PLAYLIST)
                     putString(KEY_PLAYLIST_ID, playlistId)
                 }
-                println("aaaa requestSongsForPlaylist id: ${playlistId}")
+                //println("aaaa requestSongsForPlaylist id: ${playlistId}")
             }
             try {
                 messenger.send(msg)
@@ -134,18 +198,21 @@ class PA2DataFetchService : Service() {
         when(action) {
             ACTION_PLAYLISTS -> gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists.also { playlists ->
                 println("aaaa ACTION_PLAYLISTS ${playlists.size}")
-
                 musicFetcher.playlistsFlow.value = playlists
-                // TODO: DO NOT do this! songs need to be requested on demand
-                for(playlist in playlists) {
-                    requestSongsForPlaylist(playlist.id)
+            }
+            ACTION_ARTISTS -> gson.fromJson(jsonStr, ArtistsDto::class.java).artists.also { artists ->
+                musicFetcher.artistsFlow.update { oldArtists ->
+                    val combined = (oldArtists + artists).distinct()
+                    println("aaaa parseJsonString ACTION_ARTISTS $albumId size ${combined.size}")
+                    combined
                 }
             }
-            ACTION_ARTISTS -> gson.fromJson(jsonStr, ArtistsDto::class.java).artists.also {
-                musicFetcher.artistsFlow.value = it
-            }
-            ACTION_ALBUMS -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also {
-                musicFetcher.albumsFlow.value = it
+            ACTION_ALBUMS -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                musicFetcher.albumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa parseJsonString ACTION_ALBUMS $albumId size ${combined.size}")
+                    combined
+                }
             }
             ACTION_SONGS_ALBUM -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
                 //println("aaaa ACTION_SONGS_RESPONSE ${albumId}")
@@ -154,45 +221,57 @@ class PA2DataFetchService : Service() {
                 }
             }
             ACTION_SONGS_PLAYLIST -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
-                println("aaaa ACTION_SONGS_PLAYLIST ${albumId}  ${songs.size}")
-                // TODO: DO NOT do this! songs need to be requested on demand
                 musicFetcher.playlistSongsMapFlow.update { map ->
-                    (map + (albumId!! to songs))
+                    val newList: LinkedHashSet<Song> = LinkedHashSet(map[albumId] ?: emptyList())
+                    newList.addAll(songs)
+                    //println("aaaa ACTION_SONGS_PLAYLIST ${albumId}  ${newList.size}")
+
+                    (map + (albumId!! to newList.toList()))
                 }
             }
             "highest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
-                println("aaaa highest_albums   ${songs.size}")
-
-                musicFetcher.highRatedAlbumsFlow.value = albums
-                // TODO: DO NOT do this! songs need to be requested on demand
-                for(album in albums) {
-                    requestSongsForAlbum(album.id)
+                addToAlbumsList(albums)
+                musicFetcher.highRatedAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa parseJsonString highest_albums $albumId size ${combined.size}")
+                    combined
                 }
             }
             "favourite_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
-                musicFetcher.favouriteAlbumsFlow.value = albums
-                // TODO: DO NOT do this! songs need to be requested on demand
-                for(album in albums) {
-                    requestSongsForAlbum(album.id)
+                addToAlbumsList(albums)
+                musicFetcher.favouriteAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa favouriteAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
                 }
             }
             "recent_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
-                // TODO: DO NOT do this! songs need to be requested on demand
-                musicFetcher.recentAlbumsFlow.value = albums
-                for(album in albums) {
-                    requestSongsForAlbum(album.id)
+                addToAlbumsList(albums)
+                musicFetcher.recentAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa recentAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
                 }
             }
             "latest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
-                // TODO: DO NOT do this! songs need to be requested on demand
-                musicFetcher.latestAlbumsFlow.value = albums
-                for(album in albums) {
-                    requestSongsForAlbum(album.id)
+                addToAlbumsList(albums)
+                musicFetcher.latestAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa latestAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
                 }
             }
             "queue" -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also {
                 musicFetcher.currentQueueFlow.value = it
             }
+        }
+    }
+
+    private fun addToAlbumsList(albums: List<Album>) {
+        musicFetcher.albumsFlow.update { oldAlbums ->
+            val combined = (oldAlbums + albums).distinct()
+            println("aaaa addToAlbumsList size ${combined.size}")
+            combined
         }
     }
 
@@ -220,4 +299,11 @@ class PA2DataFetchService : Service() {
             }
         }
     }
+
+    // MUSIC LISTENER METHODS
+    override fun getAlbums(query: String) = requestAlbums(query)
+    override fun getArtists(query: String) = requestArtists(query)
+    override fun getSongsFromAlbum(albumId: String) = requestSongsForAlbum(albumId)
+    override fun getSongsFromPlaylist(playlistId: String) = requestSongsForPlaylist(playlistId)
+    override fun getAlbumsFromArtist(artistId: String) = requestAlbumsFromArtist(artistId)
 }

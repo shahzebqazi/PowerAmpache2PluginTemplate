@@ -29,6 +29,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 
 interface MusicFetcher {
+    var musicFetcherListener: MusicFetcherListener?
     val currentQueueFlow: MutableStateFlow<List<Song>>
     val playlistsFlow: MutableStateFlow<List<Playlist>>
     val artistsFlow: MutableStateFlow<List<Artist>>
@@ -40,7 +41,9 @@ interface MusicFetcher {
     val albumSongsMapFlow: MutableStateFlow<Map<String, List<Song>>>
     val playlistSongsMapFlow: MutableStateFlow<Map<String, List<Song>>>
 
+    fun getArtists(query: String = ""): Flow<List<Artist>>
+    fun getAlbums(query: String = ""): Flow<List<Album>>
     fun getSongsFromAlbum(albumId: String): Flow<List<Song>>
     fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>>
-    fun getAlbumsFromArtist(artistId: String): List<Album>
+    fun getAlbumsFromArtist(artistId: String): Flow<List<Album>>
 }

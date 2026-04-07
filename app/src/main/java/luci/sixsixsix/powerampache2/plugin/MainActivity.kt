@@ -35,28 +35,33 @@ import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImpl() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        openPowerAmpache2()
+        handleOnBackPressed(this) // prevent the activity from being destroyed on back-press
 
-        // Launch another app by package name
-        val intent = packageManager.getLaunchIntentForPackage("luci.sixsixsix.powerampache2.fdroid.debug")?.apply {
+        // uncomment for testing, viewModel contains a few examples to get data
+        testContent()
+    }
+
+    private fun testContent() {
+        setContent {
+            PowerAmpache2Theme(
+                darkTheme = true,
+                dynamicColor = false
+            ) {
+                SongListScreen()
+            }
+        }
+    }
+
+    /**
+     * Launch another app by package name
+     */
+    private fun openPowerAmpache2() {
+        // TODO: add all possible package names
+        packageManager.getLaunchIntentForPackage("luci.sixsixsix.powerampache2.fdroid.debug")?.apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        }
+        }?.let { startActivity(it) }
 
-        intent?.let {
-            startActivity(it)
-        }
-
-        finish()
-
-//        // prevent the activity from being destroyed on back-press
-        handleOnBackPressed(this)
-//
-//        setContent {
-//            PowerAmpache2Theme(
-//                darkTheme = true,
-//                dynamicColor = false
-//            ) {
-//                SongListScreen()
-//            }
-//        }
+        //finish()
     }
 }

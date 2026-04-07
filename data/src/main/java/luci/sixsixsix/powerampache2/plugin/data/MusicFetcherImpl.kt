@@ -24,9 +24,9 @@ package luci.sixsixsix.powerampache2.plugin.data
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
+import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcherListener
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
 import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
@@ -37,6 +37,7 @@ import kotlin.collections.emptyList
 
 @Singleton
 class MusicFetcherImpl @Inject constructor(): MusicFetcher {
+    override var musicFetcherListener: MusicFetcherListener? = null
     override val currentQueueFlow = MutableStateFlow<List<Song>>(emptyList())
     override val playlistsFlow = MutableStateFlow<List<Playlist>>(emptyList())
     override val artistsFlow = MutableStateFlow<List<Artist>>(emptyList())
@@ -49,19 +50,44 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val playlistSongsMapFlow: MutableStateFlow<Map<String, List<Song>>> = MutableStateFlow(emptyMap())
 
     override fun getSongsFromAlbum(albumId: String): Flow<List<Song>> {
+        println("aaaa MusicFetcherImpl.getSongsFromAlbum $albumId")
+        musicFetcherListener?.let {
+            it.getSongsFromAlbum(albumId)
+        }
         return albumSongsMapFlow
             .map { it[albumId] ?: emptyList() }
             .distinctUntilChanged()
     }
 
     override fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>> {
-        println("aaaa getSongsFromPlaylist $playlistId")
+        println("aaaa MusicFetcherImpl.getSongsFromPlaylist $playlistId")
+        musicFetcherListener?.let {
+            it.getSongsFromPlaylist(playlistId)
+        }
         return playlistSongsMapFlow
             .map { it[playlistId] ?: emptyList() }
             .distinctUntilChanged()
     }
 
-    override fun getAlbumsFromArtist(playlistId: String): List<Album> {
-        TODO("Not yet implemented")
+    override fun getArtists(query: String): Flow<List<Artist>> =
+        musicFetcherListener?.let {
+            it.getArtists(query)
+            artistsFlow
+        } ?: artistsFlow
+
+    override fun getAlbums(query: String): Flow<List<Album>> =
+        musicFetcherListener?.let {
+            it.getAlbums(query)
+            albumsFlow
+        } ?: albumsFlow
+
+
+    override fun getAlbumsFromArtist(artistId: String): Flow<List<Album>> {
+        println("aaaa MusicFetcherImpl.getAlbumsFromArtist $artistId")
+        musicFetcherListener?.getAlbumsFromArtist(artistId)
+
+        return albumsFlow.map { albums ->
+            albums.filter { it.artist.id == artistId }
+        }.distinctUntilChanged()
     }
 }
