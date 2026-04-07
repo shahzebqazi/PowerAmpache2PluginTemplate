@@ -39,7 +39,7 @@ class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImp
         handleOnBackPressed(this) // prevent the activity from being destroyed on back-press
 
         // uncomment for testing, viewModel contains a few examples to get data
-        testContent()
+        // testContent()
     }
 
     private fun testContent() {
@@ -62,6 +62,6 @@ class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImp
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }?.let { startActivity(it) }
 
-        //finish()
+        finish()
     }
 }
