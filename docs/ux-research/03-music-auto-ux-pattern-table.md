@@ -32,10 +32,10 @@ Cross-reference: [01-platform-constraint-sheet.md](01-platform-constraint-sheet.
 
 ## Phone vs car APK
 
-This repo has **no** root **`app`** module. **Power-Ampache-2** is the phone product; **PowerAmpache2PluginTemplate** (or PA2) supplies the **Media3** build for **DHU**. When comparing mockups:
+This repo includes a **`app/`** Compose module (plugin template UI). **Power-Ampache-2** is the main phone product; **PowerAmpache2PluginTemplate** (or PA2) supplies the **Media3** build for **DHU**. When comparing prototypes:
 
 - **PA2 Auto:** Pattern column “Host vs app” = mostly **host-rendered** lists and player chrome.
-- **Phone frames:** **Phone — PA2 theme** in **`mockup/`**; car frames use **Auto — host media** patterns.
+- **Phone:** **Phone — PA2 theme** in Compose / **Power-Ampache-2**; car surfaces use **Auto — host media** patterns (content and session, not app-drawn chrome).
 
 ---
 

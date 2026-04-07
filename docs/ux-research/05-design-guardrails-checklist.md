@@ -21,11 +21,11 @@ Use before major UX reviews, browse-tree changes, or Android Auto release candid
 
 ---
 
-## Browser mockups (`mockup/`) vs shipping verification
+## Design prototypes vs shipping verification
 
-| Guardrail | What mockups can show | What still requires product / platform proof |
-|-----------|------------------------|---------------------------------------------|
-| G1, G2 | N/A — mockups are not a submission artifact | Play checklist, host behaviour, policy updates |
+| Guardrail | What prototypes can show | What still requires product / platform proof |
+|-----------|---------------------------|---------------------------------------------|
+| G1, G2 | N/A — prototypes are not a submission artifact | Play checklist, host behaviour, policy updates |
 | G3, G4 | Now-playing layouts with play/pause and skip **visible** on one surface | That **MediaSession** actions and host UI actually expose them in one step on target OEMs |
 | G5 | Flows without keyboard for P0/P1 (browse + voice implied) | Voice **MediaSession** wiring and locale tests |
 | G6, G7 | Shallow root browse, **ellipsized** row copy | Real **`MediaItem`** tree depth and string limits in production |
@@ -34,7 +34,7 @@ Use before major UX reviews, browse-tree changes, or Android Auto release candid
 | G10 | Copy / notes only | Flow audit: settings on phone or parked |
 | G11, G12 | Static frames only; no video | Artwork pipeline, category rules |
 
-Treat Svelte frames as **aligned with intent** when they follow [08-mockup-handoff-package.md](08-mockup-handoff-package.md) labels and the **Fidelity, labelling, and compliance limits** section there.
+Treat wireframes and Figma as **aligned with intent** when they follow [08-prototype-handoff-package.md](08-prototype-handoff-package.md) labels and the **Fidelity, labelling, and compliance limits** section there.
 
 ---
 
@@ -43,7 +43,7 @@ Treat Svelte frames as **aligned with intent** when they follow [08-mockup-hando
 | Date | Reviewer | Notes |
 |------|----------|-------|
 | 2026-03-30 | Research pass (initial) | Populate SRC links to exact quality-checklist sections in next edit. |
-| 2026-03-30 | Mockup/doc hardening | Added primary SRC link row; **Browser mockups vs shipping verification** table tied to `mockup/`. |
+| 2026-03-30 | Mockup/doc hardening | Added primary SRC link row; **Browser mockups vs shipping verification** table (later generalized to design prototypes). |
 
 ---
 

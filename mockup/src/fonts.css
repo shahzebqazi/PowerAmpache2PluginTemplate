@@ -1,8 +1,0 @@
-/* Nunito variable — same family as PowerAmpache2Theme (Type.kt); bundled locally (no runtime CDN). */
-@font-face {
-  font-family: 'Nunito';
-  src: url('/fonts/Nunito-Variable.ttf') format('truetype');
-  font-weight: 200 1000;
-  font-style: normal;
-  font-display: swap;
-}

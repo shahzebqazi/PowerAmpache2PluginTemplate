@@ -23,10 +23,10 @@ Summarize an **evidence-oriented** baseline for **safe, low-friction** music use
 
 - Prioritize browse roots: **continue listening**, **recents**, **playlists** before deep **artist → album** paths.
 - Exercise **voice** flows and **error** surfacing on the **Desktop Head Unit** and, when possible, a real vehicle.
-- Label mockups by surface: **phone (PA2 theme)** vs **host media** vs **plugin Auto** — this repo has **no** root Compose app (use **mockup/** and **Power-Ampache-2** for phone reference).
+- Label prototypes by surface: **phone (PA2 theme)** vs **host media** vs **plugin Auto** — this template’s **`app/`** module is a **Compose** reference for the plugin; full PA2 phone UI lives in **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**.
 
 ## Full detail
 
 - [07-research-synthesis.md](07-research-synthesis.md)  
-- [08-mockup-handoff-package.md](08-mockup-handoff-package.md)  
+- [08-prototype-handoff-package.md](08-prototype-handoff-package.md)  
 - Index: [README.md](README.md)

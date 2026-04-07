@@ -11,11 +11,11 @@ Use this sheet when scoping **Android Auto** behaviour: what the **head unit** c
 
 **Code-scan caveat (avoid overstating shipped behaviour):** A **`MediaLibraryService`** / **`MediaLibrarySession`** implementation with browse callbacks (e.g. `onGetChildren`) was **not found** under `Power-Ampache-2/**/*.kt` in this workspace snapshot. Android Auto **library browsing** still requires meeting Google’s media-for-cars expectations (see [Create audio media apps](https://developer.android.com/training/cars/media) and [Configure the manifest](https://developer.android.com/training/cars/media/configure-manifest)). **Treat “browse tree on Auto” as target UX and engineering verification**, not something this doc proves from code alone.
 
-**Conclusion:** PA2 is aligned with the **Media3 session service** integration style Google documents for car media apps. The **Cars App Library** templated path is **not** used in PA2’s player service. This workspace has **no** root Compose **`app`** — phone reference is **`mockup/`** and **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**; **not** `androidx.car.app` for standard Auto media.
+**Conclusion:** PA2 is aligned with the **Media3 session service** integration style Google documents for car media apps. The **Cars App Library** templated path is **not** used in PA2’s player service. This template’s **`app/`** module is a **Compose** reference for the plugin; full PA2 phone UI is **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**; standard Auto media is **not** `androidx.car.app`.
 
 | Path | PA2 upstream | This umbrella repo |
 |------|----------------|---------------------|
-| Media3 **`MediaSessionService`** + **`MediaSession`** + manifest **media-browser** intents | Yes | **`mockup/`** + docs only — **Media3** in nested **plugin** / PA2 clone |
+| Media3 **`MediaSessionService`** + **`MediaSession`** + manifest **media-browser** intents | Yes | **`app/`** plugin module + docs — **Media3** in plugin / PA2 clone |
 | **Full library browse** on Auto (`MediaLibraryService` / `MediaLibrarySession` pattern) | **Verify in upstream** (not confirmed in this doc’s code scan) | Plugin template on your branch when present |
 | Car App Library (custom templates) | Not in PA2 player integration | N/A in this repo |
 

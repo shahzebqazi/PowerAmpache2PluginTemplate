@@ -61,8 +61,8 @@ High-level areas (conceptual; confirm against current nav graph):
 - **Desktop Head Unit:** Development; document **input** and **latency** differences vs real HU ([Testing](https://developer.android.com/training/cars/testing)).
 - **Automotive OS:** Same **media** architecture for audio path; verify **AAOS**-specific quality checklist items at release time.
 
-## Now playing (mockup reference)
+## Now playing (host media reference)
 
-**Host-rendered** Android Auto remains **different** from handheld UI. The **`mockup/`** site is **plugin / Auto only** (no phone frames); handheld now playing lives in **Power-Ampache-2**.
+**Host-rendered** Android Auto remains **different** from handheld UI. Handheld now playing lives in **Power-Ampache-2**; car surfaces are **host-drawn** from your **MediaSession** and **`MediaItem`** tree.
 
-**`AutoNowPlaying.svelte`:** Host-like **now playing** preview with PA2 accents for review — **metadata**, **seek** row (**~48dp** surface intent), **transport**. Placeholder duration **243 s** (4:03). **`mockup/`** is a browser reference for car hierarchy, not OEM pixels.
+For **prototype** frames, aim for host-like **metadata**, **seek** row (**~48dp** surface intent where the host exposes it), and **transport** — **illustration only**, not OEM pixels.

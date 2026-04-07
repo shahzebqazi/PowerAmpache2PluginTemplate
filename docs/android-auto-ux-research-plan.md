@@ -36,7 +36,7 @@ This plan supports building an in-car experience that is **usable while driving*
 | **B** | Driver task & music UX | Task analysis, competitive/ pattern scan, screen-level implications |
 | **C** | Safety & cognitive load | Distraction research synthesis, design guardrails checklist |
 | **D** | Accessibility | Automotive + mobile a11y matrix, gaps for projected UI |
-| **E** | Synthesis & handoff | Design implications doc, risks, open questions for mockups/engineering |
+| **E** | Synthesis & handoff | Design implications doc, risks, open questions for prototypes/engineering |
 
 Phases **B–D** can overlap once Phase **A** is far enough to avoid rework.
 
@@ -135,7 +135,7 @@ Phases **B–D** can overlap once Phase **A** is far enough to avoid rework.
 **Artifacts**
 
 - Single **Research synthesis** (PDF or markdown) with executive summary ≤ 1 page.
-- **Handoff package** for mockup developer: prioritized scenarios + guardrails + open questions.
+- **Handoff package** for design/engineering: prioritized scenarios + guardrails + open questions.
 
 ---
 
@@ -170,7 +170,7 @@ Phases **B–D** can overlap once Phase **A** is far enough to avoid rework.
 
 | Risk | Mitigation |
 |------|------------|
-| Research optimizes phone UI and ignores Auto limits | Phase A constraint sheet; no mockup without it |
+| Research optimizes phone UI and ignores Auto limits | Phase A constraint sheet; no prototype work without it |
 | Over-citing outdated pre-smartphone studies | Prefer reviews from the last ~10–15 years; note vehicle-UI evolution |
 | Accessibility conflated with “more text on screen” | Phase D matrix; cap metadata in motion per guardrails |
 | No access to real car hardware | DHU + document limitations; flag “verify on road” items |

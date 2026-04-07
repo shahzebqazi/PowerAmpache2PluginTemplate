@@ -7,9 +7,9 @@ This document reconciles phases **A–D** into one narrative and calls out **tra
 ## 2. Platform reality (Phase A)
 
 - **PA2** ships **`SimpleMediaService` : `MediaSessionService`** with a **`MediaSession`** and manifest intent filters for **legacy media browser** discovery — the same **family** of integration described in [Create audio media apps](https://developer.android.com/training/cars/media). Whether **full library browse** is implemented in upstream must be **verified in code** (see caveat in [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md)).
-- This **android-auto** umbrella repo uses **`mockup/`** for phone + Auto hierarchy; **Media3** / **DHU** validation uses **Power-Ampache-2** and/or **PowerAmpache2PluginTemplate** APKs, not a root **`app`** module (removed).
+- This repo’s **`app/`** module is a **Compose** plugin UI reference; **Media3** / **DHU** validation uses **Power-Ampache-2** and/or **PowerAmpache2PluginTemplate** APKs.
 
-**Tradeoff:** Anything that **looks** like custom head-unit chrome can **misrepresent** PA2’s **host-rendered** car UX unless labelled (**Auto — host media** in mockups).
+**Tradeoff:** Anything that **looks** like custom head-unit chrome can **misrepresent** PA2’s **host-rendered** car UX unless labelled (**Auto — host media** in prototypes).
 
 ## 3. Driver tasks and music patterns (Phase B)
 
@@ -63,5 +63,5 @@ This document reconciles phases **A–D** into one narrative and calls out **tra
 
 ## 9. Next documents
 
-- Mockup priorities and engineering checklist: [08-mockup-handoff-package.md](08-mockup-handoff-package.md)
+- Prototype priorities and engineering checklist: [08-prototype-handoff-package.md](08-prototype-handoff-package.md)
 - Phone theme file map: [../design-system/appendix-pa2-theme-inventory.md](../design-system/appendix-pa2-theme-inventory.md)

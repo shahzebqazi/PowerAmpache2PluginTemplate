@@ -25,7 +25,7 @@
 - **Focus order** matches visual order on settings and auth.
 - **Color:** Do not rely on **color alone** for state (e.g. offline = icon + text).
 - **Theme:** Document tokens in [../design-system/01-brand-and-language.md](../design-system/01-brand-and-language.md).
-- **Browser mockups (`mockup/`):** Use **≥48 CSS px** touch targets on interactive controls where feasible; gate **decorative transitions** on **`prefers-reduced-motion`** (see `AutoNowPlaying.svelte`, `HomePage.svelte`). **`FrameLabel`** `surface="auto"` vs `surface="auto-pa2"` documents host-only vs PA2-accented car previews ([08-mockup-handoff-package.md](08-mockup-handoff-package.md)).
+- **Design prototypes (Figma / static frames):** Use **≥48 CSS px** or **dp-equivalent** touch targets on interactive controls where feasible; gate **decorative transitions** on **`prefers-reduced-motion`** in web previews. Label frames **host-only** vs **PA2-accented** so reviewers do not confuse preview chrome with OEM styling ([08-prototype-handoff-package.md](08-prototype-handoff-package.md)).
 
 ---
 

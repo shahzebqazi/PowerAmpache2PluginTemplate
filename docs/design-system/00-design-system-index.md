@@ -18,7 +18,7 @@ On **Android Auto**, the **head unit** draws browse lists, now playing, and tran
 
 - Android and Compose engineers working on the handheld app
 - Engineers integrating **Media3** / Android Auto (session, browse tree, metadata — not car pixel theme)
-- Anyone building browser mockups or marketing screenshots
+- Anyone building design prototypes or marketing screenshots
 
 ## Source of truth
 
@@ -48,9 +48,9 @@ When the upstream theme changes, update the **appendix** and token tables in [01
 
 Do not promise PA2 **teal primary** or **Nunito** inside the **projected** media UI unless the product moves to a **custom template** path and platform allows it.
 
-### Browser mockups (`mockup/`)
+### Design prototypes (Figma / static frames)
 
-The Vite + Svelte app shows **two labelled surfaces**: **Phone — PA2 theme** (tokens and Nunito from this folder) and **Auto — host media** (neutral chrome; content-only parity with production). Mockup **frame labels** use a **neutral badge** on car frames so stakeholders do not confuse preview chrome with OEM styling. Mockups support reviews and copy checks; **compliance** with [Google Play app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality) and [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards) is proven in **shipping code + host behaviour**, not in the browser alone (see [../ux-research/05-design-guardrails-checklist.md](../ux-research/05-design-guardrails-checklist.md)).
+Wireframes or screenshots should show **two labelled surfaces**: **Phone — PA2 theme** (tokens and Nunito from this folder) and **Auto — host media** (neutral chrome; content-only parity with production). Use a **neutral badge** on car frames so stakeholders do not confuse preview chrome with OEM styling. Prototypes support reviews and copy checks; **compliance** with [Google Play app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality) and [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards) is proven in **shipping code + host behaviour**, not in static images alone (see [../ux-research/05-design-guardrails-checklist.md](../ux-research/05-design-guardrails-checklist.md)).
 
 ## Optional tools
 
