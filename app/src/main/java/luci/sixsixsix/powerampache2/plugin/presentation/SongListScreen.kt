@@ -64,9 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.mediarouter.app.MediaRouteButton
 import coil.compose.AsyncImage
-import com.google.android.gms.cast.framework.CastButtonFactory
 import luci.sixsixsix.powerampache2.plugin.R
 
 val mainFontSize = 16.sp
@@ -81,6 +79,11 @@ val surfaceVariantLight = Color(0xFFDFE5E3)
 fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val queue = viewModel.queueStateFlow.collectAsState()
+    val highest = viewModel.highestAlbumsStateFlow.collectAsState()
+    val singleAlbum = viewModel.singleAlbumStateFlow.collectAsState()
+
+    if (singleAlbum.value.isNotEmpty())
+        println("aaaa " + singleAlbum.value[0].title)
 
     Scaffold(
         modifier = Modifier
@@ -202,18 +205,4 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
             }
         }
     }
-}
-
-@Composable
-fun CastActionButton(needsConnection: Boolean) {
-    AndroidView(
-        modifier = Modifier.size(48.dp),
-        factory = { ctx ->
-            MediaRouteButton(ctx).apply {
-                CastButtonFactory.setUpMediaRouteButton(ctx, this)
-                // Trigger dialog if not connected
-                if (needsConnection) { post { performClick() } }
-            }
-        }
-    )
 }

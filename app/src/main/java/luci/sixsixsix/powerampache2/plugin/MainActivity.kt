@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.plugin
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.fragment.app.FragmentActivity
@@ -35,16 +36,27 @@ class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImp
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // prevent the activity from being destroyed on back-press
-        handleOnBackPressed(this)
-
-        setContent {
-            PowerAmpache2Theme(
-                darkTheme = true,
-                dynamicColor = false
-            ) {
-                SongListScreen()
-            }
+        // Launch another app by package name
+        val intent = packageManager.getLaunchIntentForPackage("luci.sixsixsix.powerampache2.fdroid.debug")?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
+
+        intent?.let {
+            startActivity(it)
+        }
+
+        finish()
+
+//        // prevent the activity from being destroyed on back-press
+        handleOnBackPressed(this)
+//
+//        setContent {
+//            PowerAmpache2Theme(
+//                darkTheme = true,
+//                dynamicColor = false
+//            ) {
+//                SongListScreen()
+//            }
+//        }
     }
 }

@@ -4,8 +4,4 @@
 <!--        <item name="mediaRouteButtonStyle">@style/CustomMediaRouteButton</item>-->
     </style>
 
-    <style name="CustomMediaRouteButton" parent="Widget.MediaRouter.MediaRouteButton">
-        <item name="tint">@color/teal_200</item>
-    </style>
-
 </resources>

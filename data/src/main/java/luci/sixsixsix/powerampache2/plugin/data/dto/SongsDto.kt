@@ -24,7 +24,7 @@ package luci.sixsixsix.powerampache2.plugin.data.dto
 import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 
-data class QueueDto(
-    @SerializedName("queue")
-    val queue: List<Song> = listOf()
+data class SongsDto(
+    @SerializedName("data")
+    val songs: List<Song> = listOf()
 )

@@ -29,7 +29,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.model.mocks.SongsMock
 import javax.inject.Inject
 
 class QueueStateFlow @Inject constructor(private val musicFetcher: MusicFetcher) {
-    suspend operator fun invoke(useMock: Boolean = false) =
+    operator fun invoke(useMock: Boolean = false) =
         if (!useMock)
             musicFetcher.currentQueueFlow
         else

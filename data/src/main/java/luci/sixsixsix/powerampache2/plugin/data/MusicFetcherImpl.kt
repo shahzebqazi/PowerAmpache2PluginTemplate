@@ -21,7 +21,11 @@
  */
 package luci.sixsixsix.powerampache2.plugin.data
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
@@ -29,6 +33,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.emptyList
 
 @Singleton
 class MusicFetcherImpl @Inject constructor(): MusicFetcher {
@@ -40,13 +45,20 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val recentAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val latestAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
+    override val albumSongsMapFlow: MutableStateFlow<Map<String, List<Song>>> = MutableStateFlow(emptyMap())
+    override val playlistSongsMapFlow: MutableStateFlow<Map<String, List<Song>>> = MutableStateFlow(emptyMap())
 
-    override fun getSongsFromAlbum(albumId: String): List<Song> {
-        TODO("Not yet implemented")
+    override fun getSongsFromAlbum(albumId: String): Flow<List<Song>> {
+        return albumSongsMapFlow
+            .map { it[albumId] ?: emptyList() }
+            .distinctUntilChanged()
     }
 
-    override fun getSongsFromPlaylist(playlistId: String): List<Song> {
-        TODO("Not yet implemented")
+    override fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>> {
+        println("aaaa getSongsFromPlaylist $playlistId")
+        return playlistSongsMapFlow
+            .map { it[playlistId] ?: emptyList() }
+            .distinctUntilChanged()
     }
 
     override fun getAlbumsFromArtist(playlistId: String): List<Album> {

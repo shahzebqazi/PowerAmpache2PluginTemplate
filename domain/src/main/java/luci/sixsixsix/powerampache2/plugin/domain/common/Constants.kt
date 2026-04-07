@@ -33,3 +33,22 @@ const val ERROR_STRING = "ERROR"
 const val LOADING_STRING = "LOADING"
 const val USER_ID_ERROR = ERROR_INT
 const val DEFAULT_NO_IMAGE = ""
+
+// Message.what codes (MUST be Int)
+const val MSG_REGISTER_CLIENT = 1
+const val MSG_DATA = 2
+const val MSG_REQUEST_SONGS = 3
+
+const val KEY_ALBUM_ID = "id"
+
+// Actions the service can request from client
+const val ACTION_GET_SONGS_ALBUM = "get_songs_album"
+const val ACTION_GET_SONGS_PLAYLIST = "get_songs_playlist"
+
+// Actions client sends to service
+const val ACTION_PLAYLISTS = "playlists"
+const val ACTION_ARTISTS = "artists"
+const val ACTION_ALBUMS = "albums"
+const val ACTION_SONGS_RESPONSE = "songs_response"
+const val ACTION_SONGS_ALBUM = "songs_album"
+const val ACTION_SONGS_PLAYLIST= "songs_playlist"
