@@ -30,16 +30,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.GetSongsFromAlbumUseCase
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.HighestAlbumsStateFlow
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.QueueStateFlow
-import luci.sixsixsix.powerampache2.plugin.domain.usecase.RecentAlbumsStateFlow
 import javax.inject.Inject
 
 @HiltViewModel

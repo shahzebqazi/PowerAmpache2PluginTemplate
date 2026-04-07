@@ -39,7 +39,8 @@ const val MSG_REGISTER_CLIENT = 1
 const val MSG_DATA = 2
 const val MSG_REQUEST_SONGS = 3
 
-const val KEY_ALBUM_ID = "id"
+const val KEY_ALBUM_ID = KEY_ID
+const val KEY_PLAYLIST_ID = KEY_ID
 
 // Actions the service can request from client
 const val ACTION_GET_SONGS_ALBUM = "get_songs_album"

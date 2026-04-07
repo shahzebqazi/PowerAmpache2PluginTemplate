@@ -52,6 +52,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_SONGS_PLAYLIST
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ACTION
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ALBUM_ID
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_ID
+import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_PLAYLIST_ID
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_REQUEST_JSON
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_RESPONSE_SUCCESS
 import luci.sixsixsix.powerampache2.plugin.domain.common.MSG_DATA
@@ -115,9 +116,9 @@ class PA2DataFetchService : Service() {
             val msg = Message.obtain().apply {
                 data = Bundle().apply {
                     putString(KEY_ACTION, ACTION_GET_SONGS_PLAYLIST)
-                    putString(KEY_ALBUM_ID, playlistId)
+                    putString(KEY_PLAYLIST_ID, playlistId)
                 }
-                //println("aaaa requestSongsForAlbum id: ${albumId}")
+                println("aaaa requestSongsForPlaylist id: ${playlistId}")
             }
             try {
                 messenger.send(msg)
@@ -129,10 +130,16 @@ class PA2DataFetchService : Service() {
 
 
     private fun parseJsonString(action: String, jsonStr: String, albumId: String? = null) {
-        println("aaaa parseJsonString $action")
+        //println("aaaa parseJsonString $action")
         when(action) {
-            ACTION_PLAYLISTS -> gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists.also {
-                musicFetcher.playlistsFlow.value = it
+            ACTION_PLAYLISTS -> gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists.also { playlists ->
+                println("aaaa ACTION_PLAYLISTS ${playlists.size}")
+
+                musicFetcher.playlistsFlow.value = playlists
+                // TODO: DO NOT do this! songs need to be requested on demand
+                for(playlist in playlists) {
+                    requestSongsForPlaylist(playlist.id)
+                }
             }
             ACTION_ARTISTS -> gson.fromJson(jsonStr, ArtistsDto::class.java).artists.also {
                 musicFetcher.artistsFlow.value = it
@@ -147,30 +154,37 @@ class PA2DataFetchService : Service() {
                 }
             }
             ACTION_SONGS_PLAYLIST -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
-                println("aaaa ACTION_SONGS_PLAYLIST ${albumId}")
+                println("aaaa ACTION_SONGS_PLAYLIST ${albumId}  ${songs.size}")
+                // TODO: DO NOT do this! songs need to be requested on demand
                 musicFetcher.playlistSongsMapFlow.update { map ->
                     (map + (albumId!! to songs))
                 }
             }
             "highest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                println("aaaa highest_albums   ${songs.size}")
+
                 musicFetcher.highRatedAlbumsFlow.value = albums
+                // TODO: DO NOT do this! songs need to be requested on demand
                 for(album in albums) {
                     requestSongsForAlbum(album.id)
                 }
             }
             "favourite_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
                 musicFetcher.favouriteAlbumsFlow.value = albums
+                // TODO: DO NOT do this! songs need to be requested on demand
                 for(album in albums) {
                     requestSongsForAlbum(album.id)
                 }
             }
             "recent_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                // TODO: DO NOT do this! songs need to be requested on demand
                 musicFetcher.recentAlbumsFlow.value = albums
                 for(album in albums) {
                     requestSongsForAlbum(album.id)
                 }
             }
             "latest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                // TODO: DO NOT do this! songs need to be requested on demand
                 musicFetcher.latestAlbumsFlow.value = albums
                 for(album in albums) {
                     requestSongsForAlbum(album.id)
