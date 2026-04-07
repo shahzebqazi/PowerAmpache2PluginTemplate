@@ -29,21 +29,25 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMap
 import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.GetSongsFromAlbumUseCase
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.HighestAlbumsStateFlow
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.QueueStateFlow
+import luci.sixsixsix.powerampache2.plugin.domain.usecase.RecentAlbumsStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class SongListViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     queueStateFlowUseCase: QueueStateFlow,
-    highestAlbumsStateFlowUseCase: HighestAlbumsStateFlow,
-    getSongsFromAlbumUseCase: GetSongsFromAlbumUseCase
+    private val highestAlbumsStateFlowUseCase: HighestAlbumsStateFlow,
+    private val getSongsFromAlbumUseCase: GetSongsFromAlbumUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
@@ -58,4 +62,14 @@ class SongListViewModel @Inject constructor(
         highestAlbumsStateFlowUseCase()
             .flatMapConcat { getSongsFromAlbumUseCase("2011") }
             .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+
+
+    fun highestAlbums() {
+        viewModelScope.launch {
+            highestAlbumsStateFlow.collect { albums ->
+                val firstAlbum = albums[0]
+                val songs: List<Song> = getSongsFromAlbumUseCase(firstAlbum.id).first()
+            }
+        }
+    }
 }
