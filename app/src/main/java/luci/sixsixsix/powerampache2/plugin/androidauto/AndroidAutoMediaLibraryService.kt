@@ -98,23 +98,23 @@ class AndroidAutoMediaLibraryService : Media3MediaLibraryService() {
                 }
                 MediaLibraryIds.FAVORITES -> return collectionFuture(
                     params
-                ) { favouriteAlbumStateFlow(useMock = false).value.map { it.toBrowsableMediaItem() } }
+                ) { favouriteAlbumStateFlow().value.map { it.toBrowsableMediaItem() } }
 
                 MediaLibraryIds.RECENT_ALBUMS -> return collectionFuture(
                     params
-                ) { recentAlbumsStateFlow(useMock = false).value.map { it.toBrowsableMediaItem() } }
+                ) { recentAlbumsStateFlow().value.map { it.toBrowsableMediaItem() } }
 
                 MediaLibraryIds.HIGHEST_ALBUMS -> return collectionFuture(
                     params
-                ) { highestAlbumsStateFlow(useMock = false).value.map { it.toBrowsableMediaItem() } }
+                ) { highestAlbumsStateFlow().value.map { it.toBrowsableMediaItem() } }
 
                 MediaLibraryIds.PLAYLISTS -> return collectionFuture(
                     params
-                ) { playlistsStateFlow(useMock = false).value.map { it.toBrowsableMediaItem() } }
+                ) { playlistsStateFlow().value.map { it.toBrowsableMediaItem() } }
 
                 MediaLibraryIds.LATEST_ALBUMS -> return collectionFuture(
                     params
-                ) { latestAlbumsStateFlow(useMock = false).value.map { it.toBrowsableMediaItem() } }
+                ) { latestAlbumsStateFlow().value.map { it.toBrowsableMediaItem() } }
             }
 
             if (parentId.startsWith(MediaLibraryIds.ALBUM_PREFIX)) {

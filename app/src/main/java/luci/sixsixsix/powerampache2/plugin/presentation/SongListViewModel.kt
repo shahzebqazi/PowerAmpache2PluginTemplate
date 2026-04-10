@@ -21,27 +21,20 @@
  */
 package luci.sixsixsix.powerampache2.plugin.presentation
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.QueueStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class SongListViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
     queueStateFlowUseCase: QueueStateFlow,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
 
-    val queueStateFlow = queueStateFlowUseCase()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
-
+    val queueStateFlow: StateFlow<List<Song>> = queueStateFlowUseCase()
 }
