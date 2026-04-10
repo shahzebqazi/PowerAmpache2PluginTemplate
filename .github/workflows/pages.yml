@@ -39,33 +39,9 @@ jobs:
       - name: Build site
         run: mkdocs build
 
-      # Project Pages serves at /REPO/ on both github.io and the custom domain; nest output so
-      # https://sqazi.sh/PowerAmpache2PluginTemplate/ matches GitHub's redirect from github.io.
-      - name: Nest site under PowerAmpache2PluginTemplate + root redirect
-        run: |
-          set -euo pipefail
-          mkdir -p _staged
-          mv site/* _staged/
-          mkdir -p site/PowerAmpache2PluginTemplate
-          mv _staged/* site/PowerAmpache2PluginTemplate/
-          rmdir _staged
-          if [ -f site/PowerAmpache2PluginTemplate/CNAME ]; then
-            mv site/PowerAmpache2PluginTemplate/CNAME site/CNAME
-          fi
-          cat > site/index.html <<'HTML'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta http-equiv="refresh" content="0; url=PowerAmpache2PluginTemplate/">
-            <link rel="canonical" href="PowerAmpache2PluginTemplate/">
-            <title>Power Ampache 2 — research</title>
-          </head>
-          <body>
-            <p><a href="PowerAmpache2PluginTemplate/">Continue to the research site</a></p>
-          </body>
-          </html>
-          HTML
+      # Project Pages already maps https://<user>.github.io/<repo>/ and
+      # https://<custom-domain>/<repo>/ to the artifact root. Do not nest MkDocs output under
+      # a <repo>/ folder here — that would serve the site at /<repo>/<repo>/ and make /<repo>/ 404.
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

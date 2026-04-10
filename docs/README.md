@@ -18,12 +18,12 @@ This folder is published as a **static site** (MkDocs Material) via **GitHub Act
 | URL | Notes |
 |-----|--------|
 | **`https://sqazi.sh/PowerAmpache2PluginTemplate/`** | **Canonical** on the custom domain — matches **project** GitHub Pages (same path as `github.io`). |
-| **`https://sqazi.sh/`** | Optional **redirect** to the path above (added in the deploy workflow). |
+| **`https://sqazi.sh/`** | May be a **different** site (e.g. user/org Pages); the research docs live under **`/PowerAmpache2PluginTemplate/`** only. |
 | `https://shahzebqazi.github.io/PowerAmpache2PluginTemplate/` | Default URL; GitHub redirects to **`sqazi.sh`** with the **same path**. |
 
-**`docs/CNAME`** (`sqazi.sh`) stays at the **artifact root**; the MkDocs build is **nested** under `PowerAmpache2PluginTemplate/` in CI so the live path is not 404.
+**`docs/CNAME`** (`sqazi.sh`) is copied into the MkDocs **`site/`** output; GitHub Pages maps **`/<repo>/`** to that folder’s root — do **not** nest the build again under `PowerAmpache2PluginTemplate/` in CI.
 
-Local preview: `pip install -r requirements.txt` (repo root) then `mkdocs serve`. Build output is **`site/`** (gitignored). To preview the nested path locally: `mkdocs build &&` (see `.github/workflows/pages.yml` for the same nesting step).
+Local preview: `pip install -r requirements.txt` (repo root) then `mkdocs serve`. Build output is **`site/`** (gitignored).
 
 ---
 
