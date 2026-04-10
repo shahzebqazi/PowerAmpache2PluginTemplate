@@ -1,13 +1,14 @@
 # User stories — Android Auto plugin (MVP)
 
 **Status:** Draft — living document  
-**Last updated:** 2026-04-07  
+**Last updated:** 2026-04-10  
 **Related research:** [docs/ux-research/](ux-research/README.md)  
-**Design system (phone):** [docs/design-system/00-design-system-index.md](design-system/00-design-system-index.md)
+**Design system (phone):** [docs/design-system/00-design-system-index.md](design-system/00-design-system-index.md)  
+**Auto vs phone (brand / IA):** [docs/design-system/04-android-auto-brand-carryover.md](design-system/04-android-auto-brand-carryover.md)
 
 ## Purpose
 
-This file is the **single list of user stories** for the **MVP Android Auto** experience for Power Ampache 2, aligned with **UX research** in this repository and with **product decisions** captured in conversation (host-rendered UI, no custom car chrome for MVP, **Media3** for transport and session).
+This file is the **single list of user stories** for the **MVP Android Auto** experience for Power Ampache 2, aligned with **UX research** in this repository and with **product decisions** captured in conversation (host-rendered UI, no custom car chrome for MVP, **Media3** for transport and session). Stories that mention **metadata**, **browse**, or **errors** on Auto should stay consistent with the **two-surface** strategy in [04-android-auto-brand-carryover.md](design-system/04-android-auto-brand-carryover.md) (host chrome vs PA2 content).
 
 **Out of scope for this document:** Line-by-line engineering tasks (browse node IDs, `MediaLibrarySession` callbacks). Those belong in implementation specs or tickets.
 
@@ -218,4 +219,5 @@ This file is the **single list of user stories** for the **MVP Android Auto** ex
 
 | Date | Change |
 |------|--------|
+| 2026-04-10 | UX pass: linked [04-android-auto-brand-carryover.md](design-system/04-android-auto-brand-carryover.md); clarified two-surface alignment for metadata/browse/errors on Auto. |
 | 2026-04-07 | Initial document on **mockups** branch; MVP decisions (host UI, Media3 transport, no custom Auto chrome). |

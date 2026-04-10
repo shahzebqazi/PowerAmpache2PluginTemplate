@@ -18,7 +18,7 @@ Update **Last reviewed** when a brief changes materially.
 | 04 | [04-distraction-brief.md](04-distraction-brief.md) | Secondary-task demand + citations | 2026-04-07 |
 | 05 | [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md) | Reviewable checklist | 2026-04-07 |
 | 06 | [06-accessibility-matrix.md](06-accessibility-matrix.md) | Phone vs projected UI | 2026-04-07 |
-| 07 | [07-research-synthesis.md](07-research-synthesis.md) | Full synthesis + tradeoffs | 2026-04-07 |
+| 07 | [07-research-synthesis.md](07-research-synthesis.md) | Full synthesis + tradeoffs | 2026-04-10 |
 | 08 | [08-prototype-handoff-package.md](08-prototype-handoff-package.md) | P0–P3 scenarios, frame labels | 2026-04-07 |
 
 **Related:** [android-auto-ux-research-plan.md](../android-auto-ux-research-plan.md), [design system](../design-system/00-design-system-index.md), [user stories](../user-stories.md), [automation notes](../agents/README.md).

@@ -41,14 +41,18 @@ The **`mockups`** branch holds **docs and design assets only**. **DHU** and real
 | **Settings / accounts** | Phone-first or parked |
 | **Phone app** | Full PA2 theme; large targets; TalkBack; optional dynamic color |
 
-## 6. Open questions (for maintainer)
+## 6. Open questions (for product owner)
 
-1. **Offline** indication in **host** browse — feasible and desirable?
-2. **Multi-account** in car: block, merge roots, or “last used only”?
-3. **Lyrics** on Auto: disabled in motion vs OEM-dependent?
-4. **Classical** deep hierarchy: acceptable exception with voice?
+These need **explicit PO / maintainer sign-off** before treating them as locked requirements. Until then, use the **proposed defaults** below for planning and prototypes.
 
-**Workspace notes (non-binding):** (1) Ship **clear errors** via `MediaSession` / browse first; **offline badge** only with a stable API. (2) **Last-used** account for template-style builds; richer policy in **Power-Ampache-2**. (3) **No lyrics** in motion; parked-only if ever exposed. (4) **Voice-first** for classical deep trees; keep shallow **default** browse for driving.
+| # | Question | Proposed default (workspace) | PO decision | Date |
+|---|----------|------------------------------|-------------|------|
+| 1 | **Offline** indication in **host** browse — feasible and desirable? | Prefer **clear errors** via `MediaSession` / browse first; add an **offline** or connectivity hint in metadata/browse **only** if the stack exposes a stable signal (avoid fake badges). | Pending | — |
+| 2 | **Multi-account** in car: block, merge roots, or “last used only”? | **Last-used** account for template-style builds; full account UX stays on **phone**; richer policy in **Power-Ampache-2** if product needs it. | Pending | — |
+| 3 | **Lyrics** on Auto: disabled in motion vs OEM-dependent? | **No lyrics while driving**; **parked-only** if ever exposed, and only if upstream agrees. | Pending | — |
+| 4 | **Classical** deep hierarchy: acceptable exception with voice? | **Voice-first** for deep classical requests; **shallow** browse remains the **default** driving path; deep tree on **phone**. | Pending | — |
+
+**How to close:** Update the table with **PO decision** and **Date**, then mirror any story or acceptance-criteria changes in [../user-stories.md](../user-stories.md).
 
 ## 7. Risks (from research plan)
 
@@ -68,4 +72,4 @@ The **`mockups`** branch holds **docs and design assets only**. **DHU** and real
 
 ---
 
-*Last reviewed: 2026-04-07*
+*Last reviewed: 2026-04-10*

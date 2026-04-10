@@ -1,11 +1,17 @@
 Power Ampache 2 — Android Auto / Media3 (research assets)
 
+Last verified (links open): 2026-04-10
+
 Design file (Figma Design)
 https://www.figma.com/design/eMHaKptRXxQjkVQoodou43/Power-Ampache-2-%E2%80%94-Android-Auto-(Media3)
 
 FigJam — browse tree + async bridge (diagram widget)
 https://www.figma.com/online-whiteboard/create-diagram/2d1d9077-248c-4072-bb18-a38169fe2c8b?utm_source=cursor&utm_content=edit_in_figjam
 
+Frame labels (required for reviews)
+- Use **Phone — PA2 theme** vs **Auto — host media (PA2)** on frames so car previews are not mistaken for OEM styling. See ../../docs/agents/prototype-and-engineering.md
+
 Notes
 - Open the FigJam claim URL once if the diagram needs to be claimed into your team space.
 - The design file includes a “Research — Media3 + Domain” frame summarizing the Media3 contract and stack.
+- When pages or files move in Figma, update URLs here and bump **Last verified**.
