@@ -13,9 +13,14 @@ This folder holds **UX research**, **design-system** write-ups, **user stories**
 
 ## GitHub Pages (research site)
 
-This folder is published as a **static site** (MkDocs Material) via **GitHub Actions** when changes land on **`mockups`**. After the maintainer enables **Settings → Pages → GitHub Actions**, the site URL is:
+This folder is published as a **static site** (MkDocs Material) via **GitHub Actions** when changes land on **`mockups`**. After **Settings → Pages → GitHub Actions** is enabled:
 
-`https://shahzebqazi.github.io/PowerAmpache2PluginTemplate/`
+| URL | Notes |
+|-----|--------|
+| **`https://sqazi.sh/`** | Custom domain (see **`docs/CNAME`**). The site is at the **domain root**, not under `/PowerAmpache2PluginTemplate/`. |
+| `https://shahzebqazi.github.io/PowerAmpache2PluginTemplate/` | Default GitHub Pages URL for this repo (no custom domain). |
+
+If **`http://sqazi.sh/PowerAmpache2PluginTemplate/`** returns **404**, use **`https://sqazi.sh/`** instead — GitHub does not serve this project at a subpath on the custom domain.
 
 Local preview: `pip install -r requirements.txt` (repo root) then `mkdocs serve`. Build output is **`site/`** (gitignored).
 
