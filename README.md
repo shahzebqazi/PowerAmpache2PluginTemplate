@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="docs/images/hero-android-auto.png" alt="Android Auto media browser and playback (DHU reference)" width="720" />
+
 # Power Ampache 2 — Android Auto Plugin
 
 **Official Android Auto extension for [Power Ampache 2](https://github.com/icefields/Power-Ampache-2)**
