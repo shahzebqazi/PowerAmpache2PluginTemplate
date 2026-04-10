@@ -1,0 +1,26 @@
+{
+  "name": "read_agent_role",
+  "description": "Return the markdown body of a named role from android-auto-agents/roles/ (read-only context for LLM).",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "role_id": {
+        "type": "string",
+        "enum": [
+          "coordinator",
+          "ux-ui-researcher",
+          "ui-mockup-developer",
+          "developer",
+          "tester",
+          "debugger",
+          "shell-ci"
+        ],
+        "description": "Role file stem under roles/"
+      }
+    },
+    "required": ["role_id"]
+  },
+  "suggested_invocation": {
+    "read_file_template": "${WORKSPACE_ROOT}/android-auto-agents/roles/${role_id}.md"
+  }
+}

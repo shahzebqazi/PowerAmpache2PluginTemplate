@@ -1,0 +1,53 @@
+{
+  "name": "run_aa_plugin_smoke",
+  "description": "Composite: plugin unit tests (optional skip), adb uninstall + :app:installDebug (clean reinstall via adb-plugin-install-debug.sh), optional sleep, adb-screencap + logcat snapshot. PA2_PLUGIN_GRADLE_ROOT optional if PowerAmpache2PluginTemplate/ exists. Does NOT start DHU — use run_aa_plugin_device_cycle for optional background DHU.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "skip_tests": {
+        "type": "boolean",
+        "default": false,
+        "description": "Set SKIP_TESTS=1"
+      },
+      "skip_screencap": {
+        "type": "boolean",
+        "default": false,
+        "description": "Set SKIP_SCREENCAP=1"
+      },
+      "skip_logcat_snapshot": {
+        "type": "boolean",
+        "default": false,
+        "description": "Set SKIP_LOGCAT_SNAPSHOT=1"
+      },
+      "clear_logcat": {
+        "type": "boolean",
+        "default": false,
+        "description": "Set CLEAR_LOGCAT=1 before sleep"
+      },
+      "sleep_seconds": {
+        "type": "integer",
+        "default": 2,
+        "description": "Seconds to wait after install before screencap"
+      },
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/aa-plugin-smoke.sh"],
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}",
+      "ANDROID_SERIAL": "${android_serial}",
+      "SKIP_TESTS": "${skip_tests}",
+      "SKIP_SCREENCAP": "${skip_screencap}",
+      "SKIP_LOGCAT_SNAPSHOT": "${skip_logcat_snapshot}",
+      "CLEAR_LOGCAT": "${clear_logcat}",
+      "SLEEP_SECONDS": "${sleep_seconds}"
+    },
+    "notes": "Map booleans to 1/0 for shell env."
+  }
+}

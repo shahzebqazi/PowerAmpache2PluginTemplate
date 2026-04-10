@@ -1,6 +1,6 @@
 # Brand and design language — Power Ampache 2
 
-Aligned with **99designs** “Branding and Design Language”: philosophy, terminology, typography, color (with accessibility notes), logos/assets.
+Philosophy, terminology, typography, color (with accessibility notes), and assets — the usual “brand layer” of a design system.
 
 ## Design philosophy
 

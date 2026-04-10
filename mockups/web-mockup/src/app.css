@@ -1,0 +1,62 @@
+/* PA2 dark tokens — docs/design-system/01-brand-and-language.md */
+:root {
+  --pa2-primary: #70cccc;
+  --pa2-on-primary: #122e2e;
+  --pa2-surface: #1b1f1d;
+  --pa2-background: #282e2c;
+  --pa2-surface-container: #242927;
+  --pa2-surface-container-high: #282e2c;
+  --pa2-on-surface: #dfe5e3;
+  --pa2-on-surface-variant: #cbced1;
+  --pa2-tertiary: #faba82;
+  --pa2-on-tertiary: #421900;
+  --pa2-error: #f593ab;
+  --pa2-outline: #a5a9ad;
+
+  --mock-chrome-bg: #0f1110;
+  --mock-chrome-border: #2a2e2c;
+
+  /* Head-unit style viewport: wide landscape (typical AA / DHU; many OEMs ~16:9 or close). */
+  --car-display-max-w: 1120px;
+  --car-aspect-ratio: 16 / 9;
+
+  /* DHU / Auto mockup shells — PA2 accents on top of dark host-like base (session + metadata identity). */
+  --auto-hu-bg: #141816;
+  --auto-hu-surface: #1e2321;
+  --auto-hu-surface-elevated: #252a28;
+  --auto-hu-border: rgba(112, 204, 204, 0.2);
+  --auto-hu-text: var(--pa2-on-surface);
+  --auto-hu-muted: var(--pa2-on-surface-variant);
+  --auto-hu-accent: var(--pa2-primary);
+  --auto-hu-accent-soft: rgba(112, 204, 204, 0.14);
+  --auto-hu-focus: var(--pa2-tertiary);
+  --auto-min-hit: 56px;
+
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--mock-chrome-bg);
+  color: var(--pa2-on-surface);
+}
+
+#app {
+  min-height: 100svh;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}

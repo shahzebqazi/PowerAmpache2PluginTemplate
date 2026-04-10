@@ -1,0 +1,26 @@
+{
+  "name": "adb_screencap_phone",
+  "description": "Capture the connected phone screen to a PNG using adb exec-out screencap. Writes under artifacts/screenshots/ by default.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "output_path": {
+        "type": "string",
+        "description": "Optional absolute or repo-relative PNG path; default is artifacts/screenshots/phone-<timestamp>.png"
+      },
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL when multiple adb devices"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/adb-screencap.sh", "${output_path}"],
+    "env": {
+      "ANDROID_SERIAL": "${android_serial}"
+    },
+    "notes": "Omit output_path when optional; pass empty argv for default path."
+  }
+}

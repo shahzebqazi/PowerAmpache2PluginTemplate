@@ -1,48 +1,44 @@
-# Music on Android Auto — UX pattern table
+# Music on Android Auto — patterns and risks
 
-Cross-reference: [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md), [02-task-analysis-and-flows.md](02-task-analysis-and-flows.md).
+This table ties **flows** to **how hard** they tend to be in the car — glance time, hands, and mental load — and to **who draws the UI** (you vs the head unit). Cross-check with [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md) and [02-task-analysis-and-flows.md](02-task-analysis-and-flows.md).
 
-**Legend — Primary risk:** Glance / manual / cognitive demand while driving (qualitative).
+**Risk** here means **qualitative** demand while driving — not a formal score.
 
-| Flow | Typical depth (levels) | Host vs app control | Primary risk | Mitigation |
-|------|------------------------|---------------------|--------------|------------|
-| **Now playing** | 0 (surface) | Host UI + session metadata | Low if controls are large and stable | Reliable `PlaybackState`, artwork, title/artist brevity |
-| **Browse: root** | 1 | App tree (`MediaItem` children) | Medium (scan list) | Cap visible cognitive load: short labels, groupings, favorites first |
-| **Browse: artist → album → track** | 3+ | App tree | **High** | Flatten with playlists; voice; “recent albums” |
-| **Queue** | 1 | Depends on host implementation | Medium–High | Keep queue **short**; avoid complex reorder on car |
-| **Search** | 1+ results | Often voice-mediated | **High** if keyboard | Prefer voice; defer precision search to parked / phone |
-| **Error: no network** | — | App must expose via session / errors doc | Medium | Clear, short message; offline content surfaced at root |
-| **Continue listening** | 0–1 | App policy for root children | Low | Single-tap resume from last source |
+| Flow | Typical depth | Who controls the chrome | Risk | What usually helps |
+|------|----------------|--------------------------|------|-------------------|
+| **Now playing** | On screen now | Host + your session metadata | Low if controls stay big and stable | Solid `PlaybackState`, short title/artist, good art |
+| **Browse: root** | One level in | Your `MediaItem` children | Medium — scanning a list | Short labels, sane groupings, favorites up front |
+| **Browse: artist → album → track** | Three or more | Your tree | **High** | Playlists, recents, voice, “recent albums” |
+| **Queue** | One screen | Depends on OEM | Medium–high | Keep it simple; **reorder** mostly on phone |
+| **Search** | Results list | Often voice-led | **High** with keyboard | Voice first; precision search when parked or on phone |
+| **Error: no network** | — | You surface via session/errors | Medium | One short line + retry; offline content at root if you have it |
+| **Continue listening** | Zero or one step | Your policy for root | Low | Fast path back to last source |
+
+## Power Ampache concepts on the car
+
+| Idea | Sensible shape on Auto | Watch out for |
+|------|------------------------|---------------|
+| Server / account | Avoid switching every trip | Multi-step auth in the car |
+| Smartlists | Near root or “For you” | Medium complexity |
+| Playlists | Root | Usually fine |
+| Albums / artists | Classic 2–3 level path | **Default** deep path is tiring |
+| Flat song list | Only with search / voice filter | Long scroll |
+| Offline | Subtree or clear at root | Confusion if “what plays” is unclear |
+| Lyrics / extras | Phone-first | Reading while driving |
+
+## This project vs the main app
+
+**Power-Ampache-2** is the full phone product; the plugin template on **`dev`** includes handheld and Auto integration code. This **`mockups`** branch has **no** app sources — prototypes and docs only. For **Android Auto**, compare prototypes like this:
+
+- **Auto:** host lists and player — you own **tree + session + metadata**, not teal pixels.
+- **Phone:** **PowerAmpache2Theme**, full layout control.
+
+## When to revisit this table
+
+- Big changes to **Ampache** or PA2 browse.
+- New **[car quality](https://developer.android.com/docs/quality-guidelines/car-app-quality)** checklist from Google.
+- Findings from **DHU** or **parked** testing in a real car.
 
 ---
 
-## Power Ampache 2 feature mapping
-
-| PA2 domain concept | Suggested Auto browse shape | Risk note |
-|--------------------|----------------------------|-----------|
-| Server / account | Avoid per-trip switching; use one active library | High if multi-step auth |
-| Smartlists | Root or “For you” | Medium |
-| Playlists | Root | Low–Medium |
-| Albums / Artists | Standard 2–3 level | High if default path |
-| Songs (flat) | Only with search/voice filter | Very high scroll |
-| Offline library | Subtree or badge at root | Medium if unclear what is local |
-| Lyrics / extras | Phone-first | N/A or low on Auto unless template allows |
-
----
-
-## Phone vs car APK
-
-This repo includes a **`app/`** Compose module (plugin template UI). **Power-Ampache-2** is the main phone product; **PowerAmpache2PluginTemplate** (or PA2) supplies the **Media3** build for **DHU**. When comparing prototypes:
-
-- **PA2 Auto:** Pattern column “Host vs app” = mostly **host-rendered** lists and player chrome.
-- **Phone:** **Phone — PA2 theme** in Compose / **Power-Ampache-2**; car surfaces use **Auto — host media** patterns (content and session, not app-drawn chrome).
-
----
-
-## Review cadence
-
-Revisit this table after:
-
-- Major **Ampache API** or PA2 browse changes.
-- New **Google Play car quality** checklist revisions.
-- Usability findings from **DHU** or parked testing.
+*Last reviewed: 2026-04-07*

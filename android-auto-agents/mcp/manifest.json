@@ -1,0 +1,28 @@
+{
+  "name": "android-auto-agents",
+  "version": "0.4.0",
+  "description": "MCP tool stubs for Android Auto / Media3 / DHU workflows (Power Ampache 2 workspace).",
+  "repository_layout": {
+    "roles": "../roles",
+    "workflows": "../workflows",
+    "skills": "../skills",
+    "contracts": "../contracts",
+    "scripts": "../scripts"
+  },
+  "tools": [
+    "read_agent_role",
+    "dhu_start_usb",
+    "dhu_screencapture_macos",
+    "gradle_root_unit_test",
+    "gradle_template_unit_test",
+    "gradle_template_assemble_debug",
+    "adb_plugin_reinstall_debug",
+    "adb_install_plugin_debug_apk",
+    "adb_screencap_phone",
+    "mockup_npm_verify",
+    "logcat_car_media",
+    "logcat_car_media_snapshot",
+    "run_aa_plugin_smoke",
+    "run_aa_plugin_device_cycle"
+  ]
+}
