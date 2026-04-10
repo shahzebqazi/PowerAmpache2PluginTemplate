@@ -4,7 +4,7 @@ Portable playbooks also live under **`android-auto-agents/roles/`**.
 
 ## Coordinator
 
-Sequencing, scope boundaries (**`mockup/`** vs **`PowerAmpache2PluginTemplate/`** vs **Power-Ampache-2**), merge targets, and **done** criteria (tests + **DHU** when car work). Keeps **mockup** and **Kotlin** tracks from fighting.
+Sequencing, scope boundaries (**`mockups/`** vs **`main`** vs **Power-Ampache-2**), merge targets, and **done** criteria (tests + **DHU** when car work). Keeps **design** and **Kotlin** tracks from fighting.
 
 ## UX / UI researcher
 

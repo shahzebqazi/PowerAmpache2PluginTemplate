@@ -8,14 +8,14 @@ Standard entrypoint from repo root: **`./android-auto-agents/scripts/dhu-start.s
 - **USB retries:** **`auto`** reruns on SSL / handshake / premature exit patterns.
 - **Shell:** do **not** use **`adb … && pkill -x desktop-head-unit && …`** — **`pkill`** can exit **`1`** and skip the next command. Use **`; pkill … || true;`** or run the script alone.
 - **Stable GUI:** long sessions often need **Terminal.app** (or keep the terminal open); IDE-launched shells may exit before DHU stays up.
-- **Prereqs:** **`sdk.dir`** in the **Gradle project** you build (nested **`PowerAmpache2PluginTemplate/local.properties`**, or **`ANDROID_HOME`**). **`ANDROID_SERIAL=…`** when multiple devices.
+- **Prereqs:** **`sdk.dir`** in **`local.properties`** at the **Gradle root** (repo root on **`main`**, or the path you set as **`PA2_PLUGIN_GRADLE_ROOT`**), or **`ANDROID_HOME`**. **`ANDROID_SERIAL=…`** when multiple devices.
 
 ## What DHU validates
 
 | Build | Path | Use DHU for |
 |-------|------|-------------|
-| **Nested PA2 plugin** | Set **`PA2_PLUGIN_GRADLE_ROOT`**, then **`./android-auto-agents/scripts/gradle-plugin-template.sh :app:…`** | **When** the installed APK registers **Media3** / **Android Auto** (manifest-dependent on your branch). |
-| **Power-Ampache-2** | Nested clone | **Yes** for full-app **Media3** + Auto sign-off when that tree is the target. |
+| **This fork (`main`)** | Repo root — **`./gradlew :app:assembleDebug`** or set **`PA2_PLUGIN_GRADLE_ROOT`** to that root from **`mockups`** when using harness scripts | **When** the installed APK registers **Media3** / **Android Auto** (manifest-dependent on your branch). |
+| **Power-Ampache-2** | Separate clone | **Yes** for full-app **Media3** + Auto sign-off when that tree is the target. |
 
 ## Typical USB + phone steps (contributors)
 

@@ -6,9 +6,9 @@ This file mirrors the **UX/UI designer** and automation notes from the repositor
 
 **Quick pointers**
 
-- Design and research live on **`mockups`** (`docs/`, `mockups/`); **no** Kotlin or Gradle here.
-- **Implementation** is on **`dev`**.
-- Figma and frame labels: [Prototype and engineering](agents/prototype-and-engineering.md), [mockups notes](mockups.md).
+- Design and research live on **`mockups`** (`docs/`, `mockups/`); **no** Kotlin or Gradle **`app/`** at this branch’s root.
+- **Implementation** is on **`main`** (or feature branches merged to **`main`**).
+- Figma and frame labels: [Prototype and engineering](agents/prototype-and-engineering.md), [Mockups folder](mockups.md).
 
 ---
 

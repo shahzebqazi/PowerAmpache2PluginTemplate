@@ -1,24 +1,26 @@
-# Portfolio repo, fork workflow, and PR policy (maintainer-aligned)
+# Fork workflow and PR policy (maintainer-aligned)
 
-Normative for **this workspace’s owner** when coordinating **`pa2-auto`** (umbrella), **`PowerAmpache2PluginTemplate`** (fork), and **icefields** upstream. Does not replace maintainer rules in **`icefields/PowerAmpache2PluginTemplate`** — it constrains **what we push** and **how agents behave**.
+Normative for **this fork** when coordinating **`main`** (implementation), **`mockups`** (design / research / agent scripts on this branch), and **icefields** **upstream**. Does not replace maintainer rules in **icefields/PowerAmpache2PluginTemplate** — it constrains **what we push** and **how agents behave**.
 
 ---
 
-## Two-repo mental model
+## Single repository, two integration branches
 
-| Repo / tree | Role |
-|-------------|------|
-| **Umbrella** (e.g. **`pa2-auto`**, or this root without nested clones committed) | Portfolio: **`mockup/`**, **`docs/`**, **`android-auto-agents/`**, scripts, CV-facing **`main`**. |
-| **Plugin fork** (nested **`PowerAmpache2PluginTemplate/`** → **`origin`**) | Real **Gradle** project: Android Auto / Media3 work; branch **`plugin/AndroidAuto`** (and/or **`dev`**) for integration and **PRs to icefields**. |
+| Branch | Role |
+|--------|------|
+| **`main`** | **Gradle project at repo root** — Kotlin, **`app/`**, **`data/`**, **`domain/`**, **`PowerAmpache2Theme/`**. PRs toward **upstream** and day-to-day plugin work. |
+| **`mockups`** | **Docs + design assets only** — `docs/`, `mockups/`, `android-auto-agents/`, MkDocs. **No** duplicate nested clone; no **`app/`** source on this branch. |
 
-**`upstream`** is a **remote URL** — typically **`icefields/PowerAmpache2PluginTemplate`**. It does **not** “point at” a filesystem path. Sync using **branch names** (e.g. **`plugin/AndroidAuto`**, **`main`**) via `git fetch upstream` and merge/rebase the branch you intend to track.
+**Feature branches** (e.g. **`cursor-cloud/<topic>-1b3a`**) branch from **`main`** for scoped implementation; merge to **`main`** first, then upstream when ready.
+
+**`upstream`** is a **remote** — typically **`icefields/PowerAmpache2PluginTemplate`**. Sync with **`git fetch upstream`** and merge/rebase **`upstream/main`** into your **`main`**.
 
 ---
 
 ## What goes to icefields (when you open a PR)
 
-- **In scope:** **`PowerAmpache2PluginTemplate/app/`** presentation layer — Auto / Media3 UI, mocks, tests that belong with that module — per maintainer boundaries.
-- **Out of scope for upstream PRs:** Umbrella-only assets (**mockup** as a web app, **`pa2-auto`** portfolio-only docs, MCP packaging) unless the maintainer explicitly asks — **do not** land those as part of “plugin UI” PRs by default.
+- **In scope:** **`app/`** presentation layer — Auto / Media3, mocks, tests that belong with that module — per maintainer boundaries.
+- **Out of scope for upstream PRs by default:** **`mockups`**-only assets (MkDocs site, **`mockups/web-mockup`**, portfolio docs, MCP descriptor packaging) unless the maintainer explicitly asks — **do not** land those as part of “plugin UI” PRs unless coordinated.
 
 ---
 
@@ -28,21 +30,24 @@ Normative for **this workspace’s owner** when coordinating **`pa2-auto`** (umb
 |------|--------|
 | **`data`/`domain`** | **Do not** change unless **you or the maintainer** explicitly scopes it. Use **mocks** and **`domain/.../model/mocks/`** for presentation. |
 | **GitHub comments** | **No** new comments on **your** or **icefields** issues **without your prior yes** — especially if the issue body does not already mention the topic. |
-| **Root Android module** | **Removed** from this umbrella repo — **DHU** targets the **nested plugin** or **PA2** APK; Gradle only under **`PowerAmpache2PluginTemplate/`** via **`PA2_PLUGIN_GRADLE_ROOT`**. |
-| **Tests** | Define an **integration vs acceptance matrix** before adding broad automation; **scripted** steps (install, **`dhu-start.sh`**, adb) may run via **`android-auto-agents/`**; **subjective car UX** remains **human acceptance** unless you add explicit instrumented checks. |
-| **PA2-Theme** | **Read-only** — consume tokens (copy/import); **no** commits inside a fresh **PA2-Theme** upstream tree. |
-| **Mockup rebuild** | After **GitHub umbrella/fork merges** are in a good state (owner workflow). |
+| **DHU / Gradle** | On **`mockups`**, there is **no** **`./gradlew`** at root — build from a **`main`** checkout. **`PA2_PLUGIN_GRADLE_ROOT`** may point at that path when running **`android-auto-agents/scripts/`** from **`mockups`**. |
+| **Tests** | Define **integration vs acceptance** before broad automation; **scripted** steps (install, **`dhu-start.sh`**, adb) via **`android-auto-agents/`**; subjective car UX remains **human acceptance** unless you add explicit checks. |
+| **PA2-Theme** | **Read-only** upstream submodule — consume tokens; **no** stray commits inside a fresh **PowerAmpache2Theme** clone unless maintainer process says otherwise. |
 
 ---
 
-## Salvage and cleanup (later)
+## Salvage and cleanup
 
-- Prefer **UI/UX** in **`app/`**; **legacy `data`/`domain`** experiments may stay **documented on the fork** (e.g. **`dev`** branch) for history — not as default **upstream** direction unless the maintainer adopts them.
-- Merging **`pa2-auto`** (umbrella) **into your fork** for a single clone is allowed **for your workflow**; verify **no secrets** before push; remove sensitive local copies **after** **`origin`** is safe **and** you have confirmed no credential leaks.
+- Prefer **UI/UX** in **`app/`** on **`main`**; legacy **`data`/`domain`** experiments may remain on **old branches** for history — not default **upstream** direction unless adopted.
+- If you maintain **two local checkouts** (one on **`main`**, one on **`mockups`**) or use **git worktree**, keep **secrets** out of both; verify **no** credentials in tracked files.
 
 ---
 
 ## Related
 
-- [`01-prd-and-backlog.md`](01-prd-and-backlog.md) — backlog table; update when branching story changes.
+- [`01-prd-and-backlog.md`](01-prd-and-backlog.md) — backlog table.
 - [`05-integrity-and-tests.md`](05-integrity-and-tests.md) — proof and test honesty.
+
+---
+
+*Last updated: 2026-04-10 — second pass: removed umbrella / nested-clone / `dev` / `plugin/AndroidAuto` model.*

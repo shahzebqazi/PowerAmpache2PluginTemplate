@@ -1,52 +1,55 @@
 # PRD backlog and workspace snapshot
 
-**Single backlog owner:** keep this table aligned with checked-in behaviour. After large merges, the **coordinator** should reconcile rows with **`PowerAmpache2PluginTemplate/`** (fresh clone) and **`mockup/`**.
+**Single backlog owner:** keep this table aligned with checked-in behaviour. After large merges, the **coordinator** should reconcile rows with a fresh **`main`** checkout and this **`mockups`** branch.
 
-**Portfolio / fork / icefields PR policy** (umbrella vs nested plugin, `upstream` remotes, GitHub comment gate, PA2-Theme read-only): [`08-portfolio-and-pr-policy.md`](08-portfolio-and-pr-policy.md).
+**Portfolio / fork / icefields PR policy:** [`08-portfolio-and-pr-policy.md`](08-portfolio-and-pr-policy.md).
 
-## Tech-lead reset (this workspace)
+## Repository layout (single fork)
 
-- **`PowerAmpache2PluginTemplate/`** — **your fork** cloned locally (**`origin`** = fork, **`upstream`** = **icefields/PowerAmpache2PluginTemplate**). Integration branch for this workspace: **`origin/plugin/AndroidAuto`** (merge **`upstream/main`** into it when you want maintainer `main`).
-- **`PowerAmpache2PluginTemplateOld/`** — quarantined local history (AI-expanded **`data`/`domain`**, divergent Auto work). **Do not** cite it as product truth or copy architecture from it without human review.
-- **Boundaries:** default **plugin template `app/` only** unless the task explicitly includes **`data`**, **`domain`**, or Gradle. Do not “helpfully” extend **`data`/`domain`** to unblock UI.
-- **Mockups:** phone/full-handheld scenarios must frame **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)** as the **phone app**. The **plugin** is not a replacement phone shell in mocks; show **Android Auto / host media** (and plugin-specific car entry) where relevant.
+- **One repository:** **PowerAmpache2PluginTemplate** (your fork, e.g. **shahzebqazi/PowerAmpache2PluginTemplate**). **`origin`** → fork, **`upstream`** → **icefields/PowerAmpache2PluginTemplate** (or **`icefields/PA2PluginTemplate`** if that is the published name — verify on GitHub).
+- **`main`:** Kotlin, Gradle, **`app/`**, **`data/`**, **`domain/`**, **`PowerAmpache2Theme/`** — default integration branch for **implementation** and PRs toward **upstream**.
+- **`mockups`:** This branch — **`docs/`**, **`mockups/`**, **`android-auto-agents/`**, MkDocs / Pages. **No** application source committed here.
+- **Feature branches:** e.g. **`cursor-cloud/<topic>-1b3a`** — create from **`main`** for scoped work; open PRs to **`main`** on the fork, then to **upstream** when appropriate.
+- **`PowerAmpache2PluginTemplateOld/`** (if present locally) — quarantined history. **Do not** cite as product truth without human review.
+- **Boundaries:** default **plugin `app/` only** unless the task explicitly includes **`data`**, **`domain`**, or Gradle root changes.
+- **Mockups:** handheld / full-player scenarios frame **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)** as the **phone app**. The **plugin** APK is **Android Auto / Media3** — **host-rendered** car UI; mocks illustrate **browse / IA / metadata**, not a custom car player (see [`03-mockups-and-design.md`](03-mockups-and-design.md)).
 
-## Fork + branch (`plugin/AndroidAuto`)
-
-**Remotes:** **`origin`** → your fork (e.g. **shahzebqazi/PowerAmpache2PluginTemplate**). **`upstream`** → **icefields/PowerAmpache2PluginTemplate**.
-
-**Daily work on the integration branch:**
+## Syncing `main` with upstream
 
 ```bash
-cd PowerAmpache2PluginTemplate
 git fetch upstream
-git checkout plugin/AndroidAuto
-git merge upstream/main   # bring maintainer main into your branch; resolve conflicts, then:
-git push origin plugin/AndroidAuto
+git checkout main
+git merge upstream/main   # or rebase, per team preference; resolve conflicts, then:
+git push origin main
 ```
 
-Open PRs **from your fork** to **icefields** when ready (source branch is often **`plugin/AndroidAuto`** or a feature branch off it).
+Open PRs **from your fork** to **icefields** when ready (typically from **`main`** or a feature branch off **`main`**).
 
-**New machine:** fork on GitHub (or `gh repo fork icefields/PowerAmpache2PluginTemplate --clone=true`), then ensure **`upstream`** exists:  
-`git remote add upstream git@github.com:icefields/PowerAmpache2PluginTemplate.git` (or HTTPS).
+**New machine:** `gh repo fork icefields/PowerAmpache2PluginTemplate --clone=true`, then:
+
+`git remote add upstream git@github.com:icefields/PowerAmpache2PluginTemplate.git` (or HTTPS). Run **`git submodule update --init`** for **PowerAmpache2Theme**.
 
 ## PRD backlog (status — reset pass)
 
 | ID | Task | Owner / tree | Status |
 |----|------|----------------|--------|
-| P0-0 | Reconcile mocks + UI with **PA2 phone** vs **plugin Auto** after fresh template | **`mockup/`**, **`docs/`**, template **`app`** | **In progress** — home + copy aligned to umbrella (no root Compose); plugin **`app/`** uses mocks per boundaries. |
+| P0-0 | Reconcile **mockups** + **main** — PA2 phone vs plugin Auto (host media) | **`mockups/web-mockup/`**, **`docs/`**, **`main`** **`app/`** | **In progress** — align copy and frames with host-rendered Auto. |
 | P0-1 | Media3 Auto checklist (browse, session, artwork, errors, DHU) | **Power-Ampache-2** | **Upstream-only** when that repo is not in tree. |
 | P0-2 | Browsable `MediaItem` tree vs product | **Power-Ampache-2** + docs | **Upstream-only** for code. |
-| P0-3 | Plugin template: playback + browse + DHU | Template **`app`** (+ explicit scope only for **`data`/`domain`**) | **Reset** — verify against **fresh** `main` / **`plugin/AndroidAuto`**; do not assume **Old** behaviour. |
-| P1+ | Prior P1–P3 rows from the previous **AGENTS** era | — | **Re-triage** after mockup + template baseline. |
+| P0-3 | Plugin: playback + browse + DHU | **`main`** **`app/`** (+ explicit scope only for **`data`/`domain`**) | **Reset** — verify against fresh **`upstream/main`** merge; do not assume **Old** behaviour. |
+| P1+ | Prior P1–P3 rows from older AGENTS era | — | **Re-triage** after baseline stabilizes. |
 
-## Workspace implementation snapshot
+## Workspace snapshot
 
-Update when the fresh template + mockups stabilize.
+Update when **`main`** + **`mockups`** stabilize.
 
-| Area | Status (post-reset) |
-|------|----------------------|
-| **Policy / workflow** | Owner constraints (PR scope to icefields, no `data`/`domain` without scope): [`08-portfolio-and-pr-policy.md`](08-portfolio-and-pr-policy.md). |
-| **Root Android module** | **Removed** — umbrella repo is mockup + docs + agents; Gradle only under nested **`PowerAmpache2PluginTemplate/`** (see root **README**). |
-| **`PowerAmpache2PluginTemplate/`** | Upstream **main**: starter **SongList** flow, **`domain`** mock models (`domain/.../model/mocks/`), **`MusicFetcher`** / **`MusicFetcherImpl`**, theme submodule. **No** assumption of **Old** catalog/Auto stack until re-implemented under boundaries. |
-| **`mockup/`** | **Needs rebuild** — replace “plugin as full phone app” framing with **PA2** handheld + **plugin/Auto** slices. |
+| Area | Status |
+|------|--------|
+| **Policy / workflow** | [`08-portfolio-and-pr-policy.md`](08-portfolio-and-pr-policy.md). |
+| **`mockups` branch** | Docs, **`mockups/web-mockup/`**, **`android-auto-agents/`** — **no** Gradle **`app/`** at this root. |
+| **`main` branch** | Full template: **SongList** / plugin shell, **`domain`** mocks, **`MusicFetcher`**, **`AndroidAutoMediaLibraryService`**, theme submodule — verify paths after each **`upstream`** pull. |
+| **DHU** | Build/install from a **`main`** checkout; set **`PA2_PLUGIN_GRADLE_ROOT`** to that tree when driving scripts from **`mockups`**. |
+
+---
+
+*Last updated: 2026-04-10 — second pass: single-repo `main` + `mockups` + feature branches.*

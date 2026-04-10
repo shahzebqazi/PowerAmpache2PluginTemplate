@@ -1,20 +1,20 @@
 # Plugin template — Gradle and code map (fresh `main`)
 
-Refresh this file after major **`git pull`** / branch switches. It describes the **`PowerAmpache2PluginTemplate/`** clone (typically **your fork**), not **`PowerAmpache2PluginTemplateOld/`**.
+Refresh this file after major **`git pull`** / branch switches. Describes the **same repo** on **`main`** (Gradle at **repository root**), not **`PowerAmpache2PluginTemplateOld/`** if you keep a local copy.
 
 ## Git (fork)
 
 | Remote | Typical URL |
 |--------|-------------|
-| **`origin`** | Your fork (**push** PR branches and **`plugin/AndroidAuto`** here). |
+| **`origin`** | Your fork — **push** feature branches and **`main`** here. |
 | **`upstream`** | **icefields/PowerAmpache2PluginTemplate** (**fetch** maintainer **`main`**). |
 
 **Submodule:** after clone, **`git submodule update --init`** for **PowerAmpache2Theme**.
 
 ## Gradle
 
-- **Direct:** from the plugin clone directory — **`./gradlew :app:assembleDebug`**, **`:app:testDebugUnitTest`**, **`:app:installDebug`**.
-- **Via harness (consumer repo):** **`export PA2_PLUGIN_GRADLE_ROOT=/absolute/path/to/this/gradle/root`** then **`./android-auto-agents/scripts/gradle-plugin-template.sh`** / **`adb-plugin-install-debug.sh`** (see **`android-auto-agents/README.md`**).
+- **Direct:** from the **repo root on `main`** — **`./gradlew :app:assembleDebug`**, **`:app:testDebugUnitTest`**, **`:app:installDebug`**.
+- **Via harness from `mockups` checkout:** **`export PA2_PLUGIN_GRADLE_ROOT=/absolute/path/to/a/main-branch-clone`** then **`./android-auto-agents/scripts/gradle-plugin-template.sh`** / **`adb-plugin-install-debug.sh`** (see **`android-auto-agents/README.md`**).
 - **Theme submodule:** **`PowerAmpache2Theme/`** — init with **`git submodule update --init`** when cloning.
 
 ## Maintainer scope

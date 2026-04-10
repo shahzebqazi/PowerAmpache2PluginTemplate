@@ -36,4 +36,4 @@ Portable **roles**, **workflows**, **bash scripts**, and **MCP tool descriptor J
 
 ---
 
-*Last updated: 2026-04-10 — merged from `pa2-car-plugin` umbrella + mockups site.*
+*Last updated: 2026-04-10 — second pass: `main` + `mockups` + feature branches (no umbrella / `dev` / `plugin/AndroidAuto`).*

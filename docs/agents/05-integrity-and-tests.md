@@ -8,7 +8,7 @@
 | 2 | **Checked-in code** (manifests, Gradle, Kotlin) |
 | 3 | **README**, chat, issues — secondary |
 
-Before claiming **Android Auto** wiring, **open the template `AndroidManifest.xml`** in **`PowerAmpache2PluginTemplate/`** (fresh clone), not **Old**.
+Before claiming **Android Auto** wiring, **open `AndroidManifest.xml`** on a **`main`** checkout (repo root), not **`PowerAmpache2PluginTemplateOld/`** if you have a local copy.
 
 ## What counts as proof
 

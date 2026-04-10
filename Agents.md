@@ -38,12 +38,12 @@ You are continuing as **UX/UI designer** for the **Power Ampache 2 Android Auto 
 ### Hard constraints (MVP)
 
 - **No custom Android Auto UI** (no bespoke head-unit layouts or Car App Library templates for MVP unless product owner changes scope).
-- **No implementation on `mockups`** — engineers work on **`dev`**; you hand off **specs, stories, and annotated mocks** through this branch and issues/Projects.
-- **Branch rule** — Do **not** put design-only work on `main` (portfolio) or mix large doc rewrites into `dev` without maintainer agreement; **`mockups`** is the design source of truth.
+- **No implementation on `mockups`** — engineers work on **`main`** (or feature branches off **`main`**); you hand off **specs, stories, and annotated mocks** through this branch and issues/Projects.
+- **Branch rule** — Keep **design and research** on **`mockups`**. Land **application code** on **`main`**; do not mix large design-only doc rewrites into **`main`** without maintainer agreement.
 
 ### Working with engineering
 
-- **Validation** of real Auto behaviour uses APKs built from **`dev`** or **Power-Ampache-2** (DHU / device). The `mockups` branch has **no** build.
+- **Validation** of real Auto behaviour uses APKs built from **`main`** or **Power-Ampache-2** (DHU / device). The **`mockups`** branch has **no** Gradle build at repo root.
 - Prefer **GitHub Projects** (Kanban) for tracking design tasks and linking to PRs.
 - When stories or acceptance criteria change, update **[docs/user-stories.md](docs/user-stories.md)** and note the date.
 
@@ -60,4 +60,4 @@ General agent workflow (branches, MCP, Figma prompts): **[docs/agents/README.md]
 
 ---
 
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-10 — aligned with `main` + `mockups` workflow.*

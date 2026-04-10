@@ -4,9 +4,9 @@
 
 - **Figma** and static mockups: keep links and exports under **`mockups/`** or in team notes; align frames with [prototype-and-engineering.md](prototype-and-engineering.md).
 
-## Android Auto (implementation elsewhere)
+## Android Auto (implementation on `main`)
 
-- Validation uses **Android Studio**, Google’s **Android for Cars** docs, the **Desktop Head Unit (DHU)**, and **dev APKs** built from **`dev`** or **Power-Ampache-2** — not from this branch (there is no app code here).
+- Validation uses **Android Studio**, **Android for Cars** docs, the **Desktop Head Unit (DHU)**, and **debug APKs** built from **`main`** (this repo) or **Power-Ampache-2** — **not** from the **`mockups`** branch (no Gradle **`app/`** here).
 
 ## MCP integrations
 
@@ -14,4 +14,4 @@
 
 ---
 
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-10 — second pass.*

@@ -8,7 +8,7 @@ Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-rese
 |-------|-------------|
 | **Phone — PA2 theme** | Handheld UI: colors and type from [docs/design-system/01-brand-and-language.md](../design-system/01-brand-and-language.md) |
 | **Auto — host media (PA2)** | Android Auto: host-rendered lists and player; **pattern only**, not PA2-colored head units |
-| **Phone — PA2 reference (Compose)** | Plugin or main app handheld UI — **implementation** on the **`dev`** branch, not on **`mockups`** |
+| **Phone — PA2 reference (Compose)** | Plugin or main app handheld UI — **implementation** on **`main`**, not on **`mockups`** |
 
 - Use a **neutral badge** on car frames so previews are not read as OEM styling.
 - Web previews: respect **`prefers-reduced-motion`**; keep car concepts **static** unless motion is essential.
@@ -16,9 +16,9 @@ Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-rese
 ## Prototypes vs shipping
 
 - Wireframes prove **intent** — hierarchy, copy length, scenarios. They do **not** replace [Android app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality) or [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards).
-- **Compliance** is validated in **shipping code**, **DHU**, and **devices** — work that happens on **`dev`** / **Power-Ampache-2**, not on this design-only branch.
+- **Compliance** is validated in **shipping code**, **DHU**, and **devices** — work that happens on **`main`** / **Power-Ampache-2**, not on this design-only branch.
 
-## Engineering validation (on `dev` / upstream)
+## Engineering validation (on `main` / upstream)
 
 When implementation exists, verify against the real app:
 
@@ -38,4 +38,4 @@ When implementation exists, verify against the real app:
 
 ---
 
-*Last updated: 2026-04-10*
+*Last updated: 2026-04-10 — second pass.*
