@@ -4,7 +4,7 @@ This folder describes **how PA2 looks and reads** on the **phone**, and how that
 
 ## Android Auto vs phone (read this first)
 
-On **Android Auto**, the **head unit** draws browse lists, now playing, and transport. The app does **not** skin that UI with Power Ampache colors or Nunito. Your integration work is **Media3**: a solid `MediaSession`, a sensible `MediaItem` tree, accurate metadata and artwork, voice actions, and error reporting — within [Google’s car media guidance](https://developer.android.com/training/cars/media) and distraction rules.
+On **Android Auto**, the **head unit** draws browse lists, now playing, and transport. The app does **not** apply **Compose** colors or **Nunito** to that chrome. You **still** carry PA2 forward through **Media3**: **artwork**, **metadata** (titles, artist, album), **browse structure**, and **copy tone** — the same **content identity** as the main app. That is **not** custom Auto UI; it is what Google’s media model is built for. See **[04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md)** for the full **PA2 + Google** strategy.
 
 On the **phone**, surfaces use **PowerAmpache2Theme** (Nunito, Material 3, optional dynamic color). That is what the token tables in this folder describe.
 
@@ -37,16 +37,17 @@ When the upstream theme changes, refresh the **appendix** and the token tables i
 | 01 | [01-brand-and-language.md](01-brand-and-language.md) — voice, type, color, assets |
 | 02 | [02-layout-and-navigation.md](02-layout-and-navigation.md) — spacing, grids, IA, Auto vs phone |
 | 03 | [03-components-and-patterns.md](03-components-and-patterns.md) — patterns and states |
+| 04 | [04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md) — **PA2 fidelity + Google Auto** (MVP Media3) |
 | Apx | [appendix-pa2-theme-inventory.md](appendix-pa2-theme-inventory.md) — file map |
 
 ## Two surfaces
 
-| Surface | Who owns the visuals | PA2 theme? |
-|---------|---------------------|------------|
-| **Phone** | PA2 Compose + `PowerAmpache2Theme` | **Yes** — colors, Nunito, Material You |
-| **Android Auto (media path)** | Head unit / Android Auto host | **No** — you supply **titles, art, tree**, not teal chrome |
+| Surface | Who owns the visuals | PA2 alignment |
+|---------|---------------------|----------------|
+| **Phone** | PA2 Compose + `PowerAmpache2Theme` | **Full theme** — colors, Nunito, Material You |
+| **Android Auto (Media3)** | Head unit draws chrome | **Content-level PA2** — artwork, metadata, labels, IA; **not** teal/Nunito on OEM chrome |
 
-Do not promise PA2 **teal** or **Nunito** inside the **projected** media UI unless the product moves to a **custom template** path and the platform allows it.
+**Custom** pixel-level Auto UI is **out of scope** for MVP; **brand carryover** through **session content** is **in scope**. Details: [04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md).
 
 ## Prototypes (Figma, static frames)
 
@@ -63,4 +64,4 @@ The main app talks to other plugins (info, lyrics, Chromecast, etc.). Their **br
 
 ---
 
-*Last reviewed: 2026-04-07*
+*Last reviewed: 2026-04-10*
