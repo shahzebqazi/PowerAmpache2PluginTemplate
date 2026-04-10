@@ -1,11 +1,12 @@
 # Executive summary — UX research (Android Auto + Power Ampache 2)
 
 **Date:** 2026-03-30  
+**Last reviewed:** 2026-04-07 (merged into `dev`; cross-linked [user stories](../user-stories.md))  
 **Audience:** Maintainers, design, Android engineers.
 
 ## Purpose
 
-Summarize an **evidence-oriented** baseline for **safe, low-friction** music use on **Android Auto**, aligned with **Google’s media-for-cars** guidance. **Shipping** host media is **Power Ampache 2** with **Media3** (`MediaSession` + `MediaSessionService` and media-browser discovery in the manifest — confirm **browse** depth in upstream; see [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md)). This workspace’s root **`app`** is a **phone Compose** reference only; **PowerAmpache2PluginTemplate** is **phone** + local **ExoPlayer**, **not** an Auto media app in manifest today. **Android Auto** UI is **host-rendered** from **Power-Ampache-2**’s **Media3** integration.
+Summarize an **evidence-oriented** baseline for **safe, low-friction** music use on **Android Auto**, aligned with **Google’s media-for-cars** guidance. **Shipping** host media is **Power Ampache 2** with **Media3** (`MediaSession` + `MediaSessionService` and media-browser discovery in the manifest — confirm **browse** depth in upstream; see [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md)). This repository’s **`app/`** module is a **Compose** shell for the **plugin** (phone); it does **not** register as a standalone **Android Auto** media browser app in the manifest **today** — validate integrated **Auto** behavior with **`PowerAmpache2PluginTemplate`** / **Power-Ampache-2** APKs per [08-prototype-handoff-package.md](08-prototype-handoff-package.md). **Android Auto** UI is **host-rendered** from **Media3** integration in the **shipping** app.
 
 ## Key findings
 
@@ -29,4 +30,5 @@ Summarize an **evidence-oriented** baseline for **safe, low-friction** music use
 
 - [07-research-synthesis.md](07-research-synthesis.md)  
 - [08-prototype-handoff-package.md](08-prototype-handoff-package.md)  
-- Index: [README.md](README.md)
+- Index: [README.md](README.md)  
+- **MVP user stories:** [../user-stories.md](../user-stories.md)

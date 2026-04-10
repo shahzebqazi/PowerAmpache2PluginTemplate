@@ -19,7 +19,7 @@ Use this sheet when scoping **Android Auto** behaviour: what the **head unit** c
 | **Full library browse** on Auto (`MediaLibraryService` / `MediaLibrarySession` pattern) | **Verify in upstream** (not confirmed in this doc’s code scan) | Plugin template on your branch when present |
 | Car App Library (custom templates) | Not in PA2 player integration | N/A in this repo |
 
-**Implication:** UX research and design-system “Auto surface” sections apply to **host-rendered media UI** for the **full car stack** in **Power-Ampache-2** / **plugin**. This repo does not ship a phone Compose module.
+**Implication:** UX research and design-system “Auto surface” sections apply to **host-rendered media UI** for the **full car stack** in **Power-Ampache-2** and any **plugin** that contributes **Media3** session/browse behavior. This repo **does** include a **`app/`** Compose module (plugin shell); **phone** branding uses **PowerAmpache2Theme** — see [../design-system/00-design-system-index.md](../design-system/00-design-system-index.md).
 
 ---
 
@@ -57,7 +57,7 @@ If a product **migrates** or prototypes with [Build templated media apps](https:
 - Supported **only on Android Auto** (not the same as full AAOS templated surface mix — verify current docs).
 - Use **provided templates** for lists, grids, and actions; custom UI is constrained by the library and host validation.
 
-This workspace does **not** ship a root Compose **`app`**; PA2 production remains **Media3** / host media unless the maintainer chooses otherwise.
+This repo’s **`app/`** module is **not** the Cars App Library path; **standard** media-browser / **Media3** integration remains the **default** for Auto unless the maintainer chooses otherwise.
 
 ---
 

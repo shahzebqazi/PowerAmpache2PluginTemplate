@@ -19,7 +19,7 @@ This document orients AI and human contributors. Update it when workflows change
 
 ## Requirements and design process
 
-1. Elicit **user stories**, **functional requirements**, and **non-functional requirements** (see prompts in maintainer comms or project docs).
+1. **User stories (MVP):** [docs/user-stories.md](docs/user-stories.md). Elicit and refine **functional** and **non-functional** requirements alongside maintainer comms.
 2. Iterate until the product owner is satisfied.
 3. Produce an **executive summary** that confirms alignment before build-out.
 4. **Use cases:** Prior agents may have relied on **example** or placeholder flows. Treat maintainer-provided **real** use cases as authoritative. Do **not** implement features solely because examples show them; **remove or replace** misleading examples when implementation begins, in favor of the real use cases.

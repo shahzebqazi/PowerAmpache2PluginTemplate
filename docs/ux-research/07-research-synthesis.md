@@ -65,3 +65,9 @@ This document reconciles phases **A–D** into one narrative and calls out **tra
 
 - Prototype priorities and engineering checklist: [08-prototype-handoff-package.md](08-prototype-handoff-package.md)
 - Phone theme file map: [../design-system/appendix-pa2-theme-inventory.md](../design-system/appendix-pa2-theme-inventory.md)
+- **MVP user stories** (requirements traceability to research): [../user-stories.md](../user-stories.md)
+
+## 10. Revision — 2026-04-07
+
+- UX research branch **`cursor-cloud/car-plugin-ux-research-5a36`** (docs + design system) was **merged into `dev`**.
+- **User stories** were consolidated into [../user-stories.md](../user-stories.md); **platform constraint sheet** and **executive summary** were corrected for accuracy (this repo **does** ship an `app/` Compose module; Auto remains **host-rendered**).
