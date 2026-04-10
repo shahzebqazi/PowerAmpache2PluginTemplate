@@ -2,6 +2,8 @@
 
 These notes exist so **people** can read research and design docs without wading through tool instructions. Everything here is for **agents, scripts, and anyone using AI in the loop**.
 
+**UX/UI designer handoff** (role, constraints, reading list): see root **[../Agents.md](../Agents.md)** on the **`mockups`** branch.
+
 - [Workflow and repository rules](workflow.md)
 - [Tooling (IDE, MCP, Figma)](tooling.md)
 - [Prototype frames and review checklists](prototype-and-engineering.md)
