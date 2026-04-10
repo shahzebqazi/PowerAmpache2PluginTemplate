@@ -1,0 +1,24 @@
+{
+  "name": "dhu_screencapture_macos",
+  "description": "macOS only: capture full screen or region (pass -R x,y,w,h) to PNG for Desktop Head Unit documentation. Not for unattended CI.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "screencapture_args": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Extra args to screencapture before output path, e.g. [\"-R\",\"0,0,1024,768\"]"
+      },
+      "output_path": {
+        "type": "string",
+        "description": "Optional; env DHU_CAPTURE_OUT in script"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/dhu-screencapture-macos.sh"],
+    "notes": "Forward screencapture_args as argv; default captures full main display."
+  }
+}

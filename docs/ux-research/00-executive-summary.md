@@ -1,34 +1,35 @@
-# Executive summary — UX research (Android Auto + Power Ampache 2)
+# Executive summary — Android Auto and Power Ampache 2
 
-**Date:** 2026-03-30  
-**Last reviewed:** 2026-04-07 (merged into `dev`; cross-linked [user stories](../user-stories.md))  
-**Audience:** Maintainers, design, Android engineers.
+**Research snapshot:** 2026-03-30 · **Last refreshed:** 2026-04-07
 
-## Purpose
+This note is for **maintainers, designers, and Android engineers** who need a single page before diving into the rest of [this folder](README.md).
 
-Summarize an **evidence-oriented** baseline for **safe, low-friction** music use on **Android Auto**, aligned with **Google’s media-for-cars** guidance. **Shipping** host media is **Power Ampache 2** with **Media3** (`MediaSession` + `MediaSessionService` and media-browser discovery in the manifest — confirm **browse** depth in upstream; see [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md)). This repository’s **`app/`** module is a **Compose** shell for the **plugin** (phone); it does **not** register as a standalone **Android Auto** media browser app in the manifest **today** — validate integrated **Auto** behavior with **`PowerAmpache2PluginTemplate`** / **Power-Ampache-2** APKs per [08-prototype-handoff-package.md](08-prototype-handoff-package.md). **Android Auto** UI is **host-rendered** from **Media3** integration in the **shipping** app.
+## Why we did this
 
-## Key findings
+Streaming music in the car is easy to underestimate. Small choices — how deep the browse tree goes, how long titles are, whether search defaults to voice — change **glance time** and **hands off the wheel**. Google also sets **hard rules** for media apps on Android Auto and for Play listing.
 
-1. **Platform path:** Upstream PA2 uses **Media3** `MediaSessionService` (`SimpleMediaService`) and a **`MediaSession`** wired to the player. For **Android Auto**, Google’s **host-rendered** media UI applies once the app fully satisfies the **media browser / library** contract ([01-platform-constraint-sheet.md](01-platform-constraint-sheet.md) — including the **code-scan caveat** on browse implementation). Custom pixel-level car UI belongs to **templates** only if the product **migrates** to the Cars App Library path.
+Power Ampache 2’s **main** Android app uses **Media3** (`MediaSession` hosted in a `MediaSessionService`, media browser discovery in the manifest). **Android Auto** does not use your app’s colors or fonts on the head unit: it shows **host-rendered** lists and the player, fed by your **session**, **metadata**, and **browse tree**.
 
-2. **Tasks that matter:** **Play/pause**, **skip**, and **resume** are the critical low-load tasks; **deep browse** and **typed search** carry **high** glance and manual demand ([02-task-analysis-and-flows.md](02-task-analysis-and-flows.md)).
+This **`mockups`** branch is **documentation only**. Validate integrated **Auto** behaviour on the **Desktop Head Unit** or hardware with an APK built from **`dev`** or **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**, as described in [08-prototype-handoff-package.md](08-prototype-handoff-package.md).
 
-3. **Safety:** **Google Play car quality** and **distraction safeguards** are the binding gates; academic and NHTSA-style references inform **heuristics** but do not replace store review ([04-distraction-brief.md](04-distraction-brief.md), [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md)).
+## What we learned
 
-4. **Accessibility:** Strong **TalkBack** and scaling work on **phone**; on **Auto**, accessibility is **largely host-owned** — focus on **clear labels**, **stable IDs**, and **voice** ([06-accessibility-matrix.md](06-accessibility-matrix.md)).
+1. **Platform** — PA2 follows Google’s **media session** pattern for cars. How **complete** library browse is on Auto in every build should still be **checked in upstream**; see [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md). Custom “pixel” car UI belongs to a **different** path (Car App Library templates) if the product ever goes there.
+2. **Tasks that matter** — **Play/pause**, **skip**, and **getting back to something familiar** carry the least load while moving. **Deep browsing** and **typing-heavy search** are the expensive ones ([02-task-analysis-and-flows.md](02-task-analysis-and-flows.md)).
+3. **Safety** — Google’s **car quality** and **distraction safeguards** are the practical gates for shipping. Academic and government references in our notes are **supporting context**, not a substitute for Play review ([04-distraction-brief.md](04-distraction-brief.md), [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md)).
+4. **Accessibility** — On the **phone**, invest in TalkBack, scaling, and contrast. On **Auto**, you mostly influence **labels**, **stable IDs**, and **voice** — the host owns the chrome ([06-accessibility-matrix.md](06-accessibility-matrix.md)).
+5. **Look and feel** — **Phone:** PowerAmpache2Theme (Material 3, Nunito, optional dynamic color). **Auto:** the car’s UI; you supply **content**, not a teal skin ([../design-system/00-design-system-index.md](../design-system/00-design-system-index.md)).
 
-5. **Visual identity:** **Phone** UI follows **PowerAmpache2Theme** (Material 3 + optional **Material You** + Nunito). **Auto** chrome does **not** use PA2 colors directly ([../design-system/00-design-system-index.md](../design-system/00-design-system-index.md)).
+## Suggested next steps
 
-## Recommended next steps
+- Put **continue listening**, **recents**, and **playlists** near the **top** of browse before long artist → album → track paths.
+- Exercise **voice** and **error** paths on the **DHU** and, when you can, a real car.
+- Label design work by surface: **phone (PA2 theme)** vs **Auto (host media)**. Full handheld UI lives in **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**.
 
-- Prioritize browse roots: **continue listening**, **recents**, **playlists** before deep **artist → album** paths.
-- Exercise **voice** flows and **error** surfacing on the **Desktop Head Unit** and, when possible, a real vehicle.
-- Label prototypes by surface: **phone (PA2 theme)** vs **host media** vs **plugin Auto** — this template’s **`app/`** module is a **Compose** reference for the plugin; full PA2 phone UI lives in **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**.
+## Where to read more
 
-## Full detail
+- [07-research-synthesis.md](07-research-synthesis.md) — tradeoffs and open questions  
+- [08-prototype-handoff-package.md](08-prototype-handoff-package.md) — scenario priorities (P0–P3)  
+- [MVP user stories](../user-stories.md)  
+- [Index of all UX docs](README.md)
 
-- [07-research-synthesis.md](07-research-synthesis.md)  
-- [08-prototype-handoff-package.md](08-prototype-handoff-package.md)  
-- Index: [README.md](README.md)  
-- **MVP user stories:** [../user-stories.md](../user-stories.md)

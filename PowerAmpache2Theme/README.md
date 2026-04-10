@@ -1,1 +1,0 @@
-# PowerAmpache2Theme

@@ -1,0 +1,23 @@
+{
+  "name": "adb_plugin_reinstall_debug",
+  "description": "adb uninstall luci.sixsixsix.powerampache2.plugin (ignore failure) then :app:installDebug in PA2_PLUGIN_GRADLE_ROOT via adb-plugin-install-debug.sh. Requires PA2_PLUGIN_GRADLE_ROOT.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "skip_uninstall": {
+        "type": "boolean",
+        "default": false,
+        "description": "If true, pass --skip-uninstall to the script"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}"
+    },
+    "argv_template": ["./android-auto-agents/scripts/adb-plugin-install-debug.sh"],
+    "argv_template_skip_uninstall": ["./android-auto-agents/scripts/adb-plugin-install-debug.sh", "--skip-uninstall"]
+  }
+}

@@ -1,0 +1,60 @@
+# Build and deploy research docs (MkDocs) to GitHub Pages from the mockups branch.
+# Enable: Settings → Pages → Source: GitHub Actions.
+
+name: Deploy GitHub Pages (research site)
+
+on:
+  push:
+    branches:
+      - mockups
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install MkDocs
+        run: pip install -r requirements.txt
+
+      # Not --strict: some agent docs link to repo paths outside docs/ (android-auto-agents, root README);
+      # MkDocs cannot resolve those as internal pages. Fix links or add extra_files before re-enabling strict.
+      - name: Build site
+        run: mkdocs build
+
+      # Project Pages already maps https://<user>.github.io/<repo>/ and
+      # https://<custom-domain>/<repo>/ to the artifact root. Do not nest MkDocs output under
+      # a <repo>/ folder here — that would serve the site at /<repo>/<repo>/ and make /<repo>/ 404.
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

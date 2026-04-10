@@ -1,62 +1,67 @@
-# Power Ampache 2 design system — index (phone + Android Auto)
+# Power Ampache 2 design system — phone and Android Auto
 
-This design system follows the structure in [99designs — What does a design system consist of?](https://99designs.com/blog/tips/design-systems/): **branding and design language**, **layout and navigation**, **components and patterns**, plus **implementation** notes.
+This folder describes **how PA2 looks and reads** on the **phone**, and how that **differs** from **Android Auto**, where the car — not your theme — paints most of the screen.
 
-## Android Auto vs the phone app (read this first)
+## Android Auto vs phone (read this first)
 
-On **Android Auto**, the **head unit** draws browse lists, now playing, and transport controls. The app does **not** skin that UI with Power Ampache colors or Nunito. Integration work is **Media3**: a reliable `MediaSession`, a sensible `MediaItem` tree, accurate metadata and artwork, voice actions, and error reporting, within [Google’s car media](https://developer.android.com/training/cars/media) and distraction rules.
+On **Android Auto**, the **head unit** draws browse lists, now playing, and transport. The app does **not** apply **Compose** colors or **Nunito** to that chrome. You **still** carry PA2 forward through **Media3**: **artwork**, **metadata** (titles, artist, album), **browse structure**, and **copy tone** — the same **content identity** as the main app. That is **not** custom Auto UI; it is what Google’s media model is built for. See **[04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md)** for the full **PA2 + Google** strategy.
 
-**Phone** surfaces use **PowerAmpache2Theme** (Nunito, Material 3 tokens, optional dynamic color). That is the scope of the token tables in this folder.
+On the **phone**, surfaces use **PowerAmpache2Theme** (Nunito, Material 3, optional dynamic color). That is what the token tables in this folder describe.
 
-## Goals
+## Why this exists
 
-- Give designers and engineers one place to see how **brand tokens** map to **surfaces**.
-- Keep **phone** (PA2 + PowerAmpache2Theme) separate from **Android Auto** (host-rendered media for the app’s media-browser integration).
-- Stay aligned with UX research: [../ux-research/README.md](../ux-research/README.md).
+- One place to see how **brand** and **tokens** map to real screens.
+- A clear line between **phone** (you control layout and color) and **Auto** (you control **content** and **session**).
+- Alignment with UX research: [../ux-research/README.md](../ux-research/README.md).
 
-## Audience
+## Who uses it
 
-- Android and Compose engineers working on the handheld app
-- Engineers integrating **Media3** / Android Auto (session, browse tree, metadata — not car pixel theme)
-- Anyone building design prototypes or marketing screenshots
+- Android and Compose engineers on the handheld app
+- People integrating **Media3** / Android Auto (session, browse tree, metadata — not painting the head unit)
+- Designers and anyone building **mockups** or store screenshots
 
-## Source of truth
+## Where the truth lives
 
 | Layer | Location |
 |-------|----------|
-| **Code (theme module)** | `Power-Ampache-2/PowerAmpache2Theme/` (Git submodule in upstream repo) |
-| **Code (app dimens + app colours)** | `Power-Ampache-2/app/src/main/res/values/` |
-| **Inventory (this repo)** | [appendix-pa2-theme-inventory.md](appendix-pa2-theme-inventory.md) |
+| **Theme module (code)** | `Power-Ampache-2/PowerAmpache2Theme/` — submodule in the main repo |
+| **App dimens and colours** | `Power-Ampache-2/app/src/main/res/values/` |
+| **Inventory in this repo** | [appendix-pa2-theme-inventory.md](appendix-pa2-theme-inventory.md) |
 
-When the upstream theme changes, update the **appendix** and token tables in [01-brand-and-language.md](01-brand-and-language.md).
+When the upstream theme changes, refresh the **appendix** and the token tables in [01-brand-and-language.md](01-brand-and-language.md).
 
-## Documents
+## Documents here
 
 | # | Document |
 |---|----------|
-| 01 | [01-brand-and-language.md](01-brand-and-language.md) — philosophy, tone, typography, color, assets |
+| 01 | [01-brand-and-language.md](01-brand-and-language.md) — voice, type, color, assets |
 | 02 | [02-layout-and-navigation.md](02-layout-and-navigation.md) — spacing, grids, IA, Auto vs phone |
-| 03 | [03-components-and-patterns.md](03-components-and-patterns.md) — UI patterns and states |
-| Apx | [appendix-pa2-theme-inventory.md](appendix-pa2-theme-inventory.md) — file map and semantic roles |
+| 03 | [03-components-and-patterns.md](03-components-and-patterns.md) — patterns and states |
+| 04 | [04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md) — **PA2 fidelity + Google Auto** (MVP Media3) |
+| Apx | [appendix-pa2-theme-inventory.md](appendix-pa2-theme-inventory.md) — file map |
 
-## Critical distinction: two surfaces
+## Two surfaces
 
-| Surface | Who controls visuals | PA2 theme? |
-|---------|---------------------|------------|
-| **Phone** | PA2 Compose + `PowerAmpache2Theme` | **Yes** — colors, Nunito, Material You |
-| **Android Auto (media path)** | **Head unit / Android Auto host** | **No** — app supplies **content** (titles, art, tree) |
+| Surface | Who owns the visuals | PA2 alignment |
+|---------|---------------------|----------------|
+| **Phone** | PA2 Compose + `PowerAmpache2Theme` | **Full theme** — colors, Nunito, Material You |
+| **Android Auto (Media3)** | Head unit draws chrome | **Content-level PA2** — artwork, metadata, labels, IA; **not** teal/Nunito on OEM chrome |
 
-Do not promise PA2 **teal primary** or **Nunito** inside the **projected** media UI unless the product moves to a **custom template** path and platform allows it.
+**Custom** pixel-level Auto UI is **out of scope** for MVP; **brand carryover** through **session content** is **in scope**. Details: [04-android-auto-brand-carryover.md](04-android-auto-brand-carryover.md).
 
-### Design prototypes (Figma / static frames)
+## Prototypes (Figma, static frames)
 
-Wireframes or screenshots should show **two labelled surfaces**: **Phone — PA2 theme** (tokens and Nunito from this folder) and **Auto — host media** (neutral chrome; content-only parity with production). Use a **neutral badge** on car frames so stakeholders do not confuse preview chrome with OEM styling. Prototypes support reviews and copy checks; **compliance** with [Google Play app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality) and [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards) is proven in **shipping code + host behaviour**, not in static images alone (see [../ux-research/05-design-guardrails-checklist.md](../ux-research/05-design-guardrails-checklist.md)).
+Show **two labelled surfaces**: **Phone — PA2 theme** (this folder) and **Auto — host media** (neutral chrome; **content** matches production). Use a **neutral badge** on car frames. Mockups help reviews and copy; **Play** compliance is proven in **code + host**, not PNGs alone — see [../ux-research/05-design-guardrails-checklist.md](../ux-research/05-design-guardrails-checklist.md). Frame labels for tools: [../agents/prototype-and-engineering.md](../agents/prototype-and-engineering.md).
 
-## Optional tools
+## Optional
 
-- **Markdown in-repo** is the canonical **documentation** for this workspace.
-- **Figma** (or similar) may be added later; keep tokens synced from `PowerAmpache2Theme` and this folder.
+- **Markdown in-repo** is the canonical **documentation** for this fork on **`mockups`** (no theme code here — references point at **Power-Ampache-2** / **icefields/PowerAmpache2Theme**).
+- **Figma** may sit beside it; keep tokens aligned with upstream `PowerAmpache2Theme` and this folder.
 
 ## Related plugins
 
-The upstream app queries **infoplugin**, **lyricsplugin**, **chromecastplugin** packages; their **branding** should remain **subordinate** to PA2 tokens unless a plugin ships a standalone surface. Theme extraction for this package focused on **`PowerAmpache2Theme`** (shared with those integrations when they depend on the same module).
+The main app talks to other plugins (info, lyrics, Chromecast, etc.). Their **branding** should stay **secondary** to PA2 tokens unless a plugin ships its own surface. This extraction focused on **`PowerAmpache2Theme`** as the shared layer.
+
+---
+
+*Last reviewed: 2026-04-10*

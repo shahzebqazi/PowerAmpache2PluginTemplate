@@ -1,65 +1,54 @@
-# Distraction brief — secondary tasks and in-vehicle music UI
+# Distraction — what it means for music on Android Auto
 
-**Purpose:** Summarize evidence and **normative platform** requirements relevant to **consumer** music apps on **Android Auto**, and relate them to Power Ampache 2. Full citations live in [bibliography.md](bibliography.md); add peer-reviewed DOIs as the literature pass deepens.
+**Purpose:** A readable summary of **why** shallow browse and voice matter, plus **where the rules actually come from** for a consumer music app. Long-form citations sit in [bibliography.md](bibliography.md); a future pass can add DOIs for peer-reviewed papers.
 
----
+## In short
 
-## Executive summary
+- Doing **anything** besides driving — looking away, taking hands off, thinking hard — competes with the road. Music apps are **less** demanding than messaging or visual search, but **deep browse** and **typing** still hurt.
+- **Google** sets **distraction safeguards** and **Play quality** rules for car media apps. Treat those as **binding** for shipping ([distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards), [app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality)).
+- **NHTSA** and similar bodies publish research and guidelines on driver attention. Use the **specific** document and revision you mean — the [general hub](https://www.nhtsa.gov/research-data/distracted-driving) is not one numbered rulebook. None of this replaces **OEM** certification or **Play** review.
 
-- **Secondary tasks** (visual, manual, cognitive) compete with driving; music apps are lower risk than visual search or messaging but **browse depth** and **manual entry** still matter.
-- **Google** enforces **distraction safeguards** and **Play quality** rules for car media apps; these are **hard constraints** for shipping ([Implement distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards), [App quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality)).
-- **NHTSA** publishes **driver-distraction** research and (separately) **visual-manual** task guidance; use the **specific guideline revision** you cite—do not treat the general [distracted-driving hub](https://www.nhtsa.gov/research-data/distracted-driving) as if it were one numbered rule set. NHTSA material is **not** a substitute for OEM certification or Google Play review.
-- **Design response:** Prefer **shallow hierarchies**, **voice** for search, **predictable now-playing controls**, and **minimal metadata** while moving ([android-auto-ux-research-plan.md](../android-auto-ux-research-plan.md), design response section).
+## A simple framework
 
----
+| Channel | Examples in music | What we worry about |
+|---------|-------------------|------------------------|
+| **Visual** | Reading titles, scanning lists | How long and how often eyes leave the road |
+| **Manual** | Taps, scrolls, rotary nudges | Time with hands busy |
+| **Cognitive** | Choosing among many browse nodes | Memory and decision time |
 
-## Secondary task demand (framework)
+**Design response:** **Shallow** trees where you can, **voice** for search when moving, **predictable** now playing controls, **short** strings on browse rows.
 
-| Channel | Examples in music apps | Typical concern |
-|---------|------------------------|-----------------|
-| **Visual** | Reading titles, album lists, queue | Glance time, frequency |
-| **Manual** | Taps, scrolls, rotary nudges | Time off wheel, sequence length |
-| **Cognitive** | Choosing among many browse nodes | Working memory, decision time |
+## Regions and stores
 
-**Research direction:** Prefer systematic reviews on **in-vehicle information systems** and **music selection**; note vehicle and UI generation (pre-touchscreen studies may not generalize). Add 3–5 anchored citations in the next revision.
+- **United States:** NHTSA material can inform **heuristics**; cite concrete publications when you quote numbers.
+- **European Union:** High-level road safety pages set **tone**, not Android Auto compliance.
+- **Google Play:** **Android app quality for cars** is the practical gate for many teams.
 
----
+## Android Auto specifically
 
-## Regulatory and industry context (consumer app)
+Google states that distraction matters and apps must follow **design requirements** for listing ([Cars media overview](https://developer.android.com/training/cars/media)). The **media browser** model puts most layout in the **host**, which cuts arbitrary custom screens — but **browsing and scrolling** are still real risks.
 
-- **United States:** Use NHTSA’s **specific** visual-manual / distraction publications (linked from their hub) for heuristic targets; the hub URL alone is not a citation for a particular threshold.
-- **European Union:** High-level road-safety policy (e.g. [EU Road Safety](https://road-safety.transport.ec.europa.eu/index_en)) informs **ethos** only—not compliance sign-off for Android Auto.
-- **Google Play:** **Android app quality for cars** is the practical gate for Auto distribution.
+## What we try to do in PA2
 
----
+| Area | Aim |
+|------|-----|
+| Browse | **Wide** roots — recents, playlists — before deep taxonomies as the default |
+| Search | **Voice-first**; keyboard-heavy flows when **parked** or on **phone** |
+| Metadata | Short **title / artist** lines |
+| Errors | One **clear** line + retry; avoid multi-step recovery while moving |
+| Queue | **Secondary** on the car; serious edits on **phone** |
 
-## Platform-specific: Android Auto media
+## Gaps and honest guesses
 
-Google states that driver distraction is taken seriously and apps must meet **design requirements** for Play listing ([Cars media overview](https://developer.android.com/training/cars/media)). The **media browser** model moves much UI to the **host**, which **reduces** arbitrary custom layouts but **does not** remove browse/scroll risk.
+- We have not yet inlined **peer-reviewed** citations into this brief — placeholder for a systematic literature pass.
+- **Hypothesis:** people forgive fewer features on Auto if **play, pause, and skip** are flawless.
+- **Tension:** “Rich library browsing” vs “shallow hierarchy” — see [07-research-synthesis.md](07-research-synthesis.md).
 
----
+## Related
 
-## Implications for Power Ampache 2
-
-| Area | Implication |
-|------|-------------|
-| Browse tree | Favor **wide roots** (recents, playlists) over deep taxonomies as default car entry. |
-| Search | **Voice-first**; discourage keyboard-heavy flows for moving vehicle. |
-| Metadata | Short **title / artist** strings; avoid long descriptions on browse rows. |
-| Errors | Short, actionable messages; avoid multi-step recovery in motion. |
-| Queue | Treat as **secondary**; complex edits on phone. |
-
----
-
-## Gaps and hypotheses
-
-- **Gap:** Peer-reviewed citations not yet inlined in this brief (placeholder for systematic pass).
-- **Hypothesis:** Users accept **fewer features** on Auto if **T1–T2** (play/pause/skip) are flawless.
-- **Contradiction risk:** “Rich library browsing” vs “shallow hierarchy” — resolve per [07-research-synthesis.md](07-research-synthesis.md).
+- [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md) — day-to-day checklist  
+- [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md) — allowed vs discouraged
 
 ---
 
-## Related artifacts
-
-- [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md) — operational rules.
-- [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md) — allowed/forbidden summary.
+*Last reviewed: 2026-04-07*

@@ -1,0 +1,21 @@
+{
+  "name": "logcat_car_media",
+  "description": "Stream adb logcat filtered for Media3 / session tags (long-running; use ANDROID_SERIAL for multiple devices).",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/logcat-car-media.sh"],
+    "env": {
+      "ANDROID_SERIAL": "${android_serial}"
+    }
+  }
+}

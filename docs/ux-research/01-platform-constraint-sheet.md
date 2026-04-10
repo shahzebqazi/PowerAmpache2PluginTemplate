@@ -1,75 +1,59 @@
-# Platform constraint sheet — Android Auto + Power Ampache 2
+# Android Auto — what the platform allows
 
-Use this sheet when scoping **Android Auto** behaviour: what the **head unit** controls, what the **app** must supply, and what is **out of scope** for a standard media-browser app. Pair with [bibliography.md](bibliography.md) for citations.
+Use this when you scope **behaviour** on the head unit: who draws the screen, what the app must supply, and what Google says no to.
 
-## Integration path (upstream Power Ampache 2)
+## How Power Ampache 2 fits in today
 
-**Confirmed from `Power-Ampache-2` (code review):**
+The **main** Power Ampache 2 codebase uses **Media3**: a `MediaSession` built in DI and hosted by **`SimpleMediaService`** (`MediaSessionService`). The manifest exposes the legacy **media browser** intents so Android can treat the app as a **browse endpoint** next to the session.
 
-- **`androidx.media3`**: `MediaSession` built in `ServiceModule` and hosted by `SimpleMediaService`, which extends **`MediaSessionService`** (not `MediaBrowserService` / not `MediaLibraryService` as a class name).
-- **Manifest** (`AndroidManifest.xml`): `SimpleMediaService` declares intent filters for `android.media.browse.MediaBrowserService` and `android.support.v4.media.MediaBrowserCompat` so the system can treat it as a **media browser endpoint** alongside the session token.
+**Caveat:** Whether **full** `MediaLibraryService` / `MediaLibrarySession` browse exists should be **verified in code** on **`dev`** or **Power-Ampache-2**. This **`mockups`** branch has **no** source tree — docs only. See [Create audio media apps](https://developer.android.com/training/cars/media) for expectations.
 
-**Code-scan caveat (avoid overstating shipped behaviour):** A **`MediaLibraryService`** / **`MediaLibrarySession`** implementation with browse callbacks (e.g. `onGetChildren`) was **not found** under `Power-Ampache-2/**/*.kt` in this workspace snapshot. Android Auto **library browsing** still requires meeting Google’s media-for-cars expectations (see [Create audio media apps](https://developer.android.com/training/cars/media) and [Configure the manifest](https://developer.android.com/training/cars/media/configure-manifest)). **Treat “browse tree on Auto” as target UX and engineering verification**, not something this doc proves from code alone.
+**Standard** Android Auto media is **not** the Cars App Library template path unless you deliberately switch.
 
-**Conclusion:** PA2 is aligned with the **Media3 session service** integration style Google documents for car media apps. The **Cars App Library** templated path is **not** used in PA2’s player service. This template’s **`app/`** module is a **Compose** reference for the plugin; full PA2 phone UI is **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**; standard Auto media is **not** `androidx.car.app`.
+| Topic | Main PA2 app | Plugin template (`dev` branch) |
+|--------|----------------|--------------------------------|
+| Media3 session service + media browser intents | Yes | When implemented in `app/` |
+| Full browse tree on Auto | Confirm in upstream | Verify in code on `dev` |
+| Car App Library (custom templates) | Not the default player path | Not the default |
 
-| Path | PA2 upstream | This umbrella repo |
-|------|----------------|---------------------|
-| Media3 **`MediaSessionService`** + **`MediaSession`** + manifest **media-browser** intents | Yes | **`app/`** plugin module + docs — **Media3** in plugin / PA2 clone |
-| **Full library browse** on Auto (`MediaLibraryService` / `MediaLibrarySession` pattern) | **Verify in upstream** (not confirmed in this doc’s code scan) | Plugin template on your branch when present |
-| Car App Library (custom templates) | Not in PA2 player integration | N/A in this repo |
+**Takeaway:** UX notes about “Auto surfaces” mean **host-rendered** media UI. Phone branding still comes from **PowerAmpache2Theme** ([../design-system/00-design-system-index.md](../design-system/00-design-system-index.md)).
 
-**Implication:** UX research and design-system “Auto surface” sections apply to **host-rendered media UI** for the **full car stack** in **Power-Ampache-2** and any **plugin** that contributes **Media3** session/browse behavior. This repo **does** include a **`app/`** Compose module (plugin shell); **phone** branding uses **PowerAmpache2Theme** — see [../design-system/00-design-system-index.md](../design-system/00-design-system-index.md).
+## What you can do (media app on Android Auto)
 
----
+- Offer a **browsable / playable** tree with `MediaItem` flags.
+- Drive **playback** through `MediaSession` — play, pause, skip, seek when the platform allows.
+- Support **voice actions** where Google documents them ([Voice actions](https://developer.android.com/training/cars/media/voice-actions)).
+- Ship **metadata and artwork** the way the media app architecture describes.
+- Meet **[Android app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality)** for the media category if you want Play distribution.
 
-## Allowed (media app on Android Auto / AAOS)
+## What gets awkward or host-limited
 
-- Expose a **browsable/playable** tree via `MediaItem` (`FLAG_BROWSABLE`, `FLAG_PLAYABLE`).
-- Provide **playback controls** through `MediaSession` (play, pause, skip, seek where supported).
-- Support **voice actions** where documented ([Voice actions](https://developer.android.com/training/cars/media/voice-actions)).
-- Surface **metadata and artwork** per media app architecture guidelines.
-- Meet **Google Play car quality** requirements for the **media** category before distribution listing.
+- **Painting your own** full-screen car layouts on the **standard browser path** — the **host** renders browse and now playing; you feed **data**.
+- **Very long** scrolling lists without structure — bad for glance time; shallow roots and recents help.
+- **Trusting only the DHU** — latency, input (touch vs knob), and day/night differ on real head units ([Testing](https://developer.android.com/training/cars/testing)).
 
----
+## What to avoid (platform + policy)
 
-## Discouraged / host-limited
+- Flows that break Google’s **[distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards)** for media.
+- **Video** or non-media tasks while driving outside allowed app types.
+- **Typing** as the main way to do primary playback tasks when voice or shallow browse is expected — treat as a **guardrail** ([05-design-guardrails-checklist.md](05-design-guardrails-checklist.md)).
+- Shipping to Play **without** meeting the current **car quality** checklist for your category.
 
-- **Deep custom layouts** on Auto for media apps using the browser path: the **host** renders browse and now-playing; PA2 controls **data**, not pixel layout.
-- **Long lists** without pagination: poor glanceability; prefer shallow trees and recents (product decision, aligns with distraction guidance).
-- **Relying on DHU alone** for sign-off: latency, input mode, and day/night may differ on OEM head units ([Testing](https://developer.android.com/training/cars/testing)).
+## Optional: Car App Library
 
----
-
-## Forbidden / must not (platform + policy)
-
-- **Secondary tasks** that violate Google’s **distraction safeguards** for media apps ([Implement distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards)).
-- **In-app video** or non-media interactions while driving outside allowed app types ([Cars media overview](https://developer.android.com/training/cars/media)).
-- **Free-form typing** for primary driving flows where voice or shallow browse is required by policy (treat as **guardrail** in [05-design-guardrails-checklist.md](05-design-guardrails-checklist.md)).
-- Play listing **without** meeting **Android app quality for cars** for the relevant category.
-
----
-
-## Optional path: Car App Library (custom templates)
-
-If a product **migrates** or prototypes with [Build templated media apps](https://developer.android.com/training/cars/apps/media):
-
-- Supported **only on Android Auto** (not the same as full AAOS templated surface mix — verify current docs).
-- Use **provided templates** for lists, grids, and actions; custom UI is constrained by the library and host validation.
-
-This repo’s **`app/`** module is **not** the Cars App Library path; **standard** media-browser / **Media3** integration remains the **default** for Auto unless the maintainer chooses otherwise.
-
----
+If a product moved to [templated media apps](https://developer.android.com/training/cars/apps/media), you’d use **Google’s templates** — different constraints, not the default for PA2’s current player service.
 
 ## Testing
 
-- **Desktop Head Unit (DHU)** for development; document gaps vs production HU (touch vs rotary, screen geometry, performance).
-- **Host validation** / quality guidelines for store submission.
+- **DHU** for development; write down where it differs from a real car (touch vs rotary, screen shape, performance).
+- **Host validation** against Play’s car quality expectations before release.
+
+## Still to verify on a milestone
+
+- [ ] How **complete** browse is in production PA2 on Auto (full tree vs queue-heavy).
+- [ ] **AAOS**-specific needs if you target embedded Automotive OS.
+- [ ] Exact **row / depth** limits from the current distraction and quality docs — quote them into this sheet when locked.
 
 ---
 
-## Open items (verify on milestone)
-
-- [ ] **Browse implementation:** Confirm whether production PA2 exposes a **full `MediaItem` browse tree** on Android Auto (vs now-playing / queue only), and whether `MediaLibraryService` / `MediaLibrarySession` should be added per current Media3 guidance.
-- [ ] **AAOS**-specific behaviour if PA2 targets embedded Automotive OS builds.
-- [ ] Current **row count / browse depth** limits from [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards) and Play quality docs (copy **quoted** limits into this sheet when confirmed).
+*Last reviewed: 2026-04-07*

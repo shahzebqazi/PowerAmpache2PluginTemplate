@@ -1,0 +1,37 @@
+{
+  "name": "logcat_car_media_snapshot",
+  "description": "Non-streaming logcat dump (-d) for Media3 / car tags, written to artifacts/logcat/ and tail printed for LLM context.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "tags": {
+        "type": "string",
+        "description": "Space-separated TAG:V entries (logcat -s). Default: MediaLibrary:V MediaSession:V AndroidAuto:V ExoPlayer:V"
+      },
+      "max_lines": {
+        "type": "integer",
+        "default": 500,
+        "description": "Tail lines printed to stdout"
+      },
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL"
+      },
+      "out_file": {
+        "type": "string",
+        "description": "Optional full path for the full dump (env OUT_FILE in script)"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/logcat-snapshot.sh"],
+    "env": {
+      "ANDROID_SERIAL": "${android_serial}",
+      "TAGS": "${tags}",
+      "MAX_LINES": "${max_lines}",
+      "OUT_FILE": "${out_file}"
+    }
+  }
+}

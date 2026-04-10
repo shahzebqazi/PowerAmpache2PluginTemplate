@@ -1,0 +1,28 @@
+{
+  "name": "dhu_start_usb",
+  "description": "Start SDK Desktop Head Unit (dhu-start.sh). Primary: usb/auto = USB accessory AOA + --usb=SERIAL. Optional mode adb = adb forward + --adb (head unit server on phone). ANDROID_SERIAL when multiple devices. cwd = repo root.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "mode": {
+        "type": "string",
+        "enum": ["usb", "auto", "adb"],
+        "description": "usb = single USB session; auto = USB retries; adb = tunnel to head unit server (not USB accessory)",
+        "default": "usb"
+      },
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL when multiple adb devices"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/dhu-start.sh", "${mode}"],
+    "env": {
+      "ANDROID_SERIAL": "${android_serial}",
+      "DHU_ALWAYS_ON_TOP": "${dhu_always_on_top}"
+    }
+  }
+}
