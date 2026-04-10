@@ -11,6 +11,14 @@ This folder holds **UX research**, **design-system** write-ups, **user stories**
 
 **Branch:** **`mockups`** — docs and design assets **only**. **No** application code on this branch; use **`dev`** for the plugin.
 
+## GitHub Pages (research site)
+
+This folder is published as a **static site** (MkDocs Material) via **GitHub Actions** when changes land on **`mockups`**. After the maintainer enables **Settings → Pages → GitHub Actions**, the site URL is:
+
+`https://shahzebqazi.github.io/PowerAmpache2PluginTemplate/`
+
+Local preview: `pip install -r requirements.txt` (repo root) then `mkdocs serve`. Build output is **`site/`** (gitignored).
+
 ---
 
 *Last updated: 2026-04-10*

@@ -1,0 +1,2 @@
+# GitHub Pages — MkDocs (mockups branch). See mkdocs.yml and .github/workflows/pages.yml
+mkdocs-material>=9.5,<10

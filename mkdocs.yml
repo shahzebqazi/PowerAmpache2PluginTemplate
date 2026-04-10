@@ -1,0 +1,86 @@
+# MkDocs — GitHub Pages (mockups branch). Build: pip install -r requirements.txt && mkdocs build
+# Site URL after enable Pages → GitHub Actions in repo Settings.
+
+site_name: Power Ampache 2 — Android Auto (research)
+site_description: UX research, design system, and Figma mockups for the PA2 Android Auto plugin (MVP).
+site_url: https://shahzebqazi.github.io/PowerAmpache2PluginTemplate/
+site_author: Power Ampache 2 contributors
+
+repo_url: https://github.com/shahzebqazi/PowerAmpache2PluginTemplate
+repo_name: Repository
+
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: teal
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: teal
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+
+plugins:
+  - search
+
+# Avoid duplicate home: only docs/README.md (not ux-research/README.md, etc.)
+exclude_docs: |
+  /README.md
+
+markdown_extensions:
+  - md_in_html
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - "Agents (handoff)": Agents.md
+  - User stories: user-stories.md
+  - Research plan: android-auto-ux-research-plan.md
+  - UX research:
+      - Index: ux-research/README.md
+      - "00 Executive summary": ux-research/00-executive-summary.md
+      - "01 Platform constraint sheet": ux-research/01-platform-constraint-sheet.md
+      - "02 Task analysis and flows": ux-research/02-task-analysis-and-flows.md
+      - "03 Music Auto UX pattern table": ux-research/03-music-auto-ux-pattern-table.md
+      - "04 Distraction brief": ux-research/04-distraction-brief.md
+      - "05 Design guardrails checklist": ux-research/05-design-guardrails-checklist.md
+      - "06 Accessibility matrix": ux-research/06-accessibility-matrix.md
+      - "07 Research synthesis": ux-research/07-research-synthesis.md
+      - "08 Prototype handoff package": ux-research/08-prototype-handoff-package.md
+      - Bibliography: ux-research/bibliography.md
+  - Design system:
+      - Index: design-system/00-design-system-index.md
+      - "01 Brand and language": design-system/01-brand-and-language.md
+      - "02 Layout and navigation": design-system/02-layout-and-navigation.md
+      - "03 Components and patterns": design-system/03-components-and-patterns.md
+      - "04 Android Auto brand carryover": design-system/04-android-auto-brand-carryover.md
+      - "Appendix — PA2 theme inventory": design-system/appendix-pa2-theme-inventory.md
+  - Agents & workflow:
+      - Index: agents/README.md
+      - Workflow: agents/workflow.md
+      - Tooling: agents/tooling.md
+      - "Research methodology": agents/research-methodology.md
+      - "Prototype and engineering": agents/prototype-and-engineering.md
+  - "Mockups (repo folder)": mockups.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/shahzebqazi/PowerAmpache2PluginTemplate
