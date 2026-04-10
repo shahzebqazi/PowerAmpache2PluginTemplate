@@ -1,9 +1,9 @@
 # Agents
 
-Automation and contributor rules: **[docs/agents/](docs/agents/README.md)**.
+Automation notes: **[docs/agents/](docs/agents/README.md)**.
 
-**Branch rule:** UX research, design docs, user stories, and `mockups/` assets belong on **`mockups`** — **not** `dev` or `main`. The short pointer at repo root is intentional; detailed policy is in `docs/agents/workflow.md`.
+**This branch (`mockups`):** **Design and research only** — `docs/`, `mockups/`. **No** Kotlin, Gradle, or Android modules. **Implementation** is on **`dev`**.
 
 ---
 
-*Last updated: 2026-04-07*
+*Last updated: 2026-04-10*

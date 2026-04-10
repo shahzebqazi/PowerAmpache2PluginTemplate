@@ -26,9 +26,9 @@ This table ties **flows** to **how hard** they tend to be in the car — glance 
 | Offline | Subtree or clear at root | Confusion if “what plays” is unclear |
 | Lyrics / extras | Phone-first | Reading while driving |
 
-## This repo vs the main app
+## This project vs the main app
 
-This project has a small **`app/`** Compose module (plugin). **Power-Ampache-2** is the full phone product. For **Android Auto**, compare prototypes like this:
+**Power-Ampache-2** is the full phone product; the plugin template on **`dev`** includes handheld and Auto integration code. This **`mockups`** branch has **no** app sources — prototypes and docs only. For **Android Auto**, compare prototypes like this:
 
 - **Auto:** host lists and player — you own **tree + session + metadata**, not teal pixels.
 - **Phone:** **PowerAmpache2Theme**, full layout control.

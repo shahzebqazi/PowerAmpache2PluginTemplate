@@ -6,7 +6,7 @@ This document pulls phases **A–D** of [../android-auto-ux-research-plan.md](..
 
 Power Ampache 2 ships **`SimpleMediaService`** as a **`MediaSessionService`** with a **`MediaSession`** and manifest hooks for **media browser** discovery — the same **family** Google describes in [Create audio media apps](https://developer.android.com/training/cars/media). Whether **full library browse** is implemented in every build must still be **verified in code** ([01-platform-constraint-sheet.md](01-platform-constraint-sheet.md)).
 
-This repo’s **`mockups`** branch carries **plugin `app/`** code and **docs** together. **DHU** and real-car testing use APKs built here and/or **Power-Ampache-2**.
+The **`mockups`** branch holds **docs and design assets only**. **DHU** and real-car testing use APKs built from **`dev`** and/or **Power-Ampache-2**.
 
 **Tradeoff:** Anything that **looks** like custom head-unit chrome can **misrepresent** real Auto unless you label it **Auto — host media** in prototypes.
 

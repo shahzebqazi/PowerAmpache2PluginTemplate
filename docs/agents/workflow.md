@@ -5,30 +5,30 @@
 - **Upstream template:** `icefields/PA2PluginTemplate` — ask for access if `git fetch` fails with “repository not found.”
 - **This fork:** `origin` — default remote for day-to-day work.
 - **`main`:** Portfolio / GitHub Pages — **not** for UX research or mockup docs.
-- **`dev`:** Plugin implementation — **not** for UX research or mockup docs.
-- **`mockups`:** **All** UX research, design-system markdown, `docs/user-stories.md`, `mockups/research/`, and Figma links. Do design and research work here.
+- **`dev`:** **Plugin implementation** (Kotlin, Gradle, `app/`). **No** research or mockup docs live here.
+- **`mockups`:** **Design and research only** — `docs/`, `mockups/`, Figma notes. **No** application source code on this branch.
 - **Other branches** (for example `plugin/AndroidAuto`, `cursor-cloud/*`): preserve; do not delete without maintainer approval.
 
 ## Scope
 
-- Unless the scope is expanded, **implement inside `app/`** only (when coding on `dev` or feature branches).
-- **Architecture:** propose options; the **human maintainer or product owner** decides.
-- **Theme:** handheld UI and mockups use **PowerAmpache2Theme** (PA2Theme submodule).
+- **On `mockups`:** edit documentation, user stories, and mockup assets only.
+- **On `dev`:** implementation; unless scope expands, prefer **`app/`** for the plugin.
+- **Architecture:** propose options; the **human** product owner or maintainer decides.
+- **Theme:** handheld UI references **PowerAmpache2Theme** (see design-system docs; code lives in **Power-Ampache-2** / **`dev`**).
 
-## When to write code
+## When to write application code
 
-- Do **not** merge or ship application code until the **product owner** explicitly asks for implementation.
+- **Not on `mockups`.** Land code on **`dev`** (or feature branches) when the product owner asks.
 
 ## Requirements
 
-- **User stories:** [docs/user-stories.md](../user-stories.md) on the **`mockups`** branch.
-- Run a full pass on **functional** and **non-functional** requirements with the maintainer; capture alignment in an executive summary when the team agrees.
-- **Use cases:** example flows in the codebase are not the product spec. Prefer **maintainer-provided** real use cases.
+- **User stories:** [docs/user-stories.md](../user-stories.md) on this branch.
+- Treat maintainer **real** use cases as authoritative over placeholder examples in code on **`dev`**.
 
 ## Tracking
 
-- Use the **GitHub Projects** board for this repo.
+- Use the repo **GitHub Projects** board; keep cards in sync with work.
 
 ---
 
-*Last updated: 2026-04-07*
+*Last updated: 2026-04-10*

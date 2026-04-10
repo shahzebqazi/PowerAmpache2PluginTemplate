@@ -1,5 +1,12 @@
-# Plugin Template for Power Ampache 2 (beta).
+# Power Ampache 2 — Android Auto (design & research)
 
-**UX research, design notes, user stories, and mock assets:** branch **`mockups`** — see [docs/README.md](docs/README.md) and [mockups/README.md](mockups/README.md). Not maintained on **`dev`** or **`main`**.
+This **`mockups`** branch holds **documentation and design assets only** — UX research, design-system notes, user stories, and files under `mockups/`.
 
-**Contributor / AI rules:** [Agents.md](Agents.md) → [docs/agents/](docs/agents/README.md).
+**Application code** (Kotlin, Gradle, `app/`, `data/`, `domain/`) lives on **`dev`**, not here.
+
+- **Docs index:** [docs/README.md](docs/README.md)
+- **Contributor / AI rules:** [Agents.md](Agents.md)
+
+---
+
+*Branch: `mockups` — design & research; use `dev` for implementation.*

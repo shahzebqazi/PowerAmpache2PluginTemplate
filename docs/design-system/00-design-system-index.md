@@ -54,8 +54,8 @@ Show **two labelled surfaces**: **Phone — PA2 theme** (this folder) and **Auto
 
 ## Optional
 
-- **Markdown in-repo** is the canonical **documentation** for this fork on **`mockups`**.
-- **Figma** may sit beside it; keep tokens aligned with `PowerAmpache2Theme` and this folder.
+- **Markdown in-repo** is the canonical **documentation** for this fork on **`mockups`** (no theme code here — references point at **Power-Ampache-2** / **icefields/PowerAmpache2Theme**).
+- **Figma** may sit beside it; keep tokens aligned with upstream `PowerAmpache2Theme` and this folder.
 
 ## Related plugins
 

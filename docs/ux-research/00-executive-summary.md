@@ -10,7 +10,7 @@ Streaming music in the car is easy to underestimate. Small choices — how deep 
 
 Power Ampache 2’s **main** Android app uses **Media3** (`MediaSession` hosted in a `MediaSessionService`, media browser discovery in the manifest). **Android Auto** does not use your app’s colors or fonts on the head unit: it shows **host-rendered** lists and the player, fed by your **session**, **metadata**, and **browse tree**.
 
-On the `**mockups`** branch, this repo includes plugin `**app/**` code and docs together. Validate integrated **Auto** behaviour on the **Desktop Head Unit** or hardware with the APK built from this branch or **Power-Ampache-2**, as described in [08-prototype-handoff-package.md](08-prototype-handoff-package.md).
+This **`mockups`** branch is **documentation only**. Validate integrated **Auto** behaviour on the **Desktop Head Unit** or hardware with an APK built from **`dev`** or **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)**, as described in [08-prototype-handoff-package.md](08-prototype-handoff-package.md).
 
 ## What we learned
 

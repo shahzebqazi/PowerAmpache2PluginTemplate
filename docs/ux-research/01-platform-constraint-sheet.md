@@ -6,15 +6,15 @@ Use this when you scope **behaviour** on the head unit: who draws the screen, wh
 
 The **main** Power Ampache 2 codebase uses **Media3**: a `MediaSession` built in DI and hosted by **`SimpleMediaService`** (`MediaSessionService`). The manifest exposes the legacy **media browser** intents so Android can treat the app as a **browse endpoint** next to the session.
 
-**Caveat:** Whether **full** `MediaLibraryService` / `MediaLibrarySession` browse exists in **every** fork should be **verified in code**. This **`mockups`** branch may include a plugin implementation — check `app/.../androidauto/` — while upstream PA2 may differ. See [Create audio media apps](https://developer.android.com/training/cars/media) for expectations.
+**Caveat:** Whether **full** `MediaLibraryService` / `MediaLibrarySession` browse exists should be **verified in code** on **`dev`** or **Power-Ampache-2**. This **`mockups`** branch has **no** source tree — docs only. See [Create audio media apps](https://developer.android.com/training/cars/media) for expectations.
 
-**This repo** has an **`app/`** Compose module (plugin). **Standard** Android Auto media is **not** the Cars App Library template path unless you deliberately switch.
+**Standard** Android Auto media is **not** the Cars App Library template path unless you deliberately switch.
 
-| Topic | Main PA2 app | This template repo |
-|--------|----------------|---------------------|
-| Media3 session service + media browser intents | Yes | Plugin `app/` when present |
-| Full browse tree on Auto | Confirm in upstream | This branch when implemented |
-| Car App Library (custom templates) | Not the default player path | Not the default here |
+| Topic | Main PA2 app | Plugin template (`dev` branch) |
+|--------|----------------|--------------------------------|
+| Media3 session service + media browser intents | Yes | When implemented in `app/` |
+| Full browse tree on Auto | Confirm in upstream | Verify in code on `dev` |
+| Car App Library (custom templates) | Not the default player path | Not the default |
 
 **Takeaway:** UX notes about “Auto surfaces” mean **host-rendered** media UI. Phone branding still comes from **PowerAmpache2Theme** ([../design-system/00-design-system-index.md](../design-system/00-design-system-index.md)).
 

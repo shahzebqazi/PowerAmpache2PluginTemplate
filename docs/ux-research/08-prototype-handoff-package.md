@@ -4,9 +4,9 @@
 
 **Before you draw car screens:** Read [01-platform-constraint-sheet.md](01-platform-constraint-sheet.md). On Android Auto you **do not** theme the head unit like the phone — you supply **content and session behaviour** (tree, metadata, artwork, errors, voice).
 
-**Verify in code:** Scenarios **P1–P2** assume a **browsable `MediaItem` tree** on the head unit, per [Create audio media apps](https://developer.android.com/training/cars/media). On this **`mockups`** branch, check `app/.../androidauto/` and confirm behaviour matches product intent before prototypes are treated as **final**.
+**Verify in code:** Scenarios **P1–P2** assume a **browsable `MediaItem` tree** on the head unit, per [Create audio media apps](https://developer.android.com/training/cars/media). Confirm in **`dev`** / **Power-Ampache-2** before prototypes are treated as **final** — this branch has no source.
 
-**Frame labels, DHU notes, and engineering tick boxes** for automation: [../agents/prototype-and-engineering.md](../agents/prototype-and-engineering.md) and [../agents/android-auto-media3.md](../agents/android-auto-media3.md).
+**Frame labels and review checklists:** [../agents/prototype-and-engineering.md](../agents/prototype-and-engineering.md).
 
 ## Fidelity and honesty
 

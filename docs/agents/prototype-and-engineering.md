@@ -1,6 +1,6 @@
-# Prototype labels and engineering checklists
+# Prototype labels and review checklists
 
-Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-research/08-prototype-handoff-package.md) (human-readable scenario priorities).
+Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-research/08-prototype-handoff-package.md) (scenario priorities).
 
 ## Frame labels (Figma / static)
 
@@ -8,7 +8,7 @@ Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-rese
 |-------|-------------|
 | **Phone — PA2 theme** | Handheld UI: colors and type from [docs/design-system/01-brand-and-language.md](../design-system/01-brand-and-language.md) |
 | **Auto — host media (PA2)** | Android Auto: host-rendered lists and player; **pattern only**, not PA2-colored head units |
-| **Phone — PA2 reference (Compose)** | This repo’s `app/` Compose shell — reference for the plugin |
+| **Phone — PA2 reference (Compose)** | Plugin or main app handheld UI — **implementation** on the **`dev`** branch, not on **`mockups`** |
 
 - Use a **neutral badge** on car frames so previews are not read as OEM styling.
 - Web previews: respect **`prefers-reduced-motion`**; keep car concepts **static** unless motion is essential.
@@ -16,13 +16,11 @@ Use this alongside [docs/ux-research/08-prototype-handoff-package.md](../ux-rese
 ## Prototypes vs shipping
 
 - Wireframes prove **intent** — hierarchy, copy length, scenarios. They do **not** replace [Android app quality for cars](https://developer.android.com/docs/quality-guidelines/car-app-quality) or [distraction safeguards](https://developer.android.com/training/cars/media/distraction-safeguards).
-- **Compliance** is validated in **Kotlin / Media3**, **DHU**, and **devices**.
+- **Compliance** is validated in **shipping code**, **DHU**, and **devices** — work that happens on **`dev`** / **Power-Ampache-2**, not on this design-only branch.
 
-## Engineering checklist — this repo (`app/` Android Auto)
+## Engineering validation (on `dev` / upstream)
 
-On the **`mockups`** branch, verify against `AndroidAutoMediaLibraryService`, `MediaItemMapping`, `MediaLibraryIds`, and manifest registration. See [android-auto-media3.md](android-auto-media3.md).
-
-## Engineering checklist — Power-Ampache-2 (upstream)
+When implementation exists, verify against the real app:
 
 - [ ] `MediaItem` hierarchy matches agreed depth goals.
 - [ ] `MediaSession` callbacks cover **transport** controls.
@@ -40,4 +38,4 @@ On the **`mockups`** branch, verify against `AndroidAutoMediaLibraryService`, `M
 
 ---
 
-*Last updated: 2026-04-07*
+*Last updated: 2026-04-10*
