@@ -3,8 +3,8 @@
 
 site_name: Power Ampache 2 — Android Auto (research)
 site_description: UX research, design system, and Figma mockups for the PA2 Android Auto plugin (MVP).
-# Canonical URL: custom domain (GitHub Pages). Default github.io project URL is also valid.
-site_url: https://sqazi.sh/
+# Project Pages path: must match GitHub Pages URL (github.io redirects custom domain to this path).
+site_url: https://sqazi.sh/PowerAmpache2PluginTemplate/
 site_author: Power Ampache 2 contributors
 
 repo_url: https://github.com/shahzebqazi/PowerAmpache2PluginTemplate
