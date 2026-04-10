@@ -73,7 +73,7 @@ For broader **Power Ampache 2** contribution practices, see the main app’s gui
 | ------- | ---- |
 | [**Power-Ampache-2**](https://github.com/icefields/Power-Ampache-2) | Main Android music client (Material You, phone UI, core playback). |
 | [**PowerAmpache2Theme**](https://github.com/icefields/PowerAmpache2Theme) | Shared Compose theme used by PA2 and this plugin. |
-| [**PA2PluginTemplate**](https://github.com/icefields/PowerAmpache2PluginTemplate) (upstream) | Template this line was derived from when applicable. |
+| [**PowerAmpache2PluginTemplate**](https://github.com/icefields/PowerAmpache2PluginTemplate) (upstream) | Upstream plugin template this project tracks. |
 
 * * *
 

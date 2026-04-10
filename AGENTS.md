@@ -19,7 +19,7 @@ If unsure whether a change counts as “code,” default to using the Kanban fir
 
 ## Repository and branches
 
-- **Upstream template (maintainer):** `icefields/PA2PluginTemplate` on GitHub when applicable. If `git fetch` fails with “repository not found,” the repo may be private: authenticate (HTTPS token or SSH) or ask the maintainer for access.
+- **Upstream template (maintainer):** `icefields/PowerAmpache2PluginTemplate` on GitHub. If `git fetch` fails with “repository not found,” the repo may be private: authenticate (HTTPS token or SSH) or ask the maintainer for access.
 - **This remote:** `origin` — develop feature work here unless directed otherwise.
 - **`main`:** Default integration branch for this repo (includes app implementation and docs merged from former `dev`).
 - **Topic branches:** e.g. `plugin/AndroidAuto`, `mockups` — preserve for reference unless the maintainer approves removal.
