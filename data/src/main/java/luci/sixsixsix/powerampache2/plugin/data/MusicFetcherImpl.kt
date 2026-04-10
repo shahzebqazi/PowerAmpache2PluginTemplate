@@ -21,7 +21,9 @@
  */
 package luci.sixsixsix.powerampache2.plugin.data
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
@@ -41,12 +43,30 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val latestAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
 
-    override fun getSongsFromAlbum(albumId: String): List<Song> {
-        TODO("Not yet implemented")
+    override fun getSongsFromAlbum(albumId: String): Flow<List<Song>> {
+        val album = findAlbum(albumId) ?: return flowOf(emptyList())
+        val tracks = when {
+            album.songs.isNotEmpty() -> album.songs
+            album.tracks.isNotEmpty() -> album.tracks
+            else -> emptyList()
+        }
+        return flowOf(tracks)
     }
 
-    override fun getSongsFromPlaylist(playlistId: String): List<Song> {
-        TODO("Not yet implemented")
+    override fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>> {
+        val playlist = playlistsFlow.value.find { it.id == playlistId }
+        return flowOf(playlist?.songs.orEmpty())
+    }
+
+    private fun findAlbum(albumId: String): Album? {
+        val inFlow: (MutableStateFlow<List<Album>>) -> Album? = { flow ->
+            flow.value.find { it.id == albumId }
+        }
+        return inFlow(albumsFlow)
+            ?: inFlow(favouriteAlbumsFlow)
+            ?: inFlow(recentAlbumsFlow)
+            ?: inFlow(latestAlbumsFlow)
+            ?: inFlow(highRatedAlbumsFlow)
     }
 
     override fun getAlbumsFromArtist(playlistId: String): List<Album> {

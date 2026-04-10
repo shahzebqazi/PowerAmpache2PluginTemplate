@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.plugin.domain
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
@@ -37,7 +38,7 @@ interface MusicFetcher {
     val latestAlbumsFlow: MutableStateFlow<List<Album>>
     val highRatedAlbumsFlow: MutableStateFlow<List<Album>>
 
-    fun getSongsFromAlbum(albumId: String): List<Song>
-    fun getSongsFromPlaylist(playlistId: String): List<Song>
+    fun getSongsFromAlbum(albumId: String): Flow<List<Song>>
+    fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>>
     fun getAlbumsFromArtist(artistId: String): List<Album>
 }
