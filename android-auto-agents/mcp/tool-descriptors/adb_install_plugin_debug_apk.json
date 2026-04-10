@@ -1,0 +1,26 @@
+{
+  "name": "adb_install_plugin_debug_apk",
+  "description": "adb install -r the plugin debug APK (default: app/build/outputs/apk/debug/app-debug.apk under PA2_PLUGIN_GRADLE_ROOT). Optional apk_path overrides. Run assembleDebug first. Requires PA2_PLUGIN_GRADLE_ROOT when using default path.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "apk_path": {
+        "type": "string",
+        "description": "Optional absolute path to app-debug.apk; default uses PA2_PLUGIN_GRADLE_ROOT"
+      },
+      "android_serial": {
+        "type": "string",
+        "description": "Optional ANDROID_SERIAL"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}",
+      "ANDROID_SERIAL": "${android_serial}"
+    },
+    "argv_template": ["./android-auto-agents/scripts/adb-install-plugin-debug-apk.sh", "${apk_path}"]
+  }
+}

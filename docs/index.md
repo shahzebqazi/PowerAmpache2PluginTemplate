@@ -2,6 +2,8 @@
 
 Welcome to the **design and research** site for the **Power Ampache 2** Android Auto plugin (MVP). This site is built from the same Markdown as the **`mockups`** branch in the repository and is published with **GitHub Pages**.
 
+![Android Auto — browser mockup hero](images/hero-android-auto.png)
+
 ## Figma — UI mockups and diagrams
 
 The live UI mockups and research frames live in **Figma** (not in this repo). Use the links below to open the design file and the FigJam board.

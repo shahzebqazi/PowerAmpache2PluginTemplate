@@ -1,0 +1,36 @@
+{
+  "name": "run_aa_plugin_device_cycle",
+  "description": "Full device cycle: optional plugin unit tests, adb uninstall + :app:installDebug (clean reinstall), optional screencap + logcat snapshot, then optionally start DHU in background for UI inspection. Same env as run_aa_plugin_smoke plus START_DHU (default 1), SKIP_DHU, DHU_MODE, DHU_NOHUP_LOG. PA2_PLUGIN_GRADLE_ROOT optional if PowerAmpache2PluginTemplate/ exists beside android-auto-agents/.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "skip_tests": { "type": "boolean", "default": false, "description": "Set SKIP_TESTS=1" },
+      "skip_screencap": { "type": "boolean", "default": false, "description": "Set SKIP_SCREENCAP=1" },
+      "skip_logcat_snapshot": { "type": "boolean", "default": false, "description": "Set SKIP_LOGCAT_SNAPSHOT=1" },
+      "clear_logcat": { "type": "boolean", "default": false, "description": "Set CLEAR_LOGCAT=1" },
+      "sleep_seconds": { "type": "integer", "default": 2, "description": "SLEEP_SECONDS after install" },
+      "android_serial": { "type": "string", "description": "Optional ANDROID_SERIAL" },
+      "start_dhu": { "type": "boolean", "default": true, "description": "Set START_DHU=1/0 (default 1)" },
+      "skip_dhu": { "type": "boolean", "default": false, "description": "Set SKIP_DHU=1 to disable DHU" },
+      "dhu_mode": { "type": "string", "default": "auto", "description": "DHU_MODE: usb or auto" }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/aa-plugin-device-cycle.sh"],
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}",
+      "ANDROID_SERIAL": "${android_serial}",
+      "SKIP_TESTS": "${skip_tests}",
+      "SKIP_SCREENCAP": "${skip_screencap}",
+      "SKIP_LOGCAT_SNAPSHOT": "${skip_logcat_snapshot}",
+      "CLEAR_LOGCAT": "${clear_logcat}",
+      "SLEEP_SECONDS": "${sleep_seconds}",
+      "START_DHU": "${start_dhu}",
+      "SKIP_DHU": "${skip_dhu}",
+      "DHU_MODE": "${dhu_mode}"
+    },
+    "notes": "Map booleans to 1/0 for shell env."
+  }
+}

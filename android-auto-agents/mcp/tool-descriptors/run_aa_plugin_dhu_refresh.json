@@ -1,0 +1,38 @@
+{
+  "name": "run_aa_plugin_dhu_refresh",
+  "description": "Autonomous plugin DHU refresh: optional mockup verify + plugin unit tests + clean installDebug + force-stop Android Auto (Gearhead) + force-stop plugin + print human replug USB banner + hint if dhu-last.log shows -251 + start DHU (background by default). Primary agent entry for verify/debug/reload after Media3 or plugin APK changes.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "verify_mockup": { "type": "boolean", "default": false, "description": "VERIFY_MOCKUP=1 (npm build + check in mockup/)" },
+      "skip_tests": { "type": "boolean", "default": false, "description": "SKIP_TESTS=1" },
+      "skip_install": { "type": "boolean", "default": false, "description": "SKIP_INSTALL=1" },
+      "skip_dhu": { "type": "boolean", "default": false, "description": "SKIP_DHU=1" },
+      "dhu_foreground": { "type": "boolean", "default": false, "description": "DHU_FOREGROUND=1 (exec dhu-start; blocks)" },
+      "dhu_mode": { "type": "string", "default": "auto", "description": "DHU_MODE passed to dhu-start.sh" },
+      "replug_banner": { "type": "boolean", "default": true, "description": "REPLUG_BANNER=0 to suppress human instructions" },
+      "skip_force_stop_gearhead": { "type": "boolean", "default": false, "description": "SKIP_FORCE_STOP_GEARHEAD=1" },
+      "skip_force_stop_plugin": { "type": "boolean", "default": false, "description": "SKIP_FORCE_STOP_PLUGIN=1" },
+      "android_serial": { "type": "string", "description": "Optional ANDROID_SERIAL" }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/aa-plugin-dhu-refresh.sh"],
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}",
+      "ANDROID_SERIAL": "${android_serial}",
+      "VERIFY_MOCKUP": "${verify_mockup}",
+      "SKIP_TESTS": "${skip_tests}",
+      "SKIP_INSTALL": "${skip_install}",
+      "SKIP_DHU": "${skip_dhu}",
+      "DHU_FOREGROUND": "${dhu_foreground}",
+      "DHU_MODE": "${dhu_mode}",
+      "REPLUG_BANNER": "${replug_banner}",
+      "SKIP_FORCE_STOP_GEARHEAD": "${skip_force_stop_gearhead}",
+      "SKIP_FORCE_STOP_PLUGIN": "${skip_force_stop_plugin}"
+    },
+    "notes": "Map booleans to 1/0 for shell env."
+  }
+}

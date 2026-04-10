@@ -1,0 +1,13 @@
+{
+  "name": "mockup_npm_verify",
+  "description": "Run npm run build and npm run check in mockup/ using android-auto-agents/scripts/mockup-verify.sh (design / stakeholder browser UI). Optional env SKIP_NPM_CI=1 to skip automatic npm ci when node_modules is missing.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/mockup-verify.sh"]
+  }
+}

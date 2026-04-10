@@ -78,6 +78,15 @@ nav:
       - Tooling: agents/tooling.md
       - "Research methodology": agents/research-methodology.md
       - "Prototype and engineering": agents/prototype-and-engineering.md
+      - "PRD and backlog": agents/01-prd-and-backlog.md
+      - "DHU and car testing": agents/02-dhu-and-car-testing.md
+      - "Mockups and design": agents/03-mockups-and-design.md
+      - "Roles (detailed)": agents/04-roles-detailed.md
+      - "Integrity and tests": agents/05-integrity-and-tests.md
+      - "Plugin template hotspots": agents/06-plugin-template-hotspots.md
+      - "Handoff plugin UI + DHU": agents/07-handoff-plugin-ui-dhu.md
+      - "Portfolio and PR policy": agents/08-portfolio-and-pr-policy.md
+  - "Android Auto agents (scripts + MCP)": android-auto-agents.md
   - "Mockups (repo folder)": mockups.md
 
 extra:

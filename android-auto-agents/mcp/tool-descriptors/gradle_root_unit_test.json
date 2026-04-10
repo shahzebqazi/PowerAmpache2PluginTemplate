@@ -1,0 +1,19 @@
+{
+  "name": "gradle_root_unit_test",
+  "description": "Deprecated: root Android module removed. Use gradle_template_test (gradle-plugin-template.sh with PA2_PLUGIN_GRADLE_ROOT) instead.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string",
+        "default": "testDebugUnitTest",
+        "description": "Ignored — use gradle_template_test"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "argv_template": ["./android-auto-agents/scripts/gradle-root.sh", "${task}"]
+  }
+}

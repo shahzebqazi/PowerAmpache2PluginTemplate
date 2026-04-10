@@ -1,0 +1,121 @@
+/* Global styles for {@html} markdown output (trusted repo docs). */
+.md-prose {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--mock-chrome-border);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--pa2-on-surface-variant);
+}
+
+.md-prose :where(h1, h2, h3, h4) {
+  color: var(--pa2-on-surface);
+  font-family: 'Nunito', system-ui, sans-serif;
+  line-height: 1.25;
+  margin: 1.1em 0 0.45em;
+}
+
+.md-prose h1 {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.md-prose h2 {
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.md-prose h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.md-prose p {
+  margin: 0.55em 0;
+}
+
+.md-prose :where(ul, ol) {
+  margin: 0.5em 0;
+  padding-left: 1.35em;
+}
+
+.md-prose li {
+  margin: 0.25em 0;
+}
+
+.md-prose a {
+  color: var(--pa2-tertiary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-word;
+}
+
+.md-prose a:hover {
+  color: var(--pa2-primary);
+}
+
+.md-prose code {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.82em;
+  padding: 0.12em 0.35em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--pa2-on-surface);
+}
+
+.md-prose pre {
+  margin: 0.75em 0;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--mock-chrome-border);
+  background: var(--mock-chrome-bg);
+  overflow: auto;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.md-prose pre code {
+  padding: 0;
+  background: none;
+  font-size: inherit;
+  color: var(--pa2-on-surface-variant);
+}
+
+.md-prose hr {
+  margin: 1.25em 0;
+  border: none;
+  border-top: 1px solid var(--mock-chrome-border);
+}
+
+.md-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  font-size: 0.8rem;
+}
+
+.md-prose th,
+.md-prose td {
+  border: 1px solid var(--mock-chrome-border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.md-prose th {
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--pa2-on-surface);
+  font-weight: 700;
+}
+
+.md-prose blockquote {
+  margin: 0.6em 0;
+  padding: 0.35em 0 0.35em 12px;
+  border-left: 3px solid var(--pa2-primary);
+  color: var(--pa2-on-surface-variant);
+}
+
+.md-prose strong {
+  color: var(--pa2-on-surface);
+  font-weight: 700;
+}

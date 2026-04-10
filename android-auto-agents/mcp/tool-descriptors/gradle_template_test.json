@@ -1,0 +1,27 @@
+{
+  "name": "gradle_template_unit_test",
+  "description": "Run :app:testDebugUnitTest (or given task) in PA2_PLUGIN_GRADLE_ROOT via gradle-plugin-template.sh. Requires env PA2_PLUGIN_GRADLE_ROOT.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "task": {
+        "type": "string",
+        "default": ":app:testDebugUnitTest",
+        "description": "Gradle task path relative to plugin project"
+      },
+      "extra_args": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Additional Gradle flags, e.g. --no-daemon"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}"
+    },
+    "argv_template": ["./android-auto-agents/scripts/gradle-plugin-template.sh", "${task}"]
+  }
+}

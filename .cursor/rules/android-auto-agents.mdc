@@ -1,0 +1,32 @@
+---
+description: Android Auto / PA2 agent pack — roles, workflows, skills, DHU (use with AGENTS.md)
+alwaysApply: true
+---
+
+# Android Auto agents (this workspace)
+
+## Sources of truth
+
+- **PRD, backlog, maintainer boundaries:** [`AGENTS.md`](AGENTS.md) + shards in [`docs/agents/`](docs/agents/README.md) (especially [`docs/agents/01-prd-and-backlog.md`](docs/agents/01-prd-and-backlog.md)).
+- **Portable roles, workflows, skills, MCP stubs:** [`android-auto-agents/`](android-auto-agents/) — start at [`android-auto-agents/README.md`](android-auto-agents/README.md).
+
+## When to load what
+
+| Situation | Read first |
+|-----------|------------|
+| Multi-role / swarm / handoffs | [`android-auto-agents/skills/orchestrate-android-auto-agents.md`](android-auto-agents/skills/orchestrate-android-auto-agents.md) + [`android-auto-agents/roles/README.md`](android-auto-agents/roles/README.md) |
+| Desktop Head Unit | [`android-auto-agents/skills/dhu-usb-session.md`](android-auto-agents/skills/dhu-usb-session.md) + [`android-auto-agents/skills/android-auto-scripts-harness.md`](android-auto-agents/skills/android-auto-scripts-harness.md) + [`android-auto-agents/workflows/dhu-troubleshooting.md`](android-auto-agents/workflows/dhu-troubleshooting.md). **Autonomous refresh (verify, install, force-stop AA + plugin, replug banner, DHU):** [`android-auto-agents/scripts/aa-plugin-dhu-refresh.sh`](android-auto-agents/scripts/aa-plugin-dhu-refresh.sh). |
+| Mockup-driven UI | [`android-auto-agents/workflows/mockup-tdd-dhu.md`](android-auto-agents/workflows/mockup-tdd-dhu.md) |
+| Plugin template build / install | [`android-auto-agents/workflows/plugin-template-verify.md`](android-auto-agents/workflows/plugin-template-verify.md) |
+| Claiming “done” | [`android-auto-agents/contracts/verification-checklist.md`](android-auto-agents/contracts/verification-checklist.md) |
+
+Acting as a **specific persona** (coordinator, tester, debugger, etc.): open the matching file under `android-auto-agents/roles/`.
+
+## DHU (non-negotiables)
+
+- Run from **repository root:** `./android-auto-agents/scripts/dhu-start.sh` or `… auto` — **SDK DHU + USB accessory (`--usb`)**; set **`ANDROID_SERIAL`** when multiple adb devices. The `… adb` subcommand is an **optional** alternate (head unit server); default testing is USB AOA only.
+- Do **not** chain `adb … && pkill -x desktop-head-unit && ./android-auto-agents/scripts/dhu-start.sh` — `pkill` can exit `1` and skip the script; use `; pkill … || true;` then the script.
+
+## MCP (future)
+
+Descriptors: `android-auto-agents/mcp/tool-descriptors/`. No in-repo MCP server yet — add a server in **Cursor Settings → MCP** when you implement one.

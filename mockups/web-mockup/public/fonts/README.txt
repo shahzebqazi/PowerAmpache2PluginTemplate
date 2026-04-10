@@ -1,0 +1,1 @@
+Nunito-Variable.ttf — Nunito variable font (OFL). See OFL.txt. Matches the Nunito family used by PowerAmpache2Theme; prefer replacing this file with copies from Power-Ampache-2/app/src/main/res/font/ when you have a full clone with font binaries checked in.

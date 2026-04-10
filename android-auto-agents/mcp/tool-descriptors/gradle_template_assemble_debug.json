@@ -1,0 +1,22 @@
+{
+  "name": "gradle_template_assemble_debug",
+  "description": "Run :app:assembleDebug in PA2_PLUGIN_GRADLE_ROOT via android-auto-agents/scripts/gradle-plugin-template.sh (consumer workspace root as cwd). Requires env PA2_PLUGIN_GRADLE_ROOT.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "extra_args": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Additional Gradle flags after the task, e.g. --no-daemon"
+      }
+    },
+    "required": []
+  },
+  "suggested_invocation": {
+    "cwd_env": "WORKSPACE_ROOT",
+    "env": {
+      "PA2_PLUGIN_GRADLE_ROOT": "${PA2_PLUGIN_GRADLE_ROOT}"
+    },
+    "argv_template": ["./android-auto-agents/scripts/gradle-plugin-template.sh", ":app:assembleDebug"]
+  }
+}

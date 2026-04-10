@@ -16,3 +16,14 @@ local.properties
 
 # MkDocs (GitHub Pages build output)
 /site
+
+# Web mockup (Svelte) under mockups/web-mockup/
+mockups/web-mockup/node_modules/
+mockups/web-mockup/dist/
+
+# android-auto-agents automation outputs
+artifacts/
+
+# Nested upstream clones (optional local checkouts; not tracked)
+Power-Ampache-2/
+PowerAmpache2PluginTemplate/
