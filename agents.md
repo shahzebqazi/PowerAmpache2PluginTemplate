@@ -1,61 +1,89 @@
-# Agent handoff — Power Ampache 2 plugin template
+# Agents — Power Ampache 2 plugin template
 
-This document orients future coding agents and maintainers working in this repository.
+This document orients AI and human contributors. Update it when workflows change.
 
-## Project
+## Repository and branches
 
-Kotlin Android plugin template for **Power Ampache 2**. Modules:
+- **Upstream template (maintainer):** `icefields/PA2PluginTemplate` on GitHub when applicable. If `git fetch` fails with “repository not found,” the repo may be private: authenticate (HTTPS token or SSH) or ask the maintainer for access.
+- **This remote:** `origin` — develop feature work here unless directed otherwise.
+- **`main`:** Default integration branch for this repo (includes app implementation and docs merged from former `dev`).
+- **Topic branches:** e.g. `plugin/AndroidAuto`, `mockups` — preserve for reference unless the maintainer approves removal.
 
-| Module | Role |
-|--------|------|
-| `domain` | Clean Architecture domain: models, `MusicFetcher`, use cases (`StateFlow` / `Flow`). |
-| `data` | `MusicFetcherImpl` and DI; binds domain interfaces. |
-| `app` | Application, Compose UI, **Android Auto** integration (`Media3`). |
-| `PowerAmpache2Theme` | Shared Compose theme. |
+## Scope and boundaries
 
-## Android Auto — Media3 (app layer)
+- **Modules:** This template uses **`domain`**, **`data`**, **`app`**, and **`PowerAmpache2Theme`**. Respect Clean Architecture boundaries; expand scope only when the product owner agrees.
+- **Architecture:** Agents assist with coding but do not make architectural decisions without explicit human approval. Propose options; the human chooses.
+- **Theme / UI:** Use **PA2Theme** (`PowerAmpache2Theme` module) for UI. Align Figma and implementation with those tokens where applicable.
 
-- **Service**: `app/.../androidauto/AndroidAutoMediaLibraryService.kt` — extends `androidx.media3.session.MediaLibraryService`, holds **ExoPlayer** + **MediaLibrarySession**.
-- **Browse contract**: Root id `[root]`; children of `[root]` are exactly five folders: `[favorites]`, `[recent_albums]`, `[highest_albums]`, `[playlists]`, `[latest_albums]`. Collections map to browsable items with ids `album_{id}` / `playlist_{id}`; tracks come from `MusicFetcher` flows (first emission).
-- **Async**: `MediaLibrarySession.Callback` returns `ListenableFuture`; use **`kotlinx.coroutines.guava`** (`future { }` on a `CoroutineScope`) for work that must bridge coroutines and Guava.
-- **Commands**: Connection uses default session+library commands and default player commands (shuffle/repeat included). No custom Android Auto UI; only `MediaItem` / `MediaMetadata`.
-- **Mapping**: `MediaItemMapping.kt`, ids in `MediaLibraryIds.kt`.
-- **Manifest**: `AndroidAutoMediaLibraryService` is registered with intent action `androidx.media3.session.MediaLibraryService`.
+## Requirements and design
 
-## Domain API (relevant to media browsing)
+1. **User stories (MVP):** [docs/user-stories.md](docs/user-stories.md). Refine functional and non-functional requirements with the maintainer.
+2. **UX research:** [docs/ux-research/README.md](docs/ux-research/README.md) and related files under `docs/`.
+3. Treat maintainer-provided **real** use cases as authoritative. Do not ship features solely because template examples show them; remove or replace misleading examples when implementation begins.
 
-- Album/playlist lists: `FavouriteAlbumStateFlow`, `RecentAlbumsStateFlow`, `HighestAlbumsStateFlow`, `PlaylistsStateFlow`, `LatestAlbumsStateFlow` — each `invoke(...): StateFlow<List<...>>` (some use cases still support `useMock` for **domain-level** previews; the Android Auto service calls them with defaults and does not enable mocks).
-- Songs: `MusicFetcher.getSongsFromAlbum(albumId)` / `getSongsFromPlaylist(playlistId)` return **`Flow<List<Song>>`**.
-- **Queue**: `QueueStateFlow` exposes **`musicFetcher.currentQueueFlow` only** (no mock branch). App `SongListViewModel` binds that `StateFlow` directly.
+## Tracking and testing
 
-## Data layer
+- **GitHub Projects:** Keep issues/cards in sync with actual work when used.
+- A **developer-supplied APK** may be available for manual testing when local builds are blocked.
 
-- `MusicFetcherImpl` resolves album tracks from in-memory album state flows; playlists from `playlistsFlow`. Unknown ids may yield **empty** lists — not fake success lists. `getAlbumsFromArtist` may still be unimplemented (`TODO`) until wired.
+## Tooling: Android Auto and MCP
 
-## Dependencies (Gradle)
+- **Android Auto:** Prefer **Android Studio**, **Android for Cars** docs, and device/DHU testing. No Android Auto–specific MCP is assumed in this workspace; other MCPs (e.g. Figma) are optional. Document any new MCP here if added.
 
-- Media3: `media3-session`, `media3-exoplayer` (see `gradle/libs.versions.toml`).
-- Coroutines: `kotlinx-coroutines-core`, `kotlinx-coroutines-guava`, plus **Guava** for `ListenableFuture` interop.
+## Figma and mockups
 
-## Branches
-
-- **`main`**: Code intended for upstream; includes Media3 service and **no** `mockups/` research folder in-repo.
-- **`mockups`**: Optional branch for **research assets** (e.g. Figma links, written notes) if maintained separately.
-
-## Conventions for agents
-
-- Prefer **minimal, task-scoped** changes; match existing style and DI (Hilt).
-- Do **not** add app-layer “mock success” paths for production features; domain `useMock` flags are for **tests/previews**, not shipped Auto behavior.
-- After substantive changes, run **`./gradlew :app:assembleDebug`** (or CI) when an Android SDK is available (`ANDROID_HOME` / `local.properties`).
-
-## Handoff — suggested next steps
-
-1. **Wire `MusicFetcherImpl`** to real Ampache/network sources so album and playlist flows return non-empty data when the host app has populated state.
-2. **Error handling** in `MediaLibrarySession.Callback`: decide when to return `LibraryResult.ofError` vs empty lists (e.g. network failure).
-3. **Foreground service / notification** if long playback or background policy requires it (evaluate against target SDK).
-4. **Integration tests** for browse tree (optional) using Media3 test utilities or a small harness.
-5. **Update `README.md`** for contributors if this template gains more surface area.
+- Mockups should reflect **approved user stories** and PA2Theme visual language where possible.
+- Optional research assets may live on a separate branch (e.g. `mockups`) if you keep docs-only work out of `main`.
 
 ---
 
-*Last updated on main branch during Android Auto Media3 integration work.*
+## Technical handoff — codebase
+
+### Modules
+
+| Module | Role |
+|--------|------|
+| `domain` | Models, `MusicFetcher`, use cases (`StateFlow` / `Flow`). |
+| `data` | `MusicFetcherImpl` and DI; binds domain interfaces. |
+| `app` | Application, Compose UI, **Android Auto** (`Media3`). |
+| `PowerAmpache2Theme` | Shared Compose theme. |
+
+### Android Auto — Media3 (app layer)
+
+- **Service:** `app/.../androidauto/AndroidAutoMediaLibraryService.kt` — `MediaLibraryService` + **ExoPlayer** + **MediaLibrarySession**.
+- **Browse contract:** Root `[root]`; five folders under it: `[favorites]`, `[recent_albums]`, `[highest_albums]`, `[playlists]`, `[latest_albums]`. Collections use ids `album_{id}` / `playlist_{id}`; tracks from `MusicFetcher` flows (first emission).
+- **Async:** `MediaLibrarySession.Callback` returns `ListenableFuture`; bridge with **`kotlinx.coroutines.guava`** (`future { }` on a `CoroutineScope`).
+- **Commands:** Default session+library and default player commands (shuffle/repeat). No custom AA UI overlays — only `MediaItem` / `MediaMetadata`.
+- **Mapping:** `MediaItemMapping.kt`, `MediaLibraryIds.kt`. **Manifest:** intent action `androidx.media3.session.MediaLibraryService`.
+
+### Domain API (media browsing)
+
+- List use cases: `FavouriteAlbumStateFlow`, `RecentAlbumsStateFlow`, `HighestAlbumsStateFlow`, `PlaylistsStateFlow`, `LatestAlbumsStateFlow` — `StateFlow` lists (some support `useMock` for **domain previews only**; the Auto service does not enable mocks).
+- Songs: `MusicFetcher.getSongsFromAlbum` / `getSongsFromPlaylist` → **`Flow<List<Song>>`**.
+- **Queue:** `QueueStateFlow` → **`musicFetcher.currentQueueFlow` only** (no mock path). `SongListViewModel` binds that `StateFlow` directly.
+
+### Data layer
+
+- `MusicFetcherImpl` resolves tracks from in-memory state; unknown ids may yield **empty** lists — not fake success lists. Some methods may remain `TODO` until wired.
+
+### Dependencies
+
+- Media3: `media3-session`, `media3-exoplayer` (`gradle/libs.versions.toml`).
+- Coroutines: `kotlinx-coroutines-core`, `kotlinx-coroutines-guava`, **Guava**.
+
+### Conventions
+
+- Minimal, task-scoped changes; match Hilt and existing style.
+- Do **not** add app-layer “mock success” for production Auto behavior.
+- Run **`./gradlew :app:assembleDebug`** when an Android SDK is configured.
+
+### Suggested next steps
+
+1. Wire `MusicFetcherImpl` to real Ampache/network data.
+2. Decide `LibraryResult.ofError` vs empty lists for browse failures.
+3. Foreground service / notification if policy requires it for playback.
+4. Optional Media3 browse integration tests.
+
+---
+
+*Last updated: merge of `dev` into `main` + Media3 integration alignment.*
