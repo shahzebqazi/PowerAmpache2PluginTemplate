@@ -2,6 +2,21 @@
 
 This document orients AI and human contributors. Update it when workflows change.
 
+## GitHub Projects Kanban (required for code)
+
+All agents **must** use the Kanban **before** editing any **code** in this repository (application source, modules, tests, Gradle/build scripts, CI config when it changes builds, etc.).
+
+- **Board:** [Power Ampache 2 - Android Auto Plugin](https://github.com/users/shahzebqazi/projects/7) — GitHub Projects (user project #7, `shahzebqazi`).
+- **Workflow:** Confirm the work is tracked on the board (existing card/issue or maintainer-approved representation). Do **not** begin code changes until the task is aligned with the Kanban per project practice.
+
+**Exceptions — Kanban not required** (unless the maintainer adds the work to the board):
+
+- **Mockups** (e.g. Figma-linked assets, mockup branches, design-only deliverables).
+- **Documentation** under `docs/` and similar doc-only edits.
+- **GitHub Pages** content or Pages-related configuration.
+
+If unsure whether a change counts as “code,” default to using the Kanban first.
+
 ## Repository and branches
 
 - **Upstream template (maintainer):** `icefields/PA2PluginTemplate` on GitHub when applicable. If `git fetch` fails with “repository not found,” the repo may be private: authenticate (HTTPS token or SSH) or ask the maintainer for access.
@@ -23,7 +38,7 @@ This document orients AI and human contributors. Update it when workflows change
 
 ## Tracking and testing
 
-- **GitHub Projects:** Keep issues/cards in sync with actual work when used.
+- **GitHub Projects:** Follow [GitHub Projects Kanban (required for code)](#github-projects-kanban-required-for-code). Keep issues/cards in sync with actual work.
 - A **developer-supplied APK** may be available for manual testing when local builds are blocked.
 
 ## Tooling: Android Auto and MCP
@@ -86,4 +101,4 @@ This document orients AI and human contributors. Update it when workflows change
 
 ---
 
-*Last updated: merge of `dev` into `main` + Media3 integration alignment.*
+*Last updated: Kanban workflow for agents + Media3 integration alignment.*
