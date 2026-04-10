@@ -14,7 +14,7 @@
 .cxx
 local.properties
 
-# MkDocs (GitHub Pages build output)
+# MkDocs (GitHub Pages build output; built on mockups branch)
 /site
 
 # Web mockup (Svelte) under mockups/web-mockup/
