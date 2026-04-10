@@ -6,7 +6,7 @@
 
 ## Repository layout (single fork)
 
-- **One repository:** **PowerAmpache2PluginTemplate** (your fork, e.g. **shahzebqazi/PowerAmpache2PluginTemplate**). **`origin`** → fork, **`upstream`** → **icefields/PowerAmpache2PluginTemplate** (or **`icefields/PA2PluginTemplate`** if that is the published name — verify on GitHub).
+- **One repository:** **PowerAmpache2PluginTemplate** (your fork, e.g. **shahzebqazi/PowerAmpache2PluginTemplate**). **`origin`** → fork, **`upstream`** → **icefields/PowerAmpache2PluginTemplate** (canonical maintainer repo name).
 - **`main`:** Kotlin, Gradle, **`app/`**, **`data/`**, **`domain/`**, **`PowerAmpache2Theme/`** — default integration branch for **implementation** and PRs toward **upstream**.
 - **`mockups`:** This branch — **`docs/`**, **`mockups/`**, **`android-auto-agents/`**, MkDocs / Pages. **No** application source committed here.
 - **Feature branches:** e.g. **`cursor-cloud/<topic>-1b3a`** — create from **`main`** for scoped work; open PRs to **`main`** on the fork, then to **upstream** when appropriate.

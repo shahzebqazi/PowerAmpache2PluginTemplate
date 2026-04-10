@@ -2,7 +2,7 @@
 
 ## Remotes and branches
 
-- **Upstream template:** **icefields/PowerAmpache2PluginTemplate** (or **PA2PluginTemplate** — match **AGENTS.md** at repo root). Ask for access if **`git fetch`** fails.
+- **Upstream template (maintainer):** **icefields/PowerAmpache2PluginTemplate**. Ask for access if **`git fetch`** fails with “repository not found.”
 - **This fork:** **`origin`** — default remote for pushes.
 - **`main`:** Default **implementation** branch — Kotlin, Gradle, **`app/`**, **`data/`**, **`domain/`**, theme submodule. Merge **`upstream/main`** here when syncing the maintainer.
 - **`mockups`:** **Design and research only** — `docs/`, `mockups/`, `android-auto-agents/`. **No** application source on this branch.
