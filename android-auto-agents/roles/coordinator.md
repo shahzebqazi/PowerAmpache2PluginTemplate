@@ -7,7 +7,7 @@ Keep a **single backlog**, avoid duplicate work across **`mockup/`**, the **nest
 ## Inputs
 
 - [`AGENTS.md`](../../AGENTS.md) PRD table and **Workspace implementation snapshot**
-- `docs/ux-research/08-mockup-handoff-package.md` for P0–P3
+- `docs/ux-research/08-prototype-handoff-package.md` for P0–P3
 - Open issues / chat scope from the human
 
 ## Outputs

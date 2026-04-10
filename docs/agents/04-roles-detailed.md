@@ -12,7 +12,7 @@ Evidence-backed research on **driving music** UI, **accessibility**, **safety / 
 
 ## UI mockup developer (Svelte)
 
-Disposable **`mockup/`** prototypes. **Must** follow [`03-mockups-and-design.md`](03-mockups-and-design.md) (**PA2 = phone**, plugin = Auto slice). Handoff package: [`docs/ux-research/08-mockup-handoff-package.md`](../../ux-research/08-mockup-handoff-package.md). Validate with Svelte tooling / MCP when available.
+Disposable **`mockups/web-mockup/`** prototypes. **Must** follow [`03-mockups-and-design.md`](03-mockups-and-design.md) (**PA2 = phone**, plugin = Auto slice). Handoff package: [`docs/ux-research/08-prototype-handoff-package.md`](../ux-research/08-prototype-handoff-package.md). Validate with Svelte tooling / MCP when available.
 
 ## Development and testing swarm
 

@@ -25,14 +25,18 @@
         <button type="button" class="voice-btn" aria-label="Voice search">Voice</button>
       </header>
 
-      <a href="#/mockup/auto-np" class="np-strip">
+      <div
+        class="np-strip"
+        role="note"
+        aria-label="Illustrative host mini-player strip — real now playing is drawn by Android Auto, not this app"
+      >
         <span class="np-mini-art" aria-hidden="true"></span>
         <span class="np-mini-text">
           <span class="np-mini-title">Midnight City</span>
-          <span class="np-mini-sub">M83 · Tap for now playing</span>
+          <span class="np-mini-sub">M83 · session metadata (host chrome)</span>
         </span>
         <span class="np-mini-play" aria-hidden="true">▶</span>
-      </a>
+      </div>
 
       <div class="browse">
         <h1 class="heading">{cfg.title}</h1>

@@ -1,7 +1,7 @@
 import doc00 from '../../../docs/ux-research/00-executive-summary.md?raw'
 import doc02 from '../../../docs/ux-research/02-task-analysis-and-flows.md?raw'
 import doc07 from '../../../docs/ux-research/07-research-synthesis.md?raw'
-import doc08 from '../../../docs/ux-research/08-mockup-handoff-package.md?raw'
+import doc08 from '../../../docs/ux-research/08-prototype-handoff-package.md?raw'
 import { renderMarkdown } from './renderMarkdown'
 
 export type ResearchSection = {
@@ -42,7 +42,7 @@ export const researchSections: ResearchSection[] = [
     title: 'Mockups and implementation checklist',
     blurb:
       'P0–P3 scenarios, frame labels for phone vs host media, Media3 checklist, and open questions to resolve with the maintainer.',
-    sourcePath: 'docs/ux-research/08-mockup-handoff-package.md',
+    sourcePath: 'docs/ux-research/08-prototype-handoff-package.md',
     html: renderMarkdown(doc08),
   },
 ]

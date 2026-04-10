@@ -6,7 +6,7 @@ Use this when an agent has **Android SDK**, a **USB device**, and **DHU** availa
 
 ## Goal
 
-Implement and validate **Android Auto / Media3–driven “UI”** for **`PowerAmpache2PluginTemplate`** on branch **`plugin/AndroidAuto`**: what the **car host** shows (browse hierarchy, now-playing metadata, artwork, errors, actions) is largely **OEM-rendered**. Your job is to supply the right **session**, **browse tree**, **MediaItem** metadata, and **playback behavior** so DHU matches the **information architecture** in [`mockup/`](../../mockup/README.md) and [`docs/ux-research/08-mockup-handoff-package.md`](../../ux-research/08-mockup-handoff-package.md), within [`docs/agents/03-mockups-and-design.md`](03-mockups-and-design.md) rules (**PA2 = phone app**, **plugin = Auto slice**).
+Implement and validate **Android Auto / Media3** behaviour for **`PowerAmpache2PluginTemplate`** on **`main`**: what the **car host** shows (browse hierarchy, now-playing metadata, artwork, errors, actions) is **OEM-rendered** — you do **not** implement a custom car player. **Session**, **browse tree**, **MediaItem** metadata, and **playback behavior** should align with the **information architecture** in [`mockups/web-mockup/`](../../mockups/web-mockup/README.md) and [`docs/ux-research/08-prototype-handoff-package.md`](../ux-research/08-prototype-handoff-package.md), within [`docs/agents/03-mockups-and-design.md`](03-mockups-and-design.md) rules (**PA2 = phone app**, **plugin = Auto slice**).
 
 ---
 
@@ -14,9 +14,9 @@ Implement and validate **Android Auto / Media3–driven “UI”** for **`PowerA
 
 | Requirement | Notes |
 |-------------|--------|
-| **Repo layout** | Consumer repo: **android-auto** (this tree). Nested clone: **`PowerAmpache2PluginTemplate/`** at `plugin/AndroidAuto` (merge **`upstream/main`** when syncing). |
-| **SDK** | `sdk.dir` in `PowerAmpache2PluginTemplate/local.properties` or **`ANDROID_HOME`** / **`ANDROID_SDK_ROOT`**. JDK **17**. |
-| **Gradle root for plugin** | `export PA2_PLUGIN_GRADLE_ROOT=/absolute/path/to/PowerAmpache2PluginTemplate` — required for harness scripts from android-auto root ([`android-auto-agents/README.md`](../../android-auto-agents/README.md)). |
+| **Repo layout** | **`mockups`** branch (this tree): docs + `mockups/` + `android-auto-agents/`. **Implementation:** clone or open the same repo on **`main`** (single Gradle project — no nested clone required). |
+| **SDK** | `sdk.dir` in `local.properties` at the **plugin repo root** (on **`main`**) or **`ANDROID_HOME`** / **`ANDROID_SDK_ROOT`**. JDK **17** (or the version in `gradle.properties`). |
+| **Gradle root for harness scripts** | If you run scripts from the **`mockups`** checkout: `export PA2_PLUGIN_GRADLE_ROOT=/absolute/path/to/a/main-branch-clone` ([`android-auto-agents/README.md`](../../android-auto-agents/README.md)). |
 | **Device** | USB debugging, **`adb devices`** shows `device`. |
 | **DHU** | SDK Manager → **Android Auto Desktop Head Unit** (or `sdkmanager "extras;google;auto"`). |
 | **Forbidden** | Do **not** use **`PowerAmpache2PluginTemplateOld/`** as source of truth ([`01-prd-and-backlog.md`](01-prd-and-backlog.md)). |
@@ -30,19 +30,14 @@ Implement and validate **Android Auto / Media3–driven “UI”** for **`PowerA
 3. **[`02-dhu-and-car-testing.md`](02-dhu-and-car-testing.md)** — USB DHU, what DHU validates.  
 4. **[`06-plugin-template-hotspots.md`](06-plugin-template-hotspots.md)** — Gradle map, mocks under **`domain/.../model/mocks/`**.  
 5. **[`android-auto-agents/contracts/android-auto-media-compliance-checklist.md`](../../android-auto-agents/contracts/android-auto-media-compliance-checklist.md)** — manifest / session / errors.  
-6. **Mockups** — [`mockup/`](../../mockup/README.md); after UI-facing changes run **`npm run check`** / **`npm run build`** in **`mockup/`** if you touch it.  
+6. **Mockups** — [`mockups/web-mockup/`](../../mockups/web-mockup/README.md); after UI-facing changes run **`npm run check`** / **`npm run build`** there if you touch it.  
 7. **Design / UX** — [`docs/design-system/`](../../design-system/00-design-system-index.md), [`docs/ux-research/01-platform-constraint-sheet.md`](../../ux-research/01-platform-constraint-sheet.md).
 
 ---
 
 ## Current baseline (do not duplicate blindly)
 
-The plugin **`app`** module already includes a **Media3 MVP**: **`PluginMediaLibraryService`**, **`MediaLibrarySession`**, **ExoPlayer**, shallow browse from **domain mocks**, **`automotive_app_desc.xml`**, and car **meta-data** in **`AndroidManifest.xml`**. Paths (relative to **`PowerAmpache2PluginTemplate/`**):
-
-- `app/src/main/java/.../PluginMediaLibraryService.kt`
-- `app/src/main/java/.../media/MediaLibraryCatalog.kt`
-- `app/src/main/java/.../media/MediaItemFactory.kt`
-- `app/src/main/res/xml/automotive_app_desc.xml`
+The plugin **`app`** module on **`main`** includes a **Media3**-based **`AndroidAutoMediaLibraryService`** (`MediaLibrarySession`, **ExoPlayer**, browse from **MusicFetcher** / domain). Verify **actual** paths and manifest entries after each pull — do not assume extra helper types unless present on your branch.
 
 Extend or refine this stack; do not assume a greenfield service unless the task says so.
 
@@ -50,7 +45,7 @@ Extend or refine this stack; do not assume a greenfield service unless the task 
 
 ## Commands (evidence before “done”)
 
-From **android-auto repo root** (with **`PA2_PLUGIN_GRADLE_ROOT`** set):
+From the repo root that contains **`android-auto-agents/`** (e.g. **`mockups`** branch), with **`PA2_PLUGIN_GRADLE_ROOT`** pointing at a **`main`** checkout **or** from the **`main`** Gradle root directly:
 
 ```bash
 ./android-auto-agents/scripts/gradle-plugin-template.sh :app:testDebugUnitTest
@@ -78,7 +73,7 @@ From **android-auto repo root** (with **`PA2_PLUGIN_GRADLE_ROOT`** set):
 ## Out of scope unless explicitly assigned
 
 - Full **Power-Ampache-2** phone app UI (separate repo).  
-- This umbrella repo has **no** root **`app/`** — DHU uses the **nested plugin** or **Power-Ampache-2** APK ([`README.md`](../../README.md)).  
+- The **`mockups`** branch has **no** Gradle **`app/`** — use a **`main`** checkout for APK builds; DHU exercises the installed media app ([`README.md`](../../README.md)).  
 - Live **Ampache / `MusicFetcherImpl`** wiring without **`data`/`domain`** scope in the task.  
 - Copying **`PowerAmpache2PluginTemplateOld/`**.  
 - Play Store / OEM-only sign-off.

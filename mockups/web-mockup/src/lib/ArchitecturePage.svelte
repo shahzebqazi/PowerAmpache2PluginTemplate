@@ -6,73 +6,57 @@
 
   const route: AppRoute = { name: 'architecture' }
 
-  /** System / deployment view — umbrella repo, nested plugin, car host. */
+  /** System / deployment view — docs + mockups branch, plugin Gradle module, car host. */
   const systemDiagram = `
 flowchart TB
-  subgraph umbrella["android-auto (umbrella repo)"]
-    mockup["mockup/ — Svelte (this site)"]
-    docs["docs/ + AGENTS.md"]
+  subgraph design["PowerAmpache2PluginTemplate — mockups branch"]
+    mockup["mockups/web-mockup — Svelte (this site)"]
+    docs["docs/ + MkDocs site"]
     agents["android-auto-agents/ — DHU, Gradle harness"]
   end
 
-  subgraph nested["PowerAmpache2PluginTemplate (nested clone; PA2_PLUGIN_GRADLE_ROOT)"]
-    app["app/ — UI + Media3"]
-    domain["domain/ — models, mocks, MusicFetcher"]
-    data["data/ — MusicFetcherImpl, PA2DataFetchService"]
-    theme["PowerAmpache2Theme/ — submodule"]
+  subgraph plugin["PowerAmpache2PluginTemplate — main (Gradle)"]
+    app["app/ — Compose shell + Media3"]
+    domain["domain/ — MusicFetcher, use cases"]
+    data["data/ — MusicFetcherImpl"]
+    theme["PowerAmpache2Theme/"]
   end
 
   subgraph device["Phone + USB"]
-    gearhead["Android Auto (Gearhead)"]
-    dhu["Desktop Head Unit (dev)"]
+    gearhead["Android Auto host"]
+    dhu["DHU (dev)"]
   end
 
   mockup -.->|"informs IA"| app
-  app --> svc["PluginMediaLibraryService"]
-  svc --> cat["MediaLibraryCatalog"]
-  svc --> fact["MediaItemFactory"]
-  cat --> domain
+  app --> svc["AndroidAutoMediaLibraryService"]
+  svc --> domain
   data --> domain
   app --> theme
-  gearhead -->|"MediaBrowser / Media3 session"| svc
+  gearhead -->|"host media browser"| svc
   dhu --> gearhead
 `
 
-  /** UML-style class view — main plugin car stack (app module). */
+  /** UML-style class view — plugin Media3 surface (simplified). */
   const classDiagram = `
 classDiagram
   direction TB
   class MainActivity {
     +setContent Compose
   }
-  class PluginHomeScreen {
-    +browse MediaLibraryCatalog
-  }
-  class PluginMediaLibraryService {
+  class AndroidAutoMediaLibraryService {
     +MediaLibrarySession
     +ExoPlayer
     +onGetLibraryRoot()
     +onGetChildren()
   }
-  class MediaLibraryCatalog {
-    <<object>>
-    +childrenFor(parentId)
-    +browseLabels
-  }
-  class MediaItemFactory {
-    <<object>>
-    +fromCatalogEntry()
-    +rootMediaItem()
-  }
-  class PA2DataFetchService {
-    +Messenger IPC
+  class MusicFetcher {
+    <<interface>>
+    +albums, playlists
   }
 
-  MainActivity --> PluginHomeScreen : hosts
-  PluginMediaLibraryService --> MediaLibraryCatalog : mock tree
-  PluginMediaLibraryService --> MediaItemFactory : MediaItems
-  MediaItemFactory ..> MediaLibraryCatalog : ids + mocks
-  note for PluginMediaLibraryService "Host (Gearhead) binds here for Android Auto"
+  MainActivity --> AndroidAutoMediaLibraryService : starts
+  AndroidAutoMediaLibraryService --> MusicFetcher : library data
+  note for AndroidAutoMediaLibraryService "Head unit renders browse/now playing; app supplies MediaItems + session"
 `
 
   let mermaidInited = false
@@ -117,10 +101,10 @@ classDiagram
   <main class="arch-main">
     <h1 class="arch-title">Architecture (current stack)</h1>
     <p class="arch-lead">
-      Umbrella repo <strong>android-auto</strong> ships docs, agent scripts, and this mockup. The car-capable APK is built
-      from a nested <strong>PowerAmpache2PluginTemplate</strong> clone (see <code>AGENTS.md</code>). The host (Android Auto)
-      renders browse and now playing; the plugin supplies <strong>Media3</strong> session + browsable <code>MediaItem</code>
-      tree from domain mocks.
+      This page documents the <strong>PowerAmpache2PluginTemplate</strong> stack: the <strong>mockups</strong> branch (this
+      site + research) and the <strong>main</strong> branch (Gradle plugin). The Android Auto <strong>host</strong> renders
+      browse and now playing; the plugin supplies a <strong>Media3</strong> <code>MediaLibraryService</code> and
+      <code>MediaItem</code> tree — not custom car UI.
     </p>
 
     <section class="arch-section" aria-labelledby="sys-h">
@@ -137,8 +121,8 @@ classDiagram
     <section class="arch-section" aria-labelledby="uml-h">
       <h2 id="uml-h">Plugin app — UML (simplified)</h2>
       <p class="arch-caption">
-        Primary types in <code>app/</code> for phone shell + <code>PluginMediaLibraryService</code> for Android Auto. IPC
-        via <code>PA2DataFetchService</code> when the host app feeds catalog data (product scope).
+        Primary types in <code>app/</code> for the Compose shell + <code>AndroidAutoMediaLibraryService</code> for Android
+        Auto. IPC via <code>PA2DataFetchService</code> when the host app feeds catalog data (product scope).
       </p>
       <div
         class="mermaid-wrap"

@@ -5,7 +5,6 @@ export type MockupFrameId =
   | 'auto-browse-recents'
   | 'auto-browse-frequent'
   | 'auto-browse-new'
-  | 'auto-np'
   | 'auto-queue'
   | 'auto-error'
 
@@ -15,7 +14,6 @@ export const MOCKUP_FRAMES: readonly MockupFrameId[] = [
   'auto-browse-recents',
   'auto-browse-frequent',
   'auto-browse-new',
-  'auto-np',
   'auto-queue',
   'auto-error',
 ] as const

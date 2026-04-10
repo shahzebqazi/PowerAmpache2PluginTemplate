@@ -9,7 +9,7 @@ export type AppRoute =
 
 const DEFAULT_MOCKUP_FRAME: MockupFrameId = 'auto-browse-playlists'
 
-/** Parse `location.hash` (e.g. `#/`, `#/design`, `#/mockup/auto-np`). */
+/** Parse `location.hash` (e.g. `#/`, `#/design`, `#/mockup/auto-queue`). */
 export function parseHash(hash: string): AppRoute {
   const raw = hash.replace(/^#/, '').replace(/^\//, '').trim()
   if (!raw) return { name: 'home' }

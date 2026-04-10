@@ -24,8 +24,8 @@
       {:else}
         <div class="hero-fallback">
           <p>
-            Drop a capture at <code>mockup/public/dhu/dhu-now-playing.png</code> if you want the photo here (from the
-            DHU <code>screenshot</code> command — see <code>mockup/README.md</code>).
+            Drop a capture at <code>mockups/web-mockup/public/dhu/dhu-now-playing.png</code> if you want the photo here
+            (from the DHU <code>screenshot</code> command — see <code>mockups/web-mockup/README.md</code>).
           </p>
         </div>
       {/if}

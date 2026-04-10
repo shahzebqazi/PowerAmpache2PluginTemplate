@@ -13,12 +13,12 @@
 - **Auto — host media**: OEM-rendered **Media3** surface; hierarchy and density, not pixel-perfect OEM chrome.
 - **Plugin / AA entry** (optional third label when needed): flows that only exist on the **plugin APK** (e.g. car launcher label **Auto Plugin for Power Ampache 2**).
 
-Update [`docs/ux-research/08-mockup-handoff-package.md`](../../ux-research/08-mockup-handoff-package.md) when scenarios change.
+Update [`docs/ux-research/08-prototype-handoff-package.md`](../ux-research/08-prototype-handoff-package.md) when scenarios change.
 
 ## Implementation alignment (until real integration)
 
 - Prefer **mock use cases** and **`domain/.../model/mocks/`** (and **`app`** test fakes) for presentation work — **do not** expand **`data`/`domain`** without an explicit task.
-- This repo has **no** root Compose app — **mockup/** and **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)** carry phone reference; the **plugin** is DHU media when its manifest registers **Media3** / Auto.
+- On the **`mockups`** branch there is **no** Gradle module — **`mockups/web-mockup/`** and **[Power-Ampache-2](https://github.com/icefields/Power-Ampache-2)** carry reference; the **plugin** on **`main`** is DHU media when its manifest registers **Media3** / Auto.
 
 ## Phone companion — player design direction
 
@@ -28,14 +28,14 @@ Applies to **PA2** full-screen / now-playing patterns (mockup + eventual **Power
 - Gestures and seek region per design-system touch targets.
 - **Android Auto** playback chrome stays **host-controlled**.
 
-## Car — now-playing
+## Car — now playing
 
-Focus on **metadata, artwork, actions, errors** the app supplies to **Media3**; do not treat **`AutoNowPlaying.svelte`** as an OEM pixel spec.
+The **head unit** draws now playing. Document **metadata, artwork, session state, and errors** the app supplies via **Media3** — do not ship or spec a **custom** Android Auto player surface in this product.
 
 ## Mockup site quality
 
-- Clear **H1** + lead per route; hash routes in **`mockup/src/lib/hash-routes.ts`** stay in sync.
-- After substantive UI changes: **`npm run build`** and **`npm run check`** under **`mockup/`**.
+- Clear **H1** + lead per route; hash routes in **`mockups/web-mockup/src/lib/hash-routes.ts`** stay in sync.
+- After substantive UI changes: **`npm run build`** and **`npm run check`** under **`mockups/web-mockup/`**.
 
 ## References
 

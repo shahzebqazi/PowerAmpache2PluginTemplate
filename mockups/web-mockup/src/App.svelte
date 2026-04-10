@@ -1,5 +1,4 @@
 <script lang="ts">
-  import AutoNowPlaying from './lib/AutoNowPlaying.svelte'
   import AutoBrowseSection from './lib/AutoBrowseSection.svelte'
   import AutoQueue from './lib/AutoQueue.svelte'
   import AutoErrorState from './lib/AutoErrorState.svelte'
@@ -18,7 +17,6 @@
     { id: 'auto-browse-recents', label: 'Browse · Recents' },
     { id: 'auto-browse-frequent', label: 'Browse · Frequently played' },
     { id: 'auto-browse-new', label: 'Browse · Newly added' },
-    { id: 'auto-np', label: 'Now playing' },
     { id: 'auto-queue', label: 'Up next (queue)' },
     { id: 'auto-error', label: 'Can’t connect (error)' },
   ]
@@ -58,9 +56,11 @@
       <aside class="mockup-meta" aria-label="Mockup list">
         <h1 class="app-title">Android Auto mockups</h1>
         <p class="app-lead">
-          <strong>Plugin / Media3</strong> only — browse surfaces the host renders from your <code>MediaItem</code> tree.
-          Handheld UI lives in <strong>Power-Ampache-2</strong>; this site does not ship phone frames. PA2 accents + ~56px
-          targets illustrate product identity and driving ergonomics — production AA remains <strong>host-rendered</strong>.
+          <strong>Plugin / Media3</strong> — we do <strong>not</strong> implement a custom Android Auto player UI. The
+          <strong>head unit</strong> draws browse, now playing, and transport; the app supplies a
+          <code>MediaItem</code> tree, session, and metadata. Handheld UI lives in
+          <strong>Power-Ampache-2</strong>. Frames below are <strong>stakeholder illustrations</strong> only (browse
+          patterns, queue, errors) — not shipping car chrome.
         </p>
         <nav class="chips" aria-label="Mockup frames">
           {#each frames as f}
@@ -75,9 +75,9 @@
           {/each}
         </nav>
         <p class="dhu-note">
-          Install the <strong>plugin template</strong> debug APK for real DHU sessions (see <code>AGENTS.md</code>). This
-          page is a browser mockup only. The home hero image is optional; see <code>mockup/README.md</code>
-          to refresh it.
+          Install the <strong>plugin</strong> debug APK for real DHU sessions (see repo <code>AGENTS.md</code> on
+          <code>main</code>). This page is a browser mockup only. The home hero image is optional; see
+          <code>mockups/web-mockup/README.md</code> to refresh it.
         </p>
       </aside>
 
@@ -85,8 +85,6 @@
         <div class="mockup-viewport mockup-viewport--wide">
           {#if isAutoBrowseFrameId(route.frame)}
             <AutoBrowseSection section={browseSectionFromFrame(route.frame)} />
-          {:else if route.frame === 'auto-np'}
-            <AutoNowPlaying />
           {:else if route.frame === 'auto-queue'}
             <AutoQueue />
           {:else if route.frame === 'auto-error'}

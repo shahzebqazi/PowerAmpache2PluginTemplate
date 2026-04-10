@@ -2,7 +2,7 @@
 
 Automation notes: **[docs/agents/](docs/agents/README.md)**.
 
-**This branch (`mockups`):** **Design and research only** — `docs/`, `mockups/`. **No** Kotlin, Gradle, or Android modules. **Implementation** is on **`dev`**.
+**This branch (`mockups`):** **Design and research only** — `docs/`, `mockups/`. **No** Kotlin, Gradle, or Android modules. **Implementation** is on **`main`**.
 
 ---
 

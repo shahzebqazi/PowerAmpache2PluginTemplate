@@ -41,4 +41,4 @@ Debug **`local.properties`** keys such as **`pa2.test.url`**, **`pa2.test.user`*
 
 ## Android Auto
 
-Car-specific services (**`PluginMediaLibraryService`**, etc.) appear **only** when implemented on your branch — verify **`AndroidManifest.xml`** after each upstream update.
+Car-specific services (e.g. **`AndroidAutoMediaLibraryService`**) appear **only** when implemented on your branch — verify **`AndroidManifest.xml`** after each upstream update.

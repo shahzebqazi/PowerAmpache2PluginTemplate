@@ -6,7 +6,7 @@ Build **Svelte** mockups under **`mockup/`** that express **information hierarch
 
 ## Inputs
 
-- `docs/ux-research/08-mockup-handoff-package.md`
+- `docs/ux-research/08-prototype-handoff-package.md`
 - `docs/design-system/*` for phone tokens (PowerAmpache2Theme alignment)
 - Researcher briefs
 
