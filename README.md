@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/images/hero-android-auto.png" alt="Android Auto media browser and playback (DHU reference)" width="720" />
+<img src="docs/images/dhu-now-playing.png" alt="Android Auto now playing in Desktop Head Unit (DHU)" width="720" />
 
 # Power Ampache 2 — Android Auto Plugin
 
