@@ -27,18 +27,16 @@ import androidx.activity.compose.setContent
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
 import luci.sixsixsix.powerampache2.plugin.presentation.SongListScreen
+import luci.sixsixsix.powerampache2.plugin.presentation.delegates.BackPressHandler
+import luci.sixsixsix.powerampache2.plugin.presentation.delegates.BackPressHandlerImpl
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
 
-/**
- * Launches the Power Ampache 2 host and finishes. Avoid registering OnBackPressedDispatcher
- * callbacks after finish() in the same onCreate — that has caused crashes on some devices
- * (launcher tap / phone UI overlay).
- */
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() {
+class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImpl() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         openPowerAmpache2()
+        handleOnBackPressed(this) // prevent the activity from being destroyed on back-press
 
         // uncomment for testing, viewModel contains a few examples to get data
         // testContent()
