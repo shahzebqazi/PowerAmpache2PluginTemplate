@@ -134,6 +134,114 @@ The following landed on topic branch **`cursor-cloud/android-auto-media3-mvp-bb4
 
 **Perpetual coding agents** should loop: reproduce → fix in **`app/`** (and only **`data/`** / **`domain/`** if the task expands scope) → `./gradlew :app:assembleDebug` → device logcat → PR with evidence → repeat until behavior is **functional, operational, and intentional**.
 
+### Kanban: Android Auto guidelines alignment (Project #7)
+
+Agents **cannot** create or update GitHub Project cards from the repository without **GitHub CLI** credentials that include **`project`** and **`read:project`** scopes. **Maintainer:** after `gh auth refresh -h github.com -s read:project -s project`, run **`./scripts/create-project-7-android-auto-cards.sh`** to create **draft** items on [Project #7](https://github.com/users/shahzebqazi/projects/7), or add the cards below manually. **Agents:** when a card or linked issue URL is assigned, follow **Instructions for AI agents — Android Auto guideline alignment** below.
+
+#### Copy-paste card titles and descriptions
+
+**Card 1 — Title:** `Android Auto: Honor root hints (≤4 root tabs)`
+
+**Card 1 — Description:**
+
+```text
+Goal: Align browse root with Google’s Android for Cars guidance: root hints typically limit top-level tabs to four (MediaConstants.BROWSER_ROOT_HINTS_KEY_ROOT_CHILDREN_LIMIT).
+
+Context: Pa2MediaLibraryService exposes five section nodes under root (playlists + four album sections). Some head units may drop or bury the fifth tab.
+
+Tasks:
+- Read: developer.android.com/training/cars/media/create-media-browser/content-hierarchy (“Structure the root menu”).
+- In Media3, read LibraryParams / root-equivalent hints in onGetLibraryRoot or onGetChildren for parent root, and reshape the tree (e.g. nest two sections under one browsable “Albums” node, or merge categories) so default AA shows ≤4 top-level browsable children when the hint says 4.
+- Update instrumented tests (root child count / IDs) and document the new hierarchy in the PR.
+
+Out of scope unless agreed: changing domain/data or MainActivity launcher contract.
+```
+
+**Card 2 — Title:** `Android Auto: Artwork on browse and playback items`
+
+**Card 2 — Description:**
+
+```text
+Goal: Populate MediaMetadata artwork (artworkUri) for songs/albums where the domain model already provides URLs (e.g. Song.imageUrl), per Google media design guidance for in-car UI.
+
+Tasks:
+- Read: “Display media artwork” / browsing views in Android for Cars media docs and Design for Driving media checklist.
+- In app/…/auto/Pa2MediaLibraryService (and helpers): set artwork on playable and browsable items when URLs are non-empty; handle invalid URIs gracefully.
+- Verify assembleDebug; extend or add tests if metadata assertions are practical.
+
+Scope: app/ only unless image URLs require data-layer fixes (then negotiate scope).
+```
+
+**Card 3 — Title:** `Android Auto: Play-from-search and MEDIA_PLAY_FROM_SEARCH`
+
+**Card 3 — Description:**
+
+```text
+Goal: Either implement play-from-search / voice search behavior expected for the manifest intent android.media.action.MEDIA_PLAY_FROM_SEARCH, or remove the intent filter if unsupported.
+
+Tasks:
+- Read: developer.android.com training/cars/media — voice actions, search; Media3 MediaLibrarySession.Callback for search/play-from-search APIs as applicable.
+- Implement resolution of search queries into playable media, or document why the plugin defers to the host and adjust manifest accordingly.
+- PR must state Assistant / AA test status (or “not tested on DHU” with logcat evidence for what was tested).
+
+Scope: app/ preferred.
+```
+
+**Card 4 — Title:** `Android Auto: Large browse lists and distraction limits`
+
+**Card 4 — Description:**
+
+```text
+Goal: Mitigate strict per-level item limits in Android Auto / AAOS when playlists or album track lists are very large (docs: “strict limits” on items per menu level).
+
+Tasks:
+- Read: content-hierarchy + browsing views design pages.
+- Design chunked browsing or subfolders (e.g. “Page 2”, alphabetical buckets) without breaking MediaIds stability for existing clients if possible; document migration in PR.
+- Add a test or documented cap behavior.
+
+Scope: app/ only unless MusicFetcher contract must change.
+```
+
+**Card 5 — Title:** `Android Auto: Session activity and branding polish`
+
+**Card 5 — Description:**
+
+```text
+Goal: Optional polish: MediaLibrarySession.setSessionActivity to deep-link to an appropriate app screen; ensure service/app icon and theme support car branding (accent / colorPrimary as appropriate).
+
+Tasks:
+- Read: Media3 session docs and Google “Provide branding elements” for media apps.
+- Implement session activity PendingIntent if product owner agrees on target activity (may be limited for plugin UX).
+- Document what was set and what still requires human verification on DHU.
+
+Scope: app/ only.
+```
+
+**Card 6 — Title:** `Android Auto: Caller validation (PackageValidator pattern)`
+
+**Card 6 — Description:**
+
+```text
+Goal: Evaluate whether Pa2MediaLibraryService should restrict browse/session clients using an allowlist pattern (system apps, Android Auto, Google Assistant packages) while returning non-null root for trusted callers.
+
+Tasks:
+- Read: UAMP PackageValidator / developer.android.com media browser “Add package validation”.
+- If implemented, document allowed packages and Assistant; do not block onGetRoot with slow I/O; keep behavior safe for Play policy.
+
+Scope: app/ only.
+```
+
+#### Instructions for AI agents — Android Auto guideline alignment
+
+When implementing any card above (or a maintainer-supplied umbrella issue):
+
+1. **Review first (cite in PR):** Read the current [Android for Cars media training path](https://developer.android.com/training/cars/media), especially [Content hierarchy](https://developer.android.com/training/cars/media/create-media-browser/content-hierarchy) (root hints, pagination notes, caller guidance) and [Design for Driving — media apps](https://developers.google.com/cars/design/create-apps/media-apps/overview) (tabs, branding, voice). Summarize which guidelines drove each code change.
+2. **Default scope:** Changes in **`app/`** only (`Pa2MediaLibraryService`, `MediaIds`, manifest, tests, resources). Do **not** modify `domain/`, `data/`, or **`MainActivity`’s launcher flow** unless the card explicitly expands scope or the maintainer agrees.
+3. **Branch and commits:** Work on **`cursor-cloud/dev-main-4dc1`** or a **`cursor-cloud/<topic>`** branch. Commit messages: **`<branch-name>: <imperative summary>`** (full branch name), per [`AGENTS.md`](AGENTS.md).
+4. **Verify before claiming done:** Run **`./gradlew :app:assembleDebug`**; if browse/session behavior changed, run **`./gradlew :app:connectedDebugAndroidTest`** when a device/emulator is available. Update **`Pa2MediaLibraryInstrumentedTest`** if root structure or IDs change.
+5. **PR:** Link the **GitHub issue / Project card URL**; list **automated** vs **human DHU/car** verification; attach logcat snippets and **screenshots** for AA-facing changes when possible (see **Perpetual coding agents** above).
+6. **Do not block** on the board: if cards are missing, still implement when asked; note in the PR that the maintainer should add the card to Project #7.
+
 ### Next step — suggested GitHub Project board items (USB phone test & debug)
 
 Agents cannot create cards on your GitHub Project from this repo; **add these as issues/cards yourself** (e.g. [Project #7](https://github.com/users/shahzebqazi/projects/7)), then link them in PRs.
