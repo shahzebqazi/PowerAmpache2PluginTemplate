@@ -4,6 +4,11 @@
  *
  * Data flows through [luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher] only; the host app
  * must bind to [luci.sixsixsix.powerampache2.plugin.PA2DataFetchService] so fetches reach the listener.
+ *
+ * Host playback (phone app) updates [MusicFetcher.currentQueueFlow]; we mirror that queue into
+ * ExoPlayer (paused) so Android Auto can show Now Playing metadata without requiring the head unit
+ * to have started playback. Single-song requests from Auto are expanded to full playlist/album
+ * queues when cached so skip/next have a multi-item timeline.
  */
 package luci.sixsixsix.powerampache2.plugin.auto
 
@@ -52,6 +57,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         val callback = Pa2LibraryCallback()
         librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback).build()
         subscribeToLibraryChanges()
+        subscribeToHostQueueMirror()
     }
 
     private fun subscribeToLibraryChanges() {
@@ -220,7 +226,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                             findAlbum(aid)?.let { albumItem(it) }
                         } else {
                             val sid = MediaIds.parseSongId(mediaId)
-                            if (sid != null) findSong(sid)?.let { songToPlayableMediaItem(it) } else null
+                            if (sid != null) findSong(sid)?.let { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) } else null
                         }
                     }
                 }
@@ -243,6 +249,17 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             mediaItems: List<MediaItem>,
         ): ListenableFuture<List<MediaItem>> {
             val resolved = mediaItems.map { resolveForPlayback(it) }
+            if (resolved.size == 1) {
+                val id = resolved[0].mediaId
+                val songId = MediaIds.parseSongId(id)
+                if (songId != null) {
+                    expandQueueForSong(songId)?.let { (items, _) ->
+                        if (items.size > 1) {
+                            return Futures.immediateFuture(items)
+                        }
+                    }
+                }
+            }
             return Futures.immediateFuture(resolved)
         }
 
@@ -254,6 +271,19 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             startPositionMs: Long,
         ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
             val resolved = mediaItems.map { resolveForPlayback(it) }
+            if (resolved.size == 1) {
+                val id = resolved[0].mediaId
+                val songId = MediaIds.parseSongId(id)
+                if (songId != null) {
+                    expandQueueForSong(songId)?.let { (items, idx) ->
+                        if (items.size > 1) {
+                            return Futures.immediateFuture(
+                                MediaSession.MediaItemsWithStartPosition(items, idx, startPositionMs)
+                            )
+                        }
+                    }
+                }
+            }
             return Futures.immediateFuture(
                 MediaSession.MediaItemsWithStartPosition(resolved, startIndex, startPositionMs)
             )
@@ -274,7 +304,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         private fun resolveSongMediaItemById(mediaId: String): MediaItem? {
             val sid = MediaIds.parseSongId(mediaId) ?: return null
             val song = findSong(sid) ?: return null
-            return songToPlayableMediaItem(song)
+            return this@Pa2MediaLibraryService.songToPlayableMediaItem(song)
         }
 
         private fun immediateChildren(
@@ -356,19 +386,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 ?: inList(musicFetcher.albumsFlow.value)
         }
 
-        private fun findSong(songId: String): Song? {
-            musicFetcher.albumSongsMapFlow.value.values.forEach { songs ->
-                songs.find { it.id == songId || it.mediaId == songId }?.let { return it }
-            }
-            musicFetcher.playlistSongsMapFlow.value.values.forEach { songs ->
-                songs.find { it.id == songId || it.mediaId == songId }?.let { return it }
-            }
-            musicFetcher.currentQueueFlow.value.find { it.id == songId || it.mediaId == songId }?.let {
-                return it
-            }
-            return null
-        }
-
         private fun playlistChildrenFuture(
             playlistId: String,
             params: MediaLibraryService.LibraryParams?
@@ -391,7 +408,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     }.getOrDefault(emptyList())
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
                             params
                         )
                     )
@@ -422,7 +439,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     }.getOrDefault(emptyList())
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
                             params
                         )
                     )
@@ -431,23 +448,114 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             }
         }
 
-        private fun songToPlayableMediaItem(song: Song): MediaItem {
-            val meta = MediaMetadata.Builder()
-                .setTitle(song.title)
-                .setArtist(song.artist.name)
-                .setAlbumTitle(song.album.name)
-                .setIsBrowsable(false)
-                .setIsPlayable(true)
-                .build()
-            val builder = MediaItem.Builder()
-                .setMediaId(MediaIds.song(song.id))
-                .setMediaMetadata(meta)
-            val url = song.songUrl
-            if (url.isNotBlank()) {
-                builder.setUri(url)
-            }
-            return builder.build()
+    }
+
+    /**
+     * When the host app plays audio, it pushes the queue via [MusicFetcher.currentQueueFlow].
+     * That playback is not this service's ExoPlayer, so Android Auto would show no metadata until
+     * we mirror the queue into the session-bound player (paused) for display only.
+     */
+    private fun subscribeToHostQueueMirror() {
+        applicationScope.launch {
+            musicFetcher.currentQueueFlow
+                .distinctUntilChanged { a, b -> a.map { it.id } == b.map { it.id } }
+                .collect { queue -> syncPlayerFromHostQueue(queue) }
         }
+    }
+
+    private fun syncPlayerFromHostQueue(queue: List<Song>) {
+        val p = player ?: return
+        if (queue.isEmpty()) {
+            if (p.mediaItemCount > 0) {
+                p.stop()
+                p.clearMediaItems()
+            }
+            return
+        }
+        val items = queue.mapNotNull { song ->
+            if (song.songUrl.isBlank()) null else songToPlayableMediaItem(song)
+        }
+        if (items.isEmpty()) return
+
+        val samePlaylist = p.mediaItemCount == items.size &&
+            (0 until items.size).all { i ->
+                p.getMediaItemAt(i).mediaId == items[i].mediaId
+            }
+        if (samePlaylist) {
+            return
+        }
+
+        p.setMediaItems(items)
+        p.seekTo(0, 0)
+        p.pause()
+    }
+
+    /**
+     * Android Auto usually sends a single playable item; ExoPlayer only exposes skip/next when the
+     * timeline has multiple windows. Rebuild the queue from the cached playlist/album song list.
+     */
+    private fun expandQueueForSong(songId: String): Pair<List<MediaItem>, Int>? {
+        for (songs in musicFetcher.playlistSongsMapFlow.value.values) {
+            val idx = songs.indexOfFirst { it.id == songId || it.mediaId == songId }
+            if (idx >= 0) {
+                buildPlayableQueueWithStartIndex(songs, idx)?.let { return it }
+            }
+        }
+        for (songs in musicFetcher.albumSongsMapFlow.value.values) {
+            val idx = songs.indexOfFirst { it.id == songId || it.mediaId == songId }
+            if (idx >= 0) {
+                buildPlayableQueueWithStartIndex(songs, idx)?.let { return it }
+            }
+        }
+        return null
+    }
+
+    private fun buildPlayableQueueWithStartIndex(songs: List<Song>, clickedIndex: Int): Pair<List<MediaItem>, Int>? {
+        val clicked = songs.getOrNull(clickedIndex) ?: return null
+        if (clicked.songUrl.isBlank()) return null
+        val items = mutableListOf<MediaItem>()
+        var startIndex = -1
+        songs.forEachIndexed { i, song ->
+            if (song.songUrl.isBlank()) return@forEachIndexed
+            val item = songToPlayableMediaItem(song)
+            if (i == clickedIndex) {
+                startIndex = items.size
+            }
+            items.add(item)
+        }
+        if (startIndex < 0 || items.isEmpty()) return null
+        return items to startIndex
+    }
+
+    private fun songToPlayableMediaItem(song: Song): MediaItem {
+        val meta = MediaMetadata.Builder()
+            .setTitle(song.title)
+            .setArtist(song.artist.name)
+            .setAlbumTitle(song.album.name)
+            .setIsBrowsable(false)
+            .setIsPlayable(true)
+            .build()
+        val builder = MediaItem.Builder()
+            .setMediaId(MediaIds.song(song.id))
+            .setMediaMetadata(meta)
+        val url = song.songUrl
+        if (url.isNotBlank()) {
+            builder.setUri(url)
+        }
+        return builder.build()
+    }
+
+    private fun findSong(songId: String): Song? {
+        musicFetcher.albumSongsMapFlow.value.values.forEach { songs ->
+            songs.find { it.id == songId || it.mediaId == songId }?.let { return it }
+        }
+        musicFetcher.playlistSongsMapFlow.value.values.forEach { songs ->
+            songs.find { it.id == songId || it.mediaId == songId }?.let { return it }
+        }
+        musicFetcher.currentQueueFlow.value.find { it.id == songId || it.mediaId == songId }?.let {
+            return it
+        }
+        return null
     }
 
     companion object {
