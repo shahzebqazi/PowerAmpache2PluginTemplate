@@ -23,19 +23,16 @@ package luci.sixsixsix.powerampache2.plugin
 
 import android.app.Service
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
-import android.os.Process
 import android.os.RemoteException
-import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.update
 import luci.sixsixsix.powerampache2.plugin.data.dto.AlbumsDto
 import luci.sixsixsix.powerampache2.plugin.data.dto.ArtistsDto
@@ -61,65 +58,37 @@ import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_QUERY
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_REQUEST_JSON
 import luci.sixsixsix.powerampache2.plugin.domain.common.KEY_RESPONSE_SUCCESS
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
-import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class PA2DataFetchService : Service(), MusicFetcherListener {
     @Inject lateinit var musicFetcher: MusicFetcher
+    @Inject lateinit var applicationCoroutineScope: CoroutineScope
     private val gson = Gson()
-    private var clientMessenger: Messenger? = null
+    private var clientMessenger: Messenger? = null // client's messenger for bidirectional communication
 
     private val messenger = Messenger(object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
-            if (!isTrustedSender(msg)) {
-                Log.w(TAG, "ignored IPC from untrusted uid")
-                return
-            }
             val action = msg.data.getString(KEY_ACTION) ?: return
 
             when (action) {
                 "register_client" -> {
+                    // ONLY store clientMessenger here
                     clientMessenger = msg.replyTo
                 }
                 else -> {
-                    val jsonStr = msg.data.getString(KEY_REQUEST_JSON) ?: return
-                    val id = msg.data.getString(KEY_ID)
-                    parseJsonString(action, jsonStr, id)
+                    parseJsonString(
+                        action,
+                        jsonStr = msg.data.getString(KEY_REQUEST_JSON) ?: return,
+                        albumId = msg.data.getString(KEY_ID)
+                    )
                     val replyTo = msg.replyTo ?: return
-                    try {
-                        replyTo.send(
-                            Message.obtain().apply {
-                                data = Bundle().apply { putBoolean(KEY_RESPONSE_SUCCESS, true) }
-                            }
-                        )
-                    } catch (e: RemoteException) {
-                        Log.w(TAG, "reply send failed", e)
-                    }
+                    replyTo.send(Message.obtain().apply { data = Bundle().apply { putBoolean(KEY_RESPONSE_SUCCESS, true) } })
                 }
             }
         }
     })
-
-    /**
-     * Only accept IPC from the Power Ampache host family (same signing domain as this plugin).
-     * Requires API 33+ for [Message.sendingUid]; older devices fall back to accepting (legacy).
-     */
-    private fun isTrustedSender(msg: Message): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            return true
-        }
-        val uid = msg.sendingUid
-        if (uid == Process.INVALID_UID) {
-            return false
-        }
-        val names = packageManager.getPackagesForUid(uid) ?: return false
-        val self = packageName
-        return names.any { pkg ->
-            pkg != self && pkg.startsWith(HOST_PACKAGE_PREFIX)
-        }
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -138,6 +107,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     putString(KEY_ACTION, ACTION_GET_ARTISTS)
                     putString(KEY_QUERY, query)
                 }
+                println("aaaa sending req ACTION_GET_ARTISTS query: ${query}")
             }
             try {
                 messenger.send(msg)
@@ -154,6 +124,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     putString(KEY_ACTION, ACTION_GET_ALBUMS)
                     putString(KEY_QUERY, query)
                 }
+                println("aaaa sending req ACTION_GET_ALBUMS query: ${query}")
             }
             try {
                 messenger.send(msg)
@@ -163,6 +134,9 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     }
 
+    /**
+     * Request songs for a specific album from the client
+     */
     fun requestSongsForAlbum(albumId: String) {
         clientMessenger?.let { messenger ->
             val msg = Message.obtain().apply {
@@ -170,6 +144,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     putString(KEY_ACTION, ACTION_GET_SONGS_ALBUM)
                     putString(KEY_ALBUM_ID, albumId)
                 }
+                println("aaaa Fetcher.requestSongsForAlbum id: ${albumId}")
             }
             try {
                 messenger.send(msg)
@@ -179,13 +154,18 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     }
 
+    /**
+     * Request songs for a specific album from the client
+     */
     fun requestAlbumsFromArtist(artistId: String) {
+        // TODO: NOT IMPLEMENTED
         clientMessenger?.let { messenger ->
             val msg = Message.obtain().apply {
                 data = Bundle().apply {
                     putString(KEY_ACTION, ACTION_GET_ALBUMS_ARTIST)
                     putString(KEY_ID, artistId)
                 }
+                println("aaaa Fetcher.requestAlbumsFromArtist id: ${artistId}")
             }
             try {
                 messenger.send(msg)
@@ -202,6 +182,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     putString(KEY_ACTION, ACTION_GET_SONGS_PLAYLIST)
                     putString(KEY_PLAYLIST_ID, playlistId)
                 }
+                //println("aaaa requestSongsForPlaylist id: ${playlistId}")
             }
             try {
                 messenger.send(msg)
@@ -211,98 +192,118 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     }
 
+
     private fun parseJsonString(action: String, jsonStr: String, albumId: String? = null) {
-        try {
-            when (action) {
-                ACTION_PLAYLISTS -> {
-                    val playlists = gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists
-                    musicFetcher.playlistsFlow.value = playlists
-                }
-                ACTION_ARTISTS -> {
-                    val artists = gson.fromJson(jsonStr, ArtistsDto::class.java).artists
-                    musicFetcher.artistsFlow.update { old -> mergeArtistsById(old, artists) }
-                }
-                ACTION_ALBUMS -> {
-                    val albums = gson.fromJson(jsonStr, AlbumsDto::class.java).albums
-                    musicFetcher.albumsFlow.update { old -> mergeAlbumsById(old, albums) }
-                    if (albumId != null) {
-                        musicFetcher.albumsByArtistFlow.update { it + (albumId to albums) }
-                    }
-                }
-                ACTION_SONGS_ALBUM -> {
-                    val id = albumId ?: run {
-                        Log.w(TAG, "ACTION_SONGS_ALBUM missing id in bundle")
-                        return
-                    }
-                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
-                    musicFetcher.albumSongsMapFlow.update { map -> map + (id to songs) }
-                }
-                ACTION_SONGS_PLAYLIST -> {
-                    val id = albumId ?: run {
-                        Log.w(TAG, "ACTION_SONGS_PLAYLIST missing id in bundle")
-                        return
-                    }
-                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
-                    musicFetcher.playlistSongsMapFlow.update { map ->
-                        val newList = LinkedHashSet(map[id] ?: emptyList())
-                        newList.addAll(songs)
-                        map + (id to newList.toList())
-                    }
-                }
-                "highest_albums" -> {
-                    val albums = gson.fromJson(jsonStr, AlbumsDto::class.java).albums
-                    addToAlbumsList(albums)
-                    musicFetcher.highRatedAlbumsFlow.update { old -> mergeAlbumsById(old, albums) }
-                }
-                "favourite_albums" -> {
-                    val albums = gson.fromJson(jsonStr, AlbumsDto::class.java).albums
-                    addToAlbumsList(albums)
-                    musicFetcher.favouriteAlbumsFlow.update { old -> mergeAlbumsById(old, albums) }
-                }
-                "recent_albums" -> {
-                    val albums = gson.fromJson(jsonStr, AlbumsDto::class.java).albums
-                    addToAlbumsList(albums)
-                    musicFetcher.recentAlbumsFlow.update { old -> mergeAlbumsById(old, albums) }
-                }
-                "latest_albums" -> {
-                    val albums = gson.fromJson(jsonStr, AlbumsDto::class.java).albums
-                    addToAlbumsList(albums)
-                    musicFetcher.latestAlbumsFlow.update { old -> mergeAlbumsById(old, albums) }
-                }
-                "queue" -> {
-                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
-                    musicFetcher.currentQueueFlow.value = songs
+        //println("aaaa parseJsonString $action")
+        when(action) {
+            ACTION_PLAYLISTS -> gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists.also { playlists ->
+                println("aaaa ACTION_PLAYLISTS ${playlists.size}")
+                musicFetcher.playlistsFlow.value = playlists
+            }
+            ACTION_ARTISTS -> gson.fromJson(jsonStr, ArtistsDto::class.java).artists.also { artists ->
+                musicFetcher.artistsFlow.update { oldArtists ->
+                    val combined = (oldArtists + artists).distinct()
+                    println("aaaa parseJsonString ACTION_ARTISTS $albumId size ${combined.size}")
+                    combined
                 }
             }
-        } catch (e: JsonSyntaxException) {
-            Log.e(TAG, "JSON parse failed action=$action", e)
-        } catch (e: RuntimeException) {
-            Log.e(TAG, "parse failed action=$action", e)
+            ACTION_ALBUMS -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                musicFetcher.albumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa parseJsonString ACTION_ALBUMS $albumId size ${combined.size}")
+                    combined
+                }
+            }
+            ACTION_SONGS_ALBUM -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
+                //println("aaaa ACTION_SONGS_RESPONSE ${albumId}")
+                musicFetcher.albumSongsMapFlow.update { map ->
+                    (map + (albumId!! to songs))
+                }
+            }
+            ACTION_SONGS_PLAYLIST -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
+                musicFetcher.playlistSongsMapFlow.update { map ->
+                    val newList: LinkedHashSet<Song> = LinkedHashSet(map[albumId] ?: emptyList())
+                    newList.addAll(songs)
+                    //println("aaaa ACTION_SONGS_PLAYLIST ${albumId}  ${newList.size}")
+
+                    (map + (albumId!! to newList.toList()))
+                }
+            }
+            "highest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                addToAlbumsList(albums)
+                musicFetcher.highRatedAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa parseJsonString highest_albums $albumId size ${combined.size}")
+                    combined
+                }
+            }
+            "favourite_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                addToAlbumsList(albums)
+                musicFetcher.favouriteAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa favouriteAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
+                }
+            }
+            "recent_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                addToAlbumsList(albums)
+                musicFetcher.recentAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa recentAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
+                }
+            }
+            "latest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
+                addToAlbumsList(albums)
+                musicFetcher.latestAlbumsFlow.update { oldAlbums ->
+                    val combined = (oldAlbums + albums).distinct()
+                    println("aaaa latestAlbumsFlow $action $albumId size ${combined.size}")
+                    combined
+                }
+            }
+            "queue" -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also {
+                musicFetcher.currentQueueFlow.value = it
+            }
         }
     }
 
     private fun addToAlbumsList(albums: List<Album>) {
-        musicFetcher.albumsFlow.update { oldAlbums -> mergeAlbumsById(oldAlbums, albums) }
+        musicFetcher.albumsFlow.update { oldAlbums ->
+            val combined = (oldAlbums + albums).distinct()
+            println("aaaa addToAlbumsList size ${combined.size}")
+            combined
+        }
     }
 
     override fun onBind(intent: Intent?): IBinder {
         return messenger.binder
     }
 
+    private fun sendResponse(replyTo: Messenger?, data: Map<String, Any>) {
+        replyTo?.let { messenger ->
+            val msg = Message.obtain().apply {
+                this.data = Bundle().apply {
+                    data.forEach { (key, value) ->
+                        when (value) {
+                            is Boolean -> putBoolean(key, value)
+                            is String -> putString(key, value)
+                            is Int -> putInt(key, value)
+                        }
+                    }
+                }
+            }
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                // Handle disconnected client
+            }
+        }
+    }
+
+    // MUSIC LISTENER METHODS
     override fun getAlbums(query: String) = requestAlbums(query)
     override fun getArtists(query: String) = requestArtists(query)
     override fun getSongsFromAlbum(albumId: String) = requestSongsForAlbum(albumId)
     override fun getSongsFromPlaylist(playlistId: String) = requestSongsForPlaylist(playlistId)
     override fun getAlbumsFromArtist(artistId: String) = requestAlbumsFromArtist(artistId)
-
-    private companion object {
-        private const val TAG = "PA2DataFetch"
-        private const val HOST_PACKAGE_PREFIX = "luci.sixsixsix.powerampache2"
-
-        private fun mergeArtistsById(old: List<Artist>, new: List<Artist>): List<Artist> =
-            (old + new).groupBy { it.id }.map { (_, list) -> list.last() }
-
-        private fun mergeAlbumsById(old: List<Album>, new: List<Album>): List<Album> =
-            (old + new).groupBy { it.id }.map { (_, list) -> list.last() }
-    }
 }

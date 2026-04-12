@@ -40,8 +40,6 @@ interface MusicFetcher {
     val highRatedAlbumsFlow: MutableStateFlow<List<Album>>
     val albumSongsMapFlow: MutableStateFlow<Map<String, List<Song>>>
     val playlistSongsMapFlow: MutableStateFlow<Map<String, List<Song>>>
-    /** Album lists keyed by artist id when the host includes the artist id on album responses. */
-    val albumsByArtistFlow: MutableStateFlow<Map<String, List<Album>>>
 
     fun getArtists(query: String = ""): Flow<List<Artist>>
     fun getAlbums(query: String = ""): Flow<List<Album>>

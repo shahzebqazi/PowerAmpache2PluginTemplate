@@ -54,24 +54,14 @@ class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImp
     }
 
     /**
-     * Launch the Power Ampache host app (first installed variant wins).
+     * Launch another app by package name
      */
     private fun openPowerAmpache2() {
-        val hostPackages = listOf(
-            "luci.sixsixsix.powerampache2.fdroid.debug",
-            "luci.sixsixsix.powerampache2.fdroid",
-            "luci.sixsixsix.powerampache2.debug",
-            "luci.sixsixsix.powerampache2",
-        )
-        for (pkg in hostPackages) {
-            val launch = packageManager.getLaunchIntentForPackage(pkg)?.apply {
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            }
-            if (launch != null) {
-                startActivity(launch)
-                break
-            }
-        }
+        // TODO: add all possible package names
+        packageManager.getLaunchIntentForPackage("luci.sixsixsix.powerampache2.fdroid.debug")?.apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }?.let { startActivity(it) }
+
         finish()
     }
 }

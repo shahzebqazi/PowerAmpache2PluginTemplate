@@ -79,6 +79,11 @@ val surfaceVariantLight = Color(0xFFDFE5E3)
 fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val queue = viewModel.queueStateFlow.collectAsState()
+    val highest = viewModel.highestAlbumsStateFlow.collectAsState()
+    val singleAlbum = viewModel.singleAlbumStateFlow.collectAsState()
+
+    if (singleAlbum.value.isNotEmpty())
+        println("aaaa " + singleAlbum.value[0].title)
 
     Scaffold(
         modifier = Modifier
@@ -174,11 +179,9 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
                         .padding(vertical = 0.dp)
                         .fillMaxWidth()
                         .background(
-                            if (uiState.value.currentSong?.mediaId == song.mediaId) {
+                            if (uiState.value.currentIndex == queue.value.indexOf(song)) {
                                 MaterialTheme.colorScheme.primaryContainer
-                            } else {
-                                Color.Transparent
-                            }
+                            } else { Color.Transparent }
                         )
                         .clickable {  }
                 ) {

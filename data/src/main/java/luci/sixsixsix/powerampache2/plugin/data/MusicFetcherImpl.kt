@@ -23,7 +23,6 @@ package luci.sixsixsix.powerampache2.plugin.data
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
@@ -49,9 +48,9 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val albumSongsMapFlow: MutableStateFlow<Map<String, List<Song>>> = MutableStateFlow(emptyMap())
     override val playlistSongsMapFlow: MutableStateFlow<Map<String, List<Song>>> = MutableStateFlow(emptyMap())
-    override val albumsByArtistFlow: MutableStateFlow<Map<String, List<Album>>> = MutableStateFlow(emptyMap())
 
     override fun getSongsFromAlbum(albumId: String): Flow<List<Song>> {
+        println("aaaa MusicFetcherImpl.getSongsFromAlbum $albumId")
         musicFetcherListener?.let {
             it.getSongsFromAlbum(albumId)
         }
@@ -61,6 +60,7 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     }
 
     override fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>> {
+        println("aaaa MusicFetcherImpl.getSongsFromPlaylist $playlistId")
         musicFetcherListener?.let {
             it.getSongsFromPlaylist(playlistId)
         }
@@ -83,10 +83,11 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
 
 
     override fun getAlbumsFromArtist(artistId: String): Flow<List<Album>> {
+        println("aaaa MusicFetcherImpl.getAlbumsFromArtist $artistId")
         musicFetcherListener?.getAlbumsFromArtist(artistId)
-        return combine(albumsByArtistFlow, albumsFlow) { byArtist, all ->
-            byArtist[artistId]?.takeIf { it.isNotEmpty() }
-                ?: all.filter { it.artist.id == artistId }
+
+        return albumsFlow.map { albums ->
+            albums.filter { it.artist.id == artistId }
         }.distinctUntilChanged()
     }
 }
