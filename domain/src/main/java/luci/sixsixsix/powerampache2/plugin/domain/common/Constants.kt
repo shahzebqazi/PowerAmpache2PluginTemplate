@@ -40,7 +40,6 @@ const val KEY_QUERY = "query"
 
 
 // Actions the service can request from client
-const val ACTION_GET_PLAYLISTS = "get_playlists"
 const val ACTION_GET_SONGS_ALBUM = "get_songs_album"
 const val ACTION_GET_SONGS_PLAYLIST = "get_songs_playlist"
 const val ACTION_GET_ALBUMS_ARTIST = "get_albums_artist"
