@@ -115,7 +115,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         librarySession?.run {
             player?.release()
             release()
-        }
+        } ?: player?.release()
         librarySession = null
         player = null
         super.onDestroy()
@@ -457,9 +457,9 @@ class Pa2MediaLibraryService : MediaLibraryService() {
      */
     private fun subscribeToHostQueueMirror() {
         applicationScope.launch {
-            musicFetcher.currentQueueFlow
-                .distinctUntilChanged { a, b -> a.map { it.id } == b.map { it.id } }
-                .collect { queue -> syncPlayerFromHostQueue(queue) }
+            musicFetcher.currentQueueFlow.collect { queue ->
+                syncPlayerFromHostQueue(queue)
+            }
         }
     }
 
@@ -476,14 +476,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             if (song.songUrl.isBlank()) null else songToPlayableMediaItem(song)
         }
         if (items.isEmpty()) return
-
-        val samePlaylist = p.mediaItemCount == items.size &&
-            (0 until items.size).all { i ->
-                p.getMediaItemAt(i).mediaId == items[i].mediaId
-            }
-        if (samePlaylist) {
-            return
-        }
 
         p.setMediaItems(items)
         p.seekTo(0, 0)
