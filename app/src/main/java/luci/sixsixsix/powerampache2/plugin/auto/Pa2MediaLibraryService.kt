@@ -30,6 +30,8 @@ import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -48,6 +50,10 @@ class Pa2MediaLibraryService : MediaLibraryService() {
     @Inject lateinit var musicFetcher: MusicFetcher
     @Inject lateinit var applicationScope: CoroutineScope
 
+    /** ExoPlayer + MediaLibrarySession must run on the main thread; [applicationScope] is IO. */
+    private val mainScopeJob = SupervisorJob()
+    private val mainScope = CoroutineScope(mainScopeJob + Dispatchers.Main)
+
     private var player: ExoPlayer? = null
     private var librarySession: MediaLibrarySession? = null
 
@@ -65,44 +71,44 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     private fun subscribeToLibraryChanges() {
         val session = librarySession ?: return
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.playlistsFlow.collect {
                 session.notifyChildrenChanged(MediaIds.ROOT, 0, null)
                 session.notifyChildrenChanged(MediaIds.SECTION_PLAYLISTS, 0, null)
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.favouriteAlbumsFlow.collect {
                 session.notifyChildrenChanged(MediaIds.ROOT, 0, null)
                 session.notifyChildrenChanged(MediaIds.SECTION_FAVOURITE_ALBUMS, 0, null)
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.recentAlbumsFlow.collect {
                 session.notifyChildrenChanged(MediaIds.ROOT, 0, null)
                 session.notifyChildrenChanged(MediaIds.SECTION_RECENT_ALBUMS, 0, null)
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.latestAlbumsFlow.collect {
                 session.notifyChildrenChanged(MediaIds.ROOT, 0, null)
                 session.notifyChildrenChanged(MediaIds.SECTION_LATEST_ALBUMS, 0, null)
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.highRatedAlbumsFlow.collect {
                 session.notifyChildrenChanged(MediaIds.ROOT, 0, null)
                 session.notifyChildrenChanged(MediaIds.SECTION_HIGHEST_RATED_ALBUMS, 0, null)
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.playlistSongsMapFlow.collect {
                 it.keys.forEach { pid ->
                     session.notifyChildrenChanged(MediaIds.playlist(pid), 0, null)
                 }
             }
         }
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.albumSongsMapFlow.collect {
                 it.keys.forEach { aid ->
                     session.notifyChildrenChanged(MediaIds.album(aid), 0, null)
@@ -115,6 +121,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         librarySession
 
     override fun onDestroy() {
+        mainScopeJob.cancel()
         librarySession?.run {
             player?.release()
             release()
@@ -459,7 +466,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
      * we mirror the queue into the session-bound player (paused) for display only.
      */
     private fun subscribeToHostQueueMirror() {
-        applicationScope.launch {
+        mainScope.launch {
             musicFetcher.currentQueueFlow.collect { queue ->
                 syncPlayerFromHostQueue(queue)
             }
@@ -473,6 +480,10 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 p.stop()
                 p.clearMediaItems()
             }
+            return
+        }
+        // Do not replace the timeline / pause while the user is playing through Android Auto on this ExoPlayer.
+        if (p.playWhenReady) {
             return
         }
         // Include every track for Now Playing metadata; stream URL may arrive later from host.
@@ -523,7 +534,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     private fun songToPlayableMediaItem(song: Song): MediaItem {
         val meta = MediaMetadata.Builder()
-            .setTitle(song.title)
+            .setTitle(song.title.ifBlank { song.name })
             .setArtist(song.artist.name)
             .setAlbumTitle(song.album.name)
             .setIsBrowsable(false)
