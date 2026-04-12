@@ -29,10 +29,31 @@ if ! ldd "$DHU" 2>/dev/null | grep -q 'libc++.so.1 => /usr/lib'; then
   fi
 fi
 
-# Single authorized adb device → pass explicit serial (helps when multiple USB gadgets exist)
-mapfile -t _adb_devs < <(adb devices 2>/dev/null | awk '/\tdevice$/{print $1}' || true)
-if [[ ${#_adb_devs[@]} -eq 1 ]]; then
-  exec "$DHU" --usb="${_adb_devs[0]}" "$@"
+# DHU is SDL-based; on Wayland, leaving SDL to pick a driver often causes an instant window close.
+# Force X11 through XWayland unless the user already set SDL_VIDEODRIVER.
+if [[ -n "${WAYLAND_DISPLAY:-}" && -z "${SDL_VIDEODRIVER:-}" ]]; then
+  export SDL_VIDEODRIVER=x11
 fi
 
-exec "$DHU" --usb "$@"
+# Resolve USB serial: never call desktop-head-unit with a bare "--usb" (invalid with multiple adb devices).
+_usb_serial=""
+if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+  _usb_serial="$ANDROID_SERIAL"
+elif [[ $# -ge 1 && "$1" != -* ]]; then
+  _usb_serial="$1"
+  shift
+fi
+
+mapfile -t _adb_devs < <(adb devices 2>/dev/null | awk '/\tdevice$/{print $1}' || true)
+if [[ -z "$_usb_serial" ]]; then
+  if [[ ${#_adb_devs[@]} -eq 1 ]]; then
+    _usb_serial="${_adb_devs[0]}"
+  else
+    echo "error: multiple adb devices (${#_adb_devs[@]}). Set ANDROID_SERIAL or pass the USB phone serial:" >&2
+    echo "  ANDROID_SERIAL=<serial> $0" >&2
+    echo "  $0 <serial>   # e.g. serial from: adb devices" >&2
+    exit 1
+  fi
+fi
+
+exec "$DHU" --usb="${_usb_serial}" "$@"
