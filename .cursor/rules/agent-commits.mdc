@@ -1,0 +1,16 @@
+---
+description: Commit message convention — include branch name for rebase-safe history
+alwaysApply: true
+---
+
+# Commits on this repository
+
+When creating commits (including autonomous / agent work):
+
+1. Run or infer `git branch --show-current` and use that value as a **prefix on the subject line**.
+2. **Format:** `<branch-name>: <concise imperative summary>`
+3. Do **not** omit the branch prefix for “small” commits — it applies to every commit on a branch.
+
+Example subject: `cursor-cloud/dev-main-4dc1: Fix browse id mapping for playlists`
+
+This keeps blame and `git log` readable after **rebases**, which rewrite commit hashes.
