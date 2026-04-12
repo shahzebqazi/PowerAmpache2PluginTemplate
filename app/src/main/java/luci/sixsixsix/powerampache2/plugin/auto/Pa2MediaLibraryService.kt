@@ -14,7 +14,6 @@ package luci.sixsixsix.powerampache2.plugin.auto
 
 import android.content.Intent
 import android.net.Uri
-import luci.sixsixsix.powerampache2.plugin.PA2DataFetchService
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -59,8 +58,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     @UnstableApi
     override fun onCreate() {
-        // Ensure fetch listener is registered before browse requests (same process).
-        startService(Intent(this, PA2DataFetchService::class.java))
         super.onCreate()
         val exoPlayer = ExoPlayer.Builder(applicationContext).build().also { player = it }
         val callback = Pa2LibraryCallback()

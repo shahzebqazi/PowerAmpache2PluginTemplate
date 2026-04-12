@@ -34,7 +34,6 @@ import android.os.Process
 import android.os.RemoteException
 import android.util.Log
 import com.google.gson.Gson
-import com.google.gson.JsonParser
 import com.google.gson.JsonSyntaxException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.update
@@ -75,7 +74,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
     private val messenger = Messenger(object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message) {
             if (!isTrustedSender(msg)) {
-                Log.w(TAG, "ignored IPC from untrusted uid (sendingUid=${msg.sendingUid})")
+                Log.w(TAG, "ignored IPC from untrusted uid")
                 return
             }
             val action = msg.data.getString(KEY_ACTION) ?: return
@@ -86,7 +85,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                 }
                 else -> {
                     val jsonStr = msg.data.getString(KEY_REQUEST_JSON) ?: return
-                    val id = resolveBundleId(msg)
+                    val id = msg.data.getString(KEY_ID)
                     parseJsonString(action, jsonStr, id)
                     val replyTo = msg.replyTo ?: return
                     try {
@@ -104,10 +103,8 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
     })
 
     /**
-     * Only accept IPC from the Power Ampache host family when [Message.sendingUid] is populated.
-     * [Message.sendingUid] is often [Process.INVALID_UID] for Messenger-delivered messages; treating
-     * that as unknown (allowed) restores host→plugin JSON delivery. When UID is set, require a
-     * non-plugin package under the Power Ampache namespace.
+     * Only accept IPC from the Power Ampache host family (same signing domain as this plugin).
+     * Requires API 33+ for [Message.sendingUid]; older devices fall back to accepting (legacy).
      */
     private fun isTrustedSender(msg: Message): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
@@ -115,23 +112,13 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
         val uid = msg.sendingUid
         if (uid == Process.INVALID_UID) {
-            return true
+            return false
         }
         val names = packageManager.getPackagesForUid(uid) ?: return false
         val self = packageName
         return names.any { pkg ->
             pkg != self && pkg.startsWith(HOST_PACKAGE_PREFIX)
         }
-    }
-
-    /** Hosts may put the entity id under [KEY_ID] or alternate keys. */
-    private fun resolveBundleId(msg: Message): String? {
-        val d = msg.data
-        return d.getString(KEY_ID)
-            ?: d.getString(KEY_PLAYLIST_ID)
-            ?: d.getString(KEY_ALBUM_ID)
-            ?: d.getString(BUNDLE_KEY_PLAYLIST_ID_ALT)
-            ?: d.getString(BUNDLE_KEY_ALBUM_ID_ALT)
     }
 
     override fun onCreate() {
@@ -177,21 +164,18 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
     }
 
     fun requestSongsForAlbum(albumId: String) {
-        val messenger = clientMessenger
-        if (messenger == null) {
-            Log.w(TAG, "requestSongsForAlbum: host not registered; albumId=$albumId")
-            return
-        }
-        val msg = Message.obtain().apply {
-            data = Bundle().apply {
-                putString(KEY_ACTION, ACTION_GET_SONGS_ALBUM)
-                putString(KEY_ALBUM_ID, albumId)
+        clientMessenger?.let { messenger ->
+            val msg = Message.obtain().apply {
+                data = Bundle().apply {
+                    putString(KEY_ACTION, ACTION_GET_SONGS_ALBUM)
+                    putString(KEY_ALBUM_ID, albumId)
+                }
             }
-        }
-        try {
-            messenger.send(msg)
-        } catch (e: RemoteException) {
-            clientMessenger = null
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                clientMessenger = null
+            }
         }
     }
 
@@ -212,21 +196,18 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
     }
 
     fun requestSongsForPlaylist(playlistId: String) {
-        val messenger = clientMessenger
-        if (messenger == null) {
-            Log.w(TAG, "requestSongsForPlaylist: host not registered (no clientMessenger); id=$playlistId")
-            return
-        }
-        val msg = Message.obtain().apply {
-            data = Bundle().apply {
-                putString(KEY_ACTION, ACTION_GET_SONGS_PLAYLIST)
-                putString(KEY_PLAYLIST_ID, playlistId)
+        clientMessenger?.let { messenger ->
+            val msg = Message.obtain().apply {
+                data = Bundle().apply {
+                    putString(KEY_ACTION, ACTION_GET_SONGS_PLAYLIST)
+                    putString(KEY_PLAYLIST_ID, playlistId)
+                }
             }
-        }
-        try {
-            messenger.send(msg)
-        } catch (e: RemoteException) {
-            clientMessenger = null
+            try {
+                messenger.send(msg)
+            } catch (e: RemoteException) {
+                clientMessenger = null
+            }
         }
     }
 
@@ -249,22 +230,19 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     }
                 }
                 ACTION_SONGS_ALBUM -> {
-                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
-                    val id = albumId ?: songs.firstOrNull()?.album?.id?.takeIf { it.isNotBlank() }
-                    if (id == null) {
-                        Log.w(TAG, "ACTION_SONGS_ALBUM missing id (bundle + song album); song count=${songs.size}")
+                    val id = albumId ?: run {
+                        Log.w(TAG, "ACTION_SONGS_ALBUM missing id in bundle")
                         return
                     }
+                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
                     musicFetcher.albumSongsMapFlow.update { map -> map + (id to songs) }
                 }
                 ACTION_SONGS_PLAYLIST -> {
-                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
-                    val id = albumId
-                        ?: parseTopLevelStringField(jsonStr, "playlist_id", "playlistId")
-                    if (id == null) {
-                        Log.w(TAG, "ACTION_SONGS_PLAYLIST missing id (bundle + JSON); song count=${songs.size}")
+                    val id = albumId ?: run {
+                        Log.w(TAG, "ACTION_SONGS_PLAYLIST missing id in bundle")
                         return
                     }
+                    val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
                     musicFetcher.playlistSongsMapFlow.update { map ->
                         val newList = LinkedHashSet(map[id] ?: emptyList())
                         newList.addAll(songs)
@@ -317,24 +295,9 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
     override fun getSongsFromPlaylist(playlistId: String) = requestSongsForPlaylist(playlistId)
     override fun getAlbumsFromArtist(artistId: String) = requestAlbumsFromArtist(artistId)
 
-    private fun parseTopLevelStringField(jsonStr: String, vararg keys: String): String? =
-        runCatching {
-            val obj = JsonParser.parseString(jsonStr).asJsonObject
-            for (k in keys) {
-                if (!obj.has(k)) continue
-                val el = obj.get(k) ?: continue
-                if (el.isJsonPrimitive && el.asJsonPrimitive.isString) {
-                    return el.asString
-                }
-            }
-            null
-        }.getOrNull()
-
     private companion object {
         private const val TAG = "PA2DataFetch"
         private const val HOST_PACKAGE_PREFIX = "luci.sixsixsix.powerampache2"
-        private const val BUNDLE_KEY_PLAYLIST_ID_ALT = "playlist_id"
-        private const val BUNDLE_KEY_ALBUM_ID_ALT = "album_id"
 
         private fun mergeArtistsById(old: List<Artist>, new: List<Artist>): List<Artist> =
             (old + new).groupBy { it.id }.map { (_, list) -> list.last() }
