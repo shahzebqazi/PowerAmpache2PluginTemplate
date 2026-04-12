@@ -8,6 +8,7 @@
 package luci.sixsixsix.powerampache2.plugin.auto
 
 import android.content.Intent
+import android.net.Uri
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -229,6 +230,51 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             } else {
                 Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_BAD_VALUE))
             }
+        }
+
+        /**
+         * Android Auto (and other controllers) send [MediaItem]s with only [MediaItem.mediaId] — the
+         * framework strips [MediaItem.localConfiguration] for privacy. ExoPlayer cannot play those
+         * until we re-attach the stream URI from our library (see androidx/media issue #156).
+         */
+        override fun onAddMediaItems(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: List<MediaItem>,
+        ): ListenableFuture<List<MediaItem>> {
+            val resolved = mediaItems.map { resolveForPlayback(it) }
+            return Futures.immediateFuture(resolved)
+        }
+
+        override fun onSetMediaItems(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+            mediaItems: List<MediaItem>,
+            startIndex: Int,
+            startPositionMs: Long,
+        ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+            val resolved = mediaItems.map { resolveForPlayback(it) }
+            return Futures.immediateFuture(
+                MediaSession.MediaItemsWithStartPosition(resolved, startIndex, startPositionMs)
+            )
+        }
+
+        private fun resolveForPlayback(mediaItem: MediaItem): MediaItem {
+            val uri = mediaItem.localConfiguration?.uri
+            if (uri != null && uri != Uri.EMPTY) {
+                return mediaItem
+            }
+            val mediaId = mediaItem.mediaId
+            if (mediaId.isNotBlank()) {
+                resolveSongMediaItemById(mediaId)?.let { return it }
+            }
+            return mediaItem
+        }
+
+        private fun resolveSongMediaItemById(mediaId: String): MediaItem? {
+            val sid = MediaIds.parseSongId(mediaId) ?: return null
+            val song = findSong(sid) ?: return null
+            return songToPlayableMediaItem(song)
         }
 
         private fun immediateChildren(
