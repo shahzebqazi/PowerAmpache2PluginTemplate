@@ -475,9 +475,8 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             }
             return
         }
-        val items = queue.mapNotNull { song ->
-            if (song.songUrl.isBlank()) null else songToPlayableMediaItem(song)
-        }
+        // Include every track for Now Playing metadata; stream URL may arrive later from host.
+        val items = queue.map { songToPlayableMediaItem(it) }
         if (items.isEmpty()) return
 
         p.setMediaItems(items)

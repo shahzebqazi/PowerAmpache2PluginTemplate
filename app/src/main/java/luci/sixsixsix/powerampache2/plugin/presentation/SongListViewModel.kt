@@ -24,10 +24,10 @@ package luci.sixsixsix.powerampache2.plugin.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import luci.sixsixsix.powerampache2.plugin.domain.usecase.QueueStateFlow
@@ -38,11 +38,20 @@ class SongListViewModel @Inject constructor(
     queueStateFlowUseCase: QueueStateFlow,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UiState())
-    val uiState: StateFlow<UiState> = _uiState
+    val queueStateFlow: StateFlow<List<Song>> = queueStateFlowUseCase()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val queueStateFlow = queueStateFlowUseCase()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, listOf())
+    /** Now playing + selection derived from host queue (first item = current track if host orders that way). */
+    val uiState: StateFlow<UiState> = queueStateFlow
+        .map { queue ->
+            UiState(
+                isConnected = queue.isNotEmpty(),
+                isPlaying = false,
+                currentIndex = 0,
+                currentSong = queue.firstOrNull(),
+            )
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), UiState())
 
     /** Placeholder until the host UI wires album drill-down. */
     val singleAlbumStateFlow: StateFlow<List<Song>> =

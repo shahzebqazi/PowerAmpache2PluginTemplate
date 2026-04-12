@@ -107,10 +107,11 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
                // cutoutShape = null
             ) {
                 uiState.value.currentSong?.let { currentSong ->
+                    val trackTitle = currentSong.name.ifBlank { currentSong.title }
                     AsyncImage(
                         modifier = Modifier.aspectRatio(1f).fillMaxHeight(),
                         model = currentSong.imageUrl,
-                        contentDescription = currentSong.name
+                        contentDescription = trackTitle
                     )
                     Column(
                         modifier = Modifier
@@ -119,7 +120,7 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = currentSong.name,
+                            text = trackTitle,
                             style = MaterialTheme.typography.titleMedium,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -166,6 +167,7 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
 
         LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
             items(queue.value) { song ->
+                val trackTitle = song.name.ifBlank { song.title }
                 Row(
                     modifier = Modifier
                         .padding(vertical = 0.dp)
@@ -182,12 +184,12 @@ fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
                     AsyncImage(
                         song.imageUrl,
                         modifier = Modifier.fillMaxWidth(0.2f).aspectRatio(1f).padding(4.dp),
-                        contentDescription = song.name
+                        contentDescription = trackTitle
                     )
                     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
                         Text(
                             modifier = Modifier.basicMarquee(),
-                            text = song.name,
+                            text = trackTitle,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold
                         )
