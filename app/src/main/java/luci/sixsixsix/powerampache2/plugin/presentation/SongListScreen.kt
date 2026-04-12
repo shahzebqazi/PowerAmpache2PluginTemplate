@@ -79,11 +79,6 @@ val surfaceVariantLight = Color(0xFFDFE5E3)
 fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val queue = viewModel.queueStateFlow.collectAsState()
-    val highest = viewModel.highestAlbumsStateFlow.collectAsState()
-    val singleAlbum = viewModel.singleAlbumStateFlow.collectAsState()
-
-    if (singleAlbum.value.isNotEmpty())
-        println("aaaa " + singleAlbum.value[0].title)
 
     Scaffold(
         modifier = Modifier

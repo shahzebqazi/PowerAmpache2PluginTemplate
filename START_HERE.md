@@ -4,7 +4,7 @@
 
 - **Upstream template:** `icefields/PowerAmpache2PluginTemplate` — branch **`main`** tracks **`upstream/main`** only (no feature work there).
 - **This fork:** development happens on **`cursor-cloud/dev-main-4dc1`** and topic branches under **`cursor-cloud/`**.
-- **Modules:** `domain`, `data`, `app`, `PowerAmpache2Theme` — respect Clean Architecture boundaries unless scope expands.
+- **Modules:** `domain`, `data`, `app`, `PowerAmpache2Theme` — respect Clean Architecture boundaries; treat **`domain/`** and **`data/`** as **maintainer-only** to change unless a task explicitly says otherwise (see **Handoff** below).
 
 ## Agents
 
@@ -19,7 +19,10 @@ Use this section as **onboarding context** when picking up work in a new session
 
 - **Upstream:** `icefields/PowerAmpache2PluginTemplate` — **`main`** mirrors **`upstream/main`** only; no feature commits there.
 - **This fork:** integrate on **`cursor-cloud/dev-main-4dc1`**; feature work on **`cursor-cloud/<topic>`** branches.
-- **Architecture:** `domain`, `data`, `app`, `PowerAmpache2Theme` — **do not** change `domain/` or `data/` (including `PA2DataFetchService`) or **`MainActivity`’s launcher flow** unless the task explicitly expands scope. Media / Android Auto work stays in **`app/`** (see Media3 brief below).
+- **This is a plugin:** the **Power Ampache 2 host** owns real network access, auth, and the JSON protocol over Messenger. The plugin’s `domain/` + `data/` layers are **shared contracts and glue** (`MusicFetcher`, `PA2DataFetchService`, DTOs). They are **not** a place to invent “IPC hardening,” “trusted sender” policies, or host-protocol changes unless the **maintainer** explicitly assigns that work with a real spec from the host app.
+- **Architecture:** `domain`, `data`, `app`, `PowerAmpache2Theme` — **do not** change `domain/` or `data/` (including `PA2DataFetchService`, **`MusicFetcher` / `MusicFetcherImpl`**, or **DTOs**) or **`MainActivity`’s launcher flow** for routine Android Auto / Media3 / UI tasks. Put those fixes in **`app/`** only. The **only** exception is when the **maintainer** clearly expands scope (e.g. a coordinated host + plugin release); vague “empty browse” or “DTO key” agent commits are not sufficient justification.
+- **History note:** On **`cursor-cloud/dev-main-4dc1`**, a batch of Cursor commits (subjects mentioned “IPC,” “DTO keys,” “harden,” `START_STICKY`, etc., ca. 2026-04-12) was **reverted**. Those messages described work that does **not** match how this plugin should evolve: treat that narrative as **invalid** and do not reintroduce the same kind of edits without maintainer direction.
+- **Media / Android Auto:** implement browse, session, and queue UI in **`app/`** only (see Media3 brief below); do not use empty lists or car UI bugs as a reason to edit **`domain/`** / **`data/`** without maintainer scope.
 
 ### Build environment (what to expect)
 
@@ -35,7 +38,7 @@ This section records **observed** behavior so agents and humans share the same e
 
 - The plugin **does load**, but **startup is not yet fully predictable**: several components can start or rely on **`PA2DataFetchService`** (`PluginApplication.onCreate`, `Pa2MediaLibraryService.onCreate`, and the host binding via **`register_client`**). It is easy to wonder whether a **previous process**, **task affinity**, or **order of host vs plugin** is affecting what you see.
 - **What to do:** When debugging, capture **one cold start** after `adb shell am force-stop luci.sixsixsix.powerampache2.plugin` (and reproduce host order: open host first vs Auto first). Use log lines from **`PA2DataFetch`**, **`MusicFetcherImpl`**, and **`Pa2MediaLibraryService`** to see whether `clientMessenger` is registered and flows receive JSON.
-- **Intent:** Future work should make **one clear initialization path** (documented order, optional single coordinator in `app/`) without breaking [`AGENTS.md`](AGENTS.md) constraints unless scope expands.
+- **Intent:** Future work should make **one clear initialization path** (documented order, optional single coordinator in `app/`) without breaking [`AGENTS.md`](AGENTS.md) constraints unless the **maintainer** expands scope.
 
 **Android Auto: USB works vs “For You” / widgets**
 
@@ -130,9 +133,9 @@ The following landed on topic branch **`cursor-cloud/android-auto-media3-mvp-bb4
 
 ### Next step — project kanban and perpetual agents
 
-**Kanban:** The human maintains the board (e.g. [Project #7](https://github.com/users/shahzebqazi/projects/7)). Suggested cards for the **next phase**: (1) **Startup / process** — document and harden ordering of `PA2DataFetchService` + host `register_client`; (2) **Android Auto** — verify Media browse vs “For You” scope; fix **Now Playing** / queue mirror with host; (3) **Empty library / timeout** — UX when host is slow or offline; (4) **Optional debug UI** — safe way to show tracks without changing the default launcher contract.
+**Kanban:** The human maintains the board (e.g. [Project #7](https://github.com/users/shahzebqazi/projects/7)). Suggested cards for the **next phase**: (1) **Startup / process** — document ordering of `PA2DataFetchService` + host `register_client`; (2) **Android Auto** — verify Media browse vs “For You” scope; fix **Now Playing** / queue mirror with host in **`app/`**; (3) **Empty library / timeout** — UX when host is slow or offline; (4) **Optional debug UI** — safe way to show tracks without changing the default launcher contract.
 
-**Perpetual coding agents** should loop: reproduce → fix in **`app/`** (and only **`data/`** / **`domain/`** if the task expands scope) → `./gradlew :app:assembleDebug` → device logcat → PR with evidence → repeat until behavior is **functional, operational, and intentional**.
+**Perpetual coding agents** should loop: reproduce → fix in **`app/`** → `./gradlew :app:assembleDebug` → device logcat → PR with evidence → repeat until behavior is **functional, operational, and intentional**. **`domain/`** / **`data/`** are **out of bounds** unless the **maintainer** assigns a coordinated host+plugin change.
 
 ### Kanban: Android Auto guidelines alignment (Project #7)
 
