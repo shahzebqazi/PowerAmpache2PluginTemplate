@@ -21,6 +21,7 @@
  */
 package luci.sixsixsix.powerampache2.plugin.data
 
+import android.util.Log
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,7 +38,7 @@ import javax.inject.Singleton
 import kotlin.collections.emptyList
 
 @Singleton
-class MusicFetcherImpl @Inject constructor(): MusicFetcher {
+class MusicFetcherImpl @Inject constructor() : MusicFetcher {
     override var musicFetcherListener: MusicFetcherListener? = null
     override val currentQueueFlow = MutableStateFlow<List<Song>>(emptyList())
     override val playlistsFlow = MutableStateFlow<List<Playlist>>(emptyList())
@@ -52,8 +53,11 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     override val albumsByArtistFlow: MutableStateFlow<Map<String, List<Album>>> = MutableStateFlow(emptyMap())
 
     override fun getSongsFromAlbum(albumId: String): Flow<List<Song>> {
-        musicFetcherListener?.let {
-            it.getSongsFromAlbum(albumId)
+        val listener = musicFetcherListener
+        if (listener == null) {
+            Log.w(TAG, "getSongsFromAlbum: no listener (start PA2DataFetchService); albumId=$albumId")
+        } else {
+            listener.getSongsFromAlbum(albumId)
         }
         return albumSongsMapFlow
             .map { it[albumId] ?: emptyList() }
@@ -61,8 +65,11 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
     }
 
     override fun getSongsFromPlaylist(playlistId: String): Flow<List<Song>> {
-        musicFetcherListener?.let {
-            it.getSongsFromPlaylist(playlistId)
+        val listener = musicFetcherListener
+        if (listener == null) {
+            Log.w(TAG, "getSongsFromPlaylist: no listener (start PA2DataFetchService); playlistId=$playlistId")
+        } else {
+            listener.getSongsFromPlaylist(playlistId)
         }
         return playlistSongsMapFlow
             .map { it[playlistId] ?: emptyList() }
@@ -88,5 +95,9 @@ class MusicFetcherImpl @Inject constructor(): MusicFetcher {
             byArtist[artistId]?.takeIf { it.isNotEmpty() }
                 ?: all.filter { it.artist.id == artistId }
         }.distinctUntilChanged()
+    }
+
+    private companion object {
+        private const val TAG = "MusicFetcherImpl"
     }
 }

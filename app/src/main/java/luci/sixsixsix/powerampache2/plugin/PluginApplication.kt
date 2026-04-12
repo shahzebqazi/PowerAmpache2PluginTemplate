@@ -22,8 +22,14 @@
 package luci.sixsixsix.powerampache2.plugin
 
 import android.app.Application
+import android.content.Intent
 import dagger.hilt.android.HiltAndroidApp
 
-
 @HiltAndroidApp
-class PluginApplication: Application() { }
+class PluginApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        // Register MusicFetcherListener before MediaLibraryService or Auto browse runs.
+        startService(Intent(this, PA2DataFetchService::class.java))
+    }
+}

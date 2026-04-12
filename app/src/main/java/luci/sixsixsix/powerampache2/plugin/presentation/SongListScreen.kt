@@ -50,7 +50,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,7 +77,7 @@ val surfaceVariantLight = Color(0xFFDFE5E3)
 @Composable
 fun SongListScreen(viewModel: SongListViewModel = hiltViewModel()) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val queue = viewModel.queueStateFlow.collectAsState()
+    val queue = viewModel.queueStateFlow.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier
