@@ -4,4 +4,10 @@
     <string name="toast_noConnection_warning">Connect to Auto before playing music</string>
     <string name="mainScreen_emptyQueue_title">Empty Queue</string>
     <string name="mainScreen_emptyQueue_subtitle">Load a queue in Power Ampache 2 to start casting your music</string>
+    <string name="media_browse_root_title">Power Ampache 2</string>
+    <string name="media_section_playlists">Playlists</string>
+    <string name="media_section_favourite_albums">Favourite albums</string>
+    <string name="media_section_recent_albums">Recent albums</string>
+    <string name="media_section_newest_albums">Newest albums</string>
+    <string name="media_section_highest_rated_albums">Highest-rated albums</string>
 </resources>

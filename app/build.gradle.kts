@@ -67,4 +67,8 @@ dependencies {
     kapt(libs.androidx.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.hilt.common)
+
+    // Android Auto / Media browse + playback (Media3)
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.session)
 }
