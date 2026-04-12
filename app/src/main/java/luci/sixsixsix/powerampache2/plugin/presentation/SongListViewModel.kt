@@ -38,8 +38,8 @@ class SongListViewModel @Inject constructor(
     queueStateFlowUseCase: QueueStateFlow,
 ) : ViewModel() {
 
+    /** Host queue; same direct [StateFlow] pattern as [luci.sixsixsix.powerampache2.plugin.domain.usecase.PlaylistsStateFlow]. */
     val queueStateFlow: StateFlow<List<Song>> = queueStateFlowUseCase()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Now playing + selection derived from host queue (first item = current track if host orders that way). */
     val uiState: StateFlow<UiState> = queueStateFlow
