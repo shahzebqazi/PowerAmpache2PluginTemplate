@@ -21,7 +21,10 @@
  */
 package luci.sixsixsix.powerampache2.plugin.data
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -29,6 +32,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcherListener
+import luci.sixsixsix.powerampache2.plugin.PA2DataFetchService
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
 import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
@@ -38,7 +42,9 @@ import javax.inject.Singleton
 import kotlin.collections.emptyList
 
 @Singleton
-class MusicFetcherImpl @Inject constructor() : MusicFetcher {
+class MusicFetcherImpl @Inject constructor(
+    @ApplicationContext private val appContext: Context,
+) : MusicFetcher {
     override var musicFetcherListener: MusicFetcherListener? = null
     override val currentQueueFlow = MutableStateFlow<List<Song>>(emptyList())
     override val playlistsFlow = MutableStateFlow<List<Playlist>>(emptyList())
@@ -56,6 +62,7 @@ class MusicFetcherImpl @Inject constructor() : MusicFetcher {
         val listener = musicFetcherListener
         if (listener == null) {
             Log.w(TAG, "getSongsFromAlbum: no listener (start PA2DataFetchService); albumId=$albumId")
+            ensureFetchServiceRunning()
         } else {
             listener.getSongsFromAlbum(albumId)
         }
@@ -68,6 +75,7 @@ class MusicFetcherImpl @Inject constructor() : MusicFetcher {
         val listener = musicFetcherListener
         if (listener == null) {
             Log.w(TAG, "getSongsFromPlaylist: no listener (start PA2DataFetchService); playlistId=$playlistId")
+            ensureFetchServiceRunning()
         } else {
             listener.getSongsFromPlaylist(playlistId)
         }
@@ -76,25 +84,43 @@ class MusicFetcherImpl @Inject constructor() : MusicFetcher {
             .distinctUntilChanged()
     }
 
-    override fun getArtists(query: String): Flow<List<Artist>> =
-        musicFetcherListener?.let {
-            it.getArtists(query)
-            artistsFlow
-        } ?: artistsFlow
+    override fun getArtists(query: String): Flow<List<Artist>> {
+        val listener = musicFetcherListener
+        if (listener == null) {
+            ensureFetchServiceRunning()
+        } else {
+            listener.getArtists(query)
+        }
+        return artistsFlow
+    }
 
-    override fun getAlbums(query: String): Flow<List<Album>> =
-        musicFetcherListener?.let {
-            it.getAlbums(query)
-            albumsFlow
-        } ?: albumsFlow
-
+    override fun getAlbums(query: String): Flow<List<Album>> {
+        val listener = musicFetcherListener
+        if (listener == null) {
+            ensureFetchServiceRunning()
+        } else {
+            listener.getAlbums(query)
+        }
+        return albumsFlow
+    }
 
     override fun getAlbumsFromArtist(artistId: String): Flow<List<Album>> {
-        musicFetcherListener?.getAlbumsFromArtist(artistId)
+        val listener = musicFetcherListener
+        if (listener == null) {
+            ensureFetchServiceRunning()
+        } else {
+            listener.getAlbumsFromArtist(artistId)
+        }
         return combine(albumsByArtistFlow, albumsFlow) { byArtist, all ->
             byArtist[artistId]?.takeIf { it.isNotEmpty() }
                 ?: all.filter { it.artist.id == artistId }
         }.distinctUntilChanged()
+    }
+
+    /** Best-effort: start [PA2DataFetchService] so it can set [musicFetcherListener]. */
+    private fun ensureFetchServiceRunning() {
+        if (musicFetcherListener != null) return
+        appContext.startService(Intent(appContext, PA2DataFetchService::class.java))
     }
 
     private companion object {

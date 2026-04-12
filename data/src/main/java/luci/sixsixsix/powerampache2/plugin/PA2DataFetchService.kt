@@ -35,7 +35,6 @@ import android.os.RemoteException
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.update
 import luci.sixsixsix.powerampache2.plugin.data.dto.AlbumsDto
@@ -108,12 +107,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     })
 
-    /**
-     * Only accept IPC from the Power Ampache host family when [Message.sendingUid] is populated.
-     * [Message.sendingUid] is often [Process.INVALID_UID] for Messenger-delivered messages; treating
-     * that as unknown (allowed) restores host→plugin JSON delivery. When UID is set, require a
-     * non-plugin package under the Power Ampache namespace.
-     */
+    /** When [Message.sendingUid] is set (API 33+), require a host package, not this plugin. */
     private fun isTrustedSender(msg: Message): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             return true
@@ -148,6 +142,8 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         musicFetcher.musicFetcherListener = null
         super.onDestroy()
     }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = Service.START_STICKY
 
     fun requestArtists(query: String = "") {
         clientMessenger?.let { messenger ->
@@ -332,9 +328,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                 }
                 else -> Log.w(TAG, "unhandled action after normalize: $action")
             }
-        } catch (e: JsonSyntaxException) {
-            Log.e(TAG, "JSON parse failed action=$action", e)
-        } catch (e: RuntimeException) {
+        } catch (e: Exception) {
             Log.e(TAG, "parse failed action=$action", e)
         }
     }

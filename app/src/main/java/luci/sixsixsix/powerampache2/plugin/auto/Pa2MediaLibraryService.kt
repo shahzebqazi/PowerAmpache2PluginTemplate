@@ -14,7 +14,7 @@ package luci.sixsixsix.powerampache2.plugin.auto
 
 import android.content.Intent
 import android.net.Uri
-import luci.sixsixsix.powerampache2.plugin.PA2DataFetchService
+import android.util.Log
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -37,10 +37,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import luci.sixsixsix.powerampache2.plugin.PA2DataFetchService
+import luci.sixsixsix.powerampache2.plugin.R
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
 import luci.sixsixsix.powerampache2.plugin.domain.model.Album
 import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
-import luci.sixsixsix.powerampache2.plugin.R
 import luci.sixsixsix.powerampache2.plugin.domain.model.Song
 import javax.inject.Inject
 
@@ -59,7 +60,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     @UnstableApi
     override fun onCreate() {
-        // Ensure fetch listener is registered before browse requests (same process).
         startService(Intent(this, PA2DataFetchService::class.java))
         super.onCreate()
         val exoPlayer = ExoPlayer.Builder(applicationContext).build().also { player = it }
@@ -231,12 +231,10 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     if (pid != null) {
                         musicFetcher.playlistsFlow.value.find { it.id == pid }?.let { playlistItem(it) }
                     } else {
-                        val aid = MediaIds.parseAlbumId(mediaId)
-                        if (aid != null) {
+                        MediaIds.parseAlbumId(mediaId)?.let { aid ->
                             findAlbum(aid)?.let { albumItem(it) }
-                        } else {
-                            val sid = MediaIds.parseSongId(mediaId)
-                            if (sid != null) findSong(sid)?.let { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) } else null
+                        } ?: MediaIds.parseSongId(mediaId)?.let { sid ->
+                            findSong(sid)?.let { songToPlayableMediaItem(it) }
                         }
                     }
                 }
@@ -314,7 +312,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         private fun resolveSongMediaItemById(mediaId: String): MediaItem? {
             val sid = MediaIds.parseSongId(mediaId) ?: return null
             val song = findSong(sid) ?: return null
-            return this@Pa2MediaLibraryService.songToPlayableMediaItem(song)
+            return songToPlayableMediaItem(song)
         }
 
         private fun immediateChildren(
@@ -387,14 +385,12 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 )
                 .build()
 
-        private fun findAlbum(albumId: String): Album? {
-            val inList: (List<Album>) -> Album? = { list -> list.find { it.id == albumId } }
-            return inList(musicFetcher.favouriteAlbumsFlow.value)
-                ?: inList(musicFetcher.recentAlbumsFlow.value)
-                ?: inList(musicFetcher.latestAlbumsFlow.value)
-                ?: inList(musicFetcher.highRatedAlbumsFlow.value)
-                ?: inList(musicFetcher.albumsFlow.value)
-        }
+        private fun findAlbum(albumId: String): Album? =
+            musicFetcher.favouriteAlbumsFlow.value.find { it.id == albumId }
+                ?: musicFetcher.recentAlbumsFlow.value.find { it.id == albumId }
+                ?: musicFetcher.latestAlbumsFlow.value.find { it.id == albumId }
+                ?: musicFetcher.highRatedAlbumsFlow.value.find { it.id == albumId }
+                ?: musicFetcher.albumsFlow.value.find { it.id == albumId }
 
         private fun playlistChildrenFuture(
             playlistId: String,
@@ -418,7 +414,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     }.getOrDefault(emptyList())
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(songs.map { songToPlayableMediaItem(it) }),
                             params
                         )
                     )
@@ -449,7 +445,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     }.getOrDefault(emptyList())
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(songs.map { songToPlayableMediaItem(it) }),
                             params
                         )
                     )
@@ -460,17 +456,14 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     }
 
-    /**
-     * When the host app plays audio, it pushes the queue via [MusicFetcher.currentQueueFlow].
-     * That playback is not this service's ExoPlayer, so Android Auto would show no metadata until
-     * we mirror the queue into the session-bound player. When ExoPlayer is idle we load the queue
-     * paused for display; when Auto is actively playing we refresh media items in place so
-     * metadata and widgets can track host updates without freezing on an early return.
-     */
+    /** Mirror host queue into the session ExoPlayer so Auto shows Now Playing / metadata. */
     private fun subscribeToHostQueueMirror() {
         mainScope.launch {
             musicFetcher.currentQueueFlow.collect { queue ->
-                syncPlayerFromHostQueue(queue)
+                runCatching { syncPlayerFromHostQueue(queue) }
+                    .onFailure { e ->
+                        Log.e(TAG, "syncPlayerFromHostQueue failed (queue size=${queue.size})", e)
+                    }
             }
         }
     }
@@ -484,14 +477,10 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             }
             return
         }
-        // Include every track for Now Playing metadata; stream URL may arrive later from host.
         val items = queue.map { songToPlayableMediaItem(it) }
         if (items.isEmpty()) return
 
         if (p.playWhenReady) {
-            // Previously we returned here, so host queue updates never reached the session while
-            // Android Auto was playing — widgets / Now Playing stayed stale. Refresh in place when
-            // the timeline length matches; otherwise rebuild while preserving index and position.
             when {
                 p.mediaItemCount == items.size -> {
                     for (i in items.indices) {
@@ -582,6 +571,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
     }
 
     companion object {
+        private const val TAG = "Pa2MediaLibrary"
         private const val FETCH_TIMEOUT_MS = 8_000L
     }
 }
