@@ -5,6 +5,6 @@ import luci.sixsixsix.powerampache2.plugin.domain.model.Playlist
 
 
 data class PlaylistsDto(
-    @SerializedName("data")
+    @SerializedName(value = "data", alternate = ["playlists"])
     val playlists: List<Playlist> = listOf()
 )

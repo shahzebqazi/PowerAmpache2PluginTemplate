@@ -49,6 +49,7 @@ import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_ARTISTS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ALBUMS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ALBUMS_ARTIST
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_ARTISTS
+import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_PLAYLISTS
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_SONGS_ALBUM
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_GET_SONGS_PLAYLIST
 import luci.sixsixsix.powerampache2.plugin.domain.common.ACTION_PLAYLISTS
@@ -83,11 +84,15 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
             when (action) {
                 "register_client" -> {
                     clientMessenger = msg.replyTo
+                    requestPlaylistsFromHost()
                 }
                 else -> {
-                    val jsonStr = msg.data.getString(KEY_REQUEST_JSON) ?: return
+                    val jsonStr = extractJsonString(msg.data) ?: run {
+                        Log.w(TAG, "missing JSON payload for action=$action bundleKeys=${msg.data.keySet()}")
+                        return
+                    }
                     val id = resolveBundleId(msg)
-                    parseJsonString(action, jsonStr, id)
+                    parseJsonString(normalizeIncomingAction(action), jsonStr, id)
                     val replyTo = msg.replyTo ?: return
                     try {
                         replyTo.send(
@@ -230,6 +235,36 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     }
 
+    /** Ask the host for the playlist list so Android Auto browse is not empty until a passive push. */
+    private fun requestPlaylistsFromHost() {
+        val messenger = clientMessenger ?: run {
+            Log.w(TAG, "requestPlaylistsFromHost: host not registered yet")
+            return
+        }
+        val msg = Message.obtain().apply {
+            data = Bundle().apply {
+                putString(KEY_ACTION, ACTION_GET_PLAYLISTS)
+            }
+        }
+        try {
+            messenger.send(msg)
+        } catch (e: RemoteException) {
+            clientMessenger = null
+        }
+    }
+
+    private fun extractJsonString(bundle: Bundle): String? =
+        bundle.getString(KEY_REQUEST_JSON)
+            ?: bundle.getString("request_json")
+            ?: bundle.getString("requestJson")
+            ?: bundle.getString("payload")
+            ?: bundle.getString("body")
+
+    private fun normalizeIncomingAction(action: String): String = when (action) {
+        ACTION_GET_PLAYLISTS, "playlist_list", "get_playlist" -> ACTION_PLAYLISTS
+        else -> action
+    }
+
     private fun parseJsonString(action: String, jsonStr: String, albumId: String? = null) {
         try {
             when (action) {
@@ -295,6 +330,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     val songs = gson.fromJson(jsonStr, SongsDto::class.java).songs
                     musicFetcher.currentQueueFlow.value = songs
                 }
+                else -> Log.w(TAG, "unhandled action after normalize: $action")
             }
         } catch (e: JsonSyntaxException) {
             Log.e(TAG, "JSON parse failed action=$action", e)

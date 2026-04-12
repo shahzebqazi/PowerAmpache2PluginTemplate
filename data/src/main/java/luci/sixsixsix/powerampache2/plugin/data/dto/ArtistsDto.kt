@@ -4,6 +4,6 @@ import com.google.gson.annotations.SerializedName
 import luci.sixsixsix.powerampache2.plugin.domain.model.Artist
 
 data class ArtistsDto(
-    @SerializedName("data")
+    @SerializedName(value = "data", alternate = ["artists"])
     val artists: List<Artist> = listOf()
 )
