@@ -71,4 +71,8 @@ dependencies {
     // Android Auto / Media browse + playback (Media3)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.session)
+    implementation(libs.androidx.concurrent.futures)
+
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.runner)
 }

@@ -1,3 +1,12 @@
+# Author-provided PA2 dev APK (local only; do not commit)
+/*.apk
+
+# Project-local JDK 21 for Gradle (see START_HERE / gradlew)
+/.jdks/
+
+# Project-local Android SDK (sdk.dir in local.properties)
+/.android-sdk/
+
 *.iml
 .gradle
 /local.properties

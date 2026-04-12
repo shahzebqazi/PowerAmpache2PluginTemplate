@@ -225,7 +225,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 }
             }
             return if (item != null) {
-                Futures.immediateFuture(LibraryResult.ofItem(item, params = null))
+                Futures.immediateFuture(LibraryResult.ofItem(item, null))
             } else {
                 Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_BAD_VALUE))
             }

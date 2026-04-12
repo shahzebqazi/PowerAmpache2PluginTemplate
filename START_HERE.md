@@ -11,9 +11,52 @@
 - **Branch policy, commit message format, and module notes:** see [`AGENTS.md`](AGENTS.md).
 - **Commit subjects** on dev branches: `<branch-name>: <short imperative summary>` (use the full current branch name from `git branch --show-current`).
 
+## Handoff for an AI coding agent
+
+Use this section as **onboarding context** when picking up work in a new session. It does not replace [`AGENTS.md`](AGENTS.md) or the task-specific briefs below.
+
+### Identity and scope
+
+- **Upstream:** `icefields/PowerAmpache2PluginTemplate` — **`main`** mirrors **`upstream/main`** only; no feature commits there.
+- **This fork:** integrate on **`cursor-cloud/dev-main-4dc1`**; feature work on **`cursor-cloud/<topic>`** branches.
+- **Architecture:** `domain`, `data`, `app`, `PowerAmpache2Theme` — **do not** change `domain/` or `data/` (including `PA2DataFetchService`) or **`MainActivity`’s launcher flow** unless the task explicitly expands scope. Media / Android Auto work stays in **`app/`** (see Media3 brief below).
+
+### Build environment (what to expect)
+
+- **`local.properties`** must define `sdk.dir=...` (file is gitignored). Align with the human’s Android Studio SDK when possible (e.g. `~/Android/Sdk`).
+- **JDK / Gradle:** The **Gradle Kotlin DSL** may fail if the **daemon runs on JDK 26+** (e.g. `IllegalArgumentException` parsing the Java version). This repo’s **`gradlew`** prefers a **project-local JDK 21** under **`.jdks/jdk-21*`** when present; **`.jdks/`** is gitignored. If no `.jdks` exists, use **JDK 17 or 21** for Gradle (`JAVA_HOME` or system packages). Do not claim `./gradlew` works on JDK 26 without verifying.
+- **Author / debug APKs:** Root-level **`*.apk`** is gitignored. Installing a **debug** build over an **author-signed release** may require **`adb uninstall`** first due to **signature mismatch**; **versionCode** on device may also block install without uninstall or downgrade flags.
+
+### Android Auto / Media3 (current direction)
+
+- Browse + playback for AA are implemented via **`Pa2MediaLibraryService`** (Media3), **`MediaIds.kt`**, and app-only dependencies in **`app/build.gradle.kts`** / **`gradle/libs.versions.toml`** (e.g. `media3-exoplayer`, `media3-session`, **`androidx.concurrent:concurrent-futures`** for `CallbackToFutureAdapter`). Wire **only** through **`MusicFetcher`** and existing flows; host must still bind **`PA2DataFetchService`** for real data.
+- **Desktop Head Unit (DHU):** Install **`extras;google;auto`** with `sdkmanager` (Android Auto Desktop Head Unit Emulator). **Recommended (DHU 2.x):** USB **Accessory (AOA)** — run **`scripts/run-dhu-usb.sh`** (or **`desktop-head-unit --usb`**) so you do **not** need **`adb forward`** or Android Auto’s **Start head unit server** (those apply to the older ADB-tunnel method). Requires **`libc++`** on Linux (`pacman -S libc++`). See [Google: Connect using Accessory Mode](https://developer.android.com/training/cars/testing/dhu#connection-aoap).
+- **Visual verification gap (important):** The **Android Auto / DHU (and related) UI has not been visually inspected** as part of this repository’s documented workflow. Automated checks (e.g. instrumented **`MediaBrowser`** tests against **`Pa2MediaLibraryService`**) validate the **media browse API**, not pixels on the head unit. Treat car/DHU behavior as **unproven** until a human has seen it.
+
+### Verification habits
+
+- Prefer **`./gradlew :app:assembleDebug`** when an SDK is available; use **`adb`** / **`adb logcat`** when a device is attached. Do not assert success without command output.
+- **Log filters** (adjust as needed): `Pa2Media`, `MediaLibrary`, `ExoPlayer`, `MediaSession`, package `luci.sixsixsix.powerampache2.plugin`.
+- **Kanban / GitHub Projects:** Agents cannot create project cards from the repo; if the human links a card/issue URL, reference it in the PR; otherwise **do not block** on missing board state (see “Perpetual coding agents” below).
+
+### Deliverables
+
+- Follow commit format in [`AGENTS.md`](AGENTS.md).
+- Document stable **media ID** changes and **constraints** (what you did / did not touch) in the PR body.
+- For Android Auto / DHU-facing work: **perpetual coding agents** must **debug on-device**, **deliver screenshots** of **working** features (browse sections, drill-down, playback where applicable), and note gaps; the **human reviews the code and UI** once implementation is ready (see below).
+
 ## Perpetual coding agents
 
 Autonomous agents should **not** block on Kanban or a “Proceed?” gate unless the task explicitly requires it. Use **sensible defaults** when product links or UI details are missing; record assumptions in the PR.
+
+### Android Auto / DHU — obligations for perpetual coding agents
+
+Until the maintainer has **visually** confirmed behavior on DHU or a car:
+
+1. **Do not assume** the head-unit UI works because **`./gradlew` or instrumented tests pass** — the **UI has not been visually inspected** in-repo; treat DHU as the source of truth for “does it look right.”
+2. **Debug on real hardware** where possible: USB phone + **`scripts/run-dhu-usb.sh`** (or equivalent), **`adb logcat`** with the filters in **Verification habits**, fix crashes / empty trees / stuck loading with evidence.
+3. **Deliver screenshots** (or short screen recordings) of **working** features in the PR or linked issue: e.g. launcher → **Auto Plugin for Power Ampache 2**, root browse, at least one drill-down, playback if URLs exist. If something cannot be shown (no host, no network), **state why** explicitly.
+4. **Human sign-off:** The **human inspects the code** (and DHU/car if they choose) **after** the agent considers the work implemented. Agents should summarize what was automated vs. what still needs human eyes.
 
 ### Android Auto–visible MVP (Media3) — agent brief
 
@@ -84,7 +127,7 @@ Agents cannot create cards on your GitHub Project from this repo; **add these as
 
 **Visual inspection (human)**
 
-10. User runs the app on the phone (or DHU / car); confirms browse UI and playback behavior; shares screenshots or screen recording if reporting issues.
+10. **You** run the app on the phone (or DHU / car), confirm browse UI and playback, and **review the code** once agents have implemented fixes. Agents should supply screenshots of working features first; **this doc does not replace** your own inspection of the implementation and head-unit behavior. Share screenshots or a screen recording when reporting issues.
 
 ---
 
@@ -105,8 +148,9 @@ When the task involves **verifying the app** or **debugging on a real device**, 
    - If project cards are missing, still implement fixes; note in the PR what was validated and what requires the human’s device.
 
 4. **Visual inspection**  
-   - Agents **cannot** see the phone screen unless the **human** provides artifacts: screenshots, screen recording, or exported DHU logs.  
-   - Ask for: app version / branch, steps taken, and **one logcat snippet** around the failure time when reporting UI or playback bugs.
+   - Agents **cannot** see the phone or DHU unless the **human** provides artifacts — so **perpetual agents must** capture and attach their **own** screenshots (or recordings) of **working** Android Auto features when claiming browse/playback work, plus logcat for failures.  
+   - When reporting bugs, still ask for: app version / branch, steps taken, and **one logcat snippet** around the failure time.  
+   - **Human:** plan to **inspect the code** after implementation; agents document what they validated vs. what you must still verify on DHU/car.
 
 5. **Foreground service & notifications**  
    - On Android 13+, notification permission may affect FGS behavior; include that in repro steps if playback or service start fails after install.
