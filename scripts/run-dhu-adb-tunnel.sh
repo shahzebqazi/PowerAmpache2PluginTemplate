@@ -14,6 +14,11 @@
 
 set -euo pipefail
 
+if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+  echo "error: DISPLAY and WAYLAND_DISPLAY are both unset. DHU needs a graphical session." >&2
+  exit 1
+fi
+
 if [[ -z "${ANDROID_HOME:-}" ]]; then
   echo "error: ANDROID_HOME is not set (e.g. export ANDROID_HOME=\$HOME/Android/Sdk)" >&2
   exit 1
@@ -29,6 +34,7 @@ fi
 if [[ -n "${WAYLAND_DISPLAY:-}" && -z "${SDL_VIDEODRIVER:-}" ]]; then
   export SDL_VIDEODRIVER=x11
 fi
+export XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}"
 
 if ! adb devices | grep -q 'device$'; then
   echo "error: no authorized adb device; connect phone and accept USB debugging" >&2

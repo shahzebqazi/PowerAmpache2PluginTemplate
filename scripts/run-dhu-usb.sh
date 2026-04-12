@@ -11,6 +11,12 @@
 
 set -euo pipefail
 
+# Need a graphical session for SDL. Pure SSH / agent shells often have no DISPLAY → DHU exits immediately.
+if [[ -z "${DISPLAY:-}" && -z "${WAYLAND_DISPLAY:-}" ]]; then
+  echo "error: DISPLAY and WAYLAND_DISPLAY are both unset. DHU needs your desktop session (e.g. export DISPLAY=:0)." >&2
+  exit 1
+fi
+
 if [[ -z "${ANDROID_HOME:-}" ]]; then
   echo "error: ANDROID_HOME is not set (e.g. export ANDROID_HOME=\$HOME/Android/Sdk)" >&2
   exit 1
@@ -35,6 +41,9 @@ if [[ -n "${WAYLAND_DISPLAY:-}" && -z "${SDL_VIDEODRIVER:-}" ]]; then
   export SDL_VIDEODRIVER=x11
 fi
 
+# X11 auth for some setups (SSH, systemd user session).
+export XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}"
+
 # Resolve USB serial: never call desktop-head-unit with a bare "--usb" (invalid with multiple adb devices).
 _usb_serial=""
 if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -54,6 +63,32 @@ if [[ -z "$_usb_serial" ]]; then
     echo "  $0 <serial>   # e.g. serial from: adb devices" >&2
     exit 1
   fi
+fi
+
+# Detached launch: IDE/agent shells often tear down `nohup … &` children when the task ends — DHU vanishes.
+# systemd-run --user --scope keeps DHU in a user transient scope (survives Cursor/terminal exit). Fallback: nohup + log.
+# Use: DHU_BACKGROUND=1 ./scripts/run-dhu-usb.sh
+# Opt out of systemd: DHU_NO_SYSTEMD=1
+if [[ -n "${DHU_BACKGROUND:-}" ]]; then
+  _log="${DHU_LOG:-/tmp/dhu-run.log}"
+  _pidf="${DHU_PID_FILE:-/tmp/dhu.pid}"
+  if [[ -x /usr/bin/systemd-run ]] && [[ -z "${DHU_NO_SYSTEMD:-}" ]] && /usr/bin/systemd-run --user --version >/dev/null 2>&1; then
+    echo "Starting DHU via systemd user scope (survives IDE/terminal exit)..."
+    /usr/bin/systemd-run --user --scope --no-block \
+      --setenv=DISPLAY="${DISPLAY:-:0}" \
+      --setenv=WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}" \
+      --setenv=SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-}" \
+      --setenv=XAUTHORITY="${XAUTHORITY:-$HOME/.Xauthority}" \
+      --setenv=ANDROID_HOME="${ANDROID_HOME}" \
+      "$DHU" --usb="${_usb_serial}" "$@"
+    echo "DHU started. Follow logs: journalctl --user -f"
+    exit 0
+  fi
+  echo "Starting DHU detached (log: $_log, pid file: $_pidf)..."
+  nohup "$DHU" --usb="${_usb_serial}" "$@" >>"$_log" 2>&1 &
+  echo $! >"$_pidf"
+  echo "DHU PID $(cat "$_pidf")"
+  exit 0
 fi
 
 exec "$DHU" --usb="${_usb_serial}" "$@"
