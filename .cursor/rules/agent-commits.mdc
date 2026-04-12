@@ -1,15 +1,20 @@
 ---
-description: Commit message convention — include branch name for rebase-safe history
+description: Branch policy + commit messages (branch prefix on dev branches)
 alwaysApply: true
 ---
 
-# Commits on this repository
+# Branch policy
 
-When creating commits (including autonomous / agent work):
+- **`main`** must match **`upstream/main`** only — no feature or agent commits on `main`. Do not commit here; sync `main` from upstream when asked.
+- **Do all work** on **`cursor-cloud/dev-main-4dc1`** (or another topic branch).
+
+# Commits (development branches)
+
+When creating commits on a development branch (including autonomous / agent work):
 
 1. Run or infer `git branch --show-current` and use that value as a **prefix on the subject line**.
 2. **Format:** `<branch-name>: <concise imperative summary>`
-3. Do **not** omit the branch prefix for “small” commits — it applies to every commit on a branch.
+3. Do **not** omit the branch prefix for “small” commits — it applies to every commit on that branch.
 
 Example subject: `cursor-cloud/dev-main-4dc1: Fix browse id mapping for playlists`
 
