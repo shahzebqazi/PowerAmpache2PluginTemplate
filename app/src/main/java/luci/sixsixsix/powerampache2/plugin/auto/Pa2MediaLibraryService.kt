@@ -482,26 +482,17 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             }
             return
         }
+        // Do not replace the timeline / pause while the user is playing through Android Auto on this ExoPlayer.
+        if (p.playWhenReady) {
+            return
+        }
         // Include every track for Now Playing metadata; stream URL may arrive later from host.
         val items = queue.map { songToPlayableMediaItem(it) }
         if (items.isEmpty()) return
 
-        val wasPlaying = p.playWhenReady
-        val prevMediaId = p.currentMediaItem?.mediaId
-
         p.setMediaItems(items)
-
-        // Keep the same logical track when the host refreshes the queue (e.g. metadata/URL fill-in).
-        // First sync / no prior id → show index 0 (host convention: current track first, or sole item).
-        val targetIndex = when {
-            prevMediaId.isNullOrBlank() -> 0
-            else -> items.indexOfFirst { it.mediaId == prevMediaId }.takeIf { it >= 0 } ?: 0
-        }
-        p.seekTo(targetIndex, 0)
-
-        if (!wasPlaying) {
-            p.pause()
-        }
+        p.seekTo(0, 0)
+        p.pause()
     }
 
     /**
