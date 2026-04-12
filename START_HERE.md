@@ -27,6 +27,31 @@ Use this section as **onboarding context** when picking up work in a new session
 - **JDK / Gradle:** The **Gradle Kotlin DSL** may fail if the **daemon runs on JDK 26+** (e.g. `IllegalArgumentException` parsing the Java version). This repo’s **`gradlew`** prefers a **project-local JDK 21** under **`.jdks/jdk-21*`** when present; **`.jdks/`** is gitignored. If no `.jdks` exists, use **JDK 17 or 21** for Gradle (`JAVA_HOME` or system packages). Do not claim `./gradlew` works on JDK 26 without verifying.
 - **Author / debug APKs:** Root-level **`*.apk`** is gitignored. Installing a **debug** build over an **author-signed release** may require **`adb uninstall`** first due to **signature mismatch**; **versionCode** on device may also block install without uninstall or downgrade flags.
 
+### Known issues and startup (field status — update as bugs are fixed)
+
+This section records **observed** behavior so agents and humans share the same expectations. It is not a substitute for logcat on your device.
+
+**Startup reliability**
+
+- The plugin **does load**, but **startup is not yet fully predictable**: several components can start or rely on **`PA2DataFetchService`** (`PluginApplication.onCreate`, `Pa2MediaLibraryService.onCreate`, and the host binding via **`register_client`**). It is easy to wonder whether a **previous process**, **task affinity**, or **order of host vs plugin** is affecting what you see.
+- **What to do:** When debugging, capture **one cold start** after `adb shell am force-stop luci.sixsixsix.powerampache2.plugin` (and reproduce host order: open host first vs Auto first). Use log lines from **`PA2DataFetch`**, **`MusicFetcherImpl`**, and **`Pa2MediaLibraryService`** to see whether `clientMessenger` is registered and flows receive JSON.
+- **Intent:** Future work should make **one clear initialization path** (documented order, optional single coordinator in `app/`) without breaking [`AGENTS.md`](AGENTS.md) constraints unless scope expands.
+
+**Android Auto: USB works vs “For You” / widgets**
+
+- **USB Android Auto** can show the plugin and **browse** via **`Pa2MediaLibraryService`** (library root → sections → playlists/albums → songs).
+- **Google’s “For You” (or similar recommendation / home-row widgets)** may **not** use the same APIs as the **Media** browser. This template implements **`MediaLibraryService` + browse tree**, not a full **Android Auto app-level “For You”** integration. If that surface does not load or play, it may be **out of scope** for the current codebase or require **additional** Media3 / OEM integration — verify whether the issue is **Media tab browse** vs **For You** before filing code against the wrong surface.
+- **Now Playing / “currently playing” on the plugin** depends on the host pushing **`MusicFetcher.currentQueueFlow`** and the media session mirroring that queue into ExoPlayer. If metadata stays stale, check host IPC and **`syncPlayerFromHostQueue`** behavior (host updates while playback is active).
+
+**Plugin UI (“no tracks”)**
+
+- **`MainActivity`** is designed to **launch the Power Ampache 2 host** and **`finish()`** immediately; the **Compose sample UI** (`testContent()` / `SongListScreen`) is **commented out** by default. So **the launcher does not show a track list** — that is **intentional** unless you enable the test UI or expand scope.
+- If you need an **in-app** track list for QA, uncomment **`testContent()`** in `MainActivity` or add a **debug-only** activity; document any change in the PR.
+
+**Responsive / reactive gaps**
+
+- Surfaces that should react to **library changes** use **`MusicFetcher` `StateFlow`s** and **`notifyChildrenChanged`** from **`Pa2MediaLibraryService`**. Gaps usually mean **no host data** (empty flows), **timeouts** on drill-down (see `FETCH_TIMEOUT_MS`), or **host not sending** the relevant JSON actions — not a missing Compose `LaunchedEffect` in the default launcher (there is no visible UI).
+
 ### Android Auto / Media3 (current direction)
 
 - Browse + playback for AA are implemented via **`Pa2MediaLibraryService`** (Media3), **`MediaIds.kt`**, and app-only dependencies in **`app/build.gradle.kts`** / **`gradle/libs.versions.toml`** (e.g. `media3-exoplayer`, `media3-session`, **`androidx.concurrent:concurrent-futures`** for `CallbackToFutureAdapter`). Wire **only** through **`MusicFetcher`** and existing flows; host must still bind **`PA2DataFetchService`** for real data.
@@ -102,6 +127,12 @@ The following landed on topic branch **`cursor-cloud/android-auto-media3-mvp-bb4
 **Reminder:** Full library data still depends on the host app binding to **`PA2DataFetchService`** so `MusicFetcher` listener callbacks run; the media service does not replace that listener.
 
 ---
+
+### Next step — project kanban and perpetual agents
+
+**Kanban:** The human maintains the board (e.g. [Project #7](https://github.com/users/shahzebqazi/projects/7)). Suggested cards for the **next phase**: (1) **Startup / process** — document and harden ordering of `PA2DataFetchService` + host `register_client`; (2) **Android Auto** — verify Media browse vs “For You” scope; fix **Now Playing** / queue mirror with host; (3) **Empty library / timeout** — UX when host is slow or offline; (4) **Optional debug UI** — safe way to show tracks without changing the default launcher contract.
+
+**Perpetual coding agents** should loop: reproduce → fix in **`app/`** (and only **`data/`** / **`domain/`** if the task expands scope) → `./gradlew :app:assembleDebug` → device logcat → PR with evidence → repeat until behavior is **functional, operational, and intentional**.
 
 ### Next step — suggested GitHub Project board items (USB phone test & debug)
 

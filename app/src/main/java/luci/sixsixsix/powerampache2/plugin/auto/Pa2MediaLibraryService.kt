@@ -463,7 +463,9 @@ class Pa2MediaLibraryService : MediaLibraryService() {
     /**
      * When the host app plays audio, it pushes the queue via [MusicFetcher.currentQueueFlow].
      * That playback is not this service's ExoPlayer, so Android Auto would show no metadata until
-     * we mirror the queue into the session-bound player (paused) for display only.
+     * we mirror the queue into the session-bound player. When ExoPlayer is idle we load the queue
+     * paused for display; when Auto is actively playing we refresh media items in place so
+     * metadata and widgets can track host updates without freezing on an early return.
      */
     private fun subscribeToHostQueueMirror() {
         mainScope.launch {
@@ -482,14 +484,30 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             }
             return
         }
-        // Do not replace the timeline / pause while the user is playing through Android Auto on this ExoPlayer.
-        if (p.playWhenReady) {
-            return
-        }
         // Include every track for Now Playing metadata; stream URL may arrive later from host.
         val items = queue.map { songToPlayableMediaItem(it) }
         if (items.isEmpty()) return
 
+        if (p.playWhenReady) {
+            // Previously we returned here, so host queue updates never reached the session while
+            // Android Auto was playing — widgets / Now Playing stayed stale. Refresh in place when
+            // the timeline length matches; otherwise rebuild while preserving index and position.
+            when {
+                p.mediaItemCount == items.size -> {
+                    for (i in items.indices) {
+                        p.replaceMediaItem(i, items[i])
+                    }
+                }
+                p.mediaItemCount == 0 -> {
+                    p.setMediaItems(items, /* startIndex= */ 0, /* startPositionMs= */ 0L)
+                }
+                else -> {
+                    val idx = p.currentMediaItemIndex.coerceIn(0, items.lastIndex)
+                    p.setMediaItems(items, idx, p.currentPosition)
+                }
+            }
+            return
+        }
         p.setMediaItems(items)
         p.seekTo(0, 0)
         p.pause()
