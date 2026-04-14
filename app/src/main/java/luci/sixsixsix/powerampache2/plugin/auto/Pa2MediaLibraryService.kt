@@ -28,6 +28,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionError
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
@@ -164,6 +165,33 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     @UnstableApi
     private inner class Pa2LibraryCallback : MediaLibrarySession.Callback {
+
+        /**
+         * Library search is **backlog** (see product plan): [onSearch] / [onGetSearchResult] are not
+         * implemented, so Media3 defaults would return [SessionError.ERROR_NOT_SUPPORTED].
+         *
+         * For **Android Auto / Automotive** controllers, remove the library search commands so the
+         * head unit does not show the search entry point (see Media3
+         * [androidx.media3.session.MediaSession.ConnectionResult] and
+         * [androidx.media3.session.SessionCommand.COMMAND_CODE_LIBRARY_SEARCH]).
+         *
+         * To re-enable when search is implemented: delete this override or stop removing those commands.
+         */
+        override fun onConnect(
+            session: MediaSession,
+            controller: MediaSession.ControllerInfo,
+        ): MediaSession.ConnectionResult {
+            val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+            if (session.isAutomotiveController(controller)) {
+                val withoutSearch =
+                    MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
+                        .remove(SessionCommand.COMMAND_CODE_LIBRARY_SEARCH)
+                        .remove(SessionCommand.COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT)
+                        .build()
+                builder.setAvailableSessionCommands(withoutSearch)
+            }
+            return builder.build()
+        }
 
         override fun onGetLibraryRoot(
             session: MediaLibrarySession,
