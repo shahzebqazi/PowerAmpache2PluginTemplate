@@ -81,7 +81,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                     parseJsonString(
                         action,
                         jsonStr = msg.data.getString(KEY_REQUEST_JSON) ?: return,
-                        albumId = msg.data.getString(KEY_ID)
+                        entityId = resolveEntityId(msg)
                     )
                     val replyTo = msg.replyTo ?: return
                     replyTo.send(Message.obtain().apply { data = Bundle().apply { putBoolean(KEY_RESPONSE_SUCCESS, true) } })
@@ -192,8 +192,13 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
         }
     }
 
+    /** Album / playlist id from the host bundle ([KEY_ID], [KEY_ALBUM_ID], [KEY_PLAYLIST_ID] are all `"id"` today). */
+    private fun resolveEntityId(msg: Message): String? =
+        msg.data.getString(KEY_ID)
+            ?: msg.data.getString(KEY_ALBUM_ID)
+            ?: msg.data.getString(KEY_PLAYLIST_ID)
 
-    private fun parseJsonString(action: String, jsonStr: String, albumId: String? = null) {
+    private fun parseJsonString(action: String, jsonStr: String, entityId: String? = null) {
         //println("aaaa parseJsonString $action")
         when(action) {
             ACTION_PLAYLISTS -> gson.fromJson(jsonStr, PlaylistsDto::class.java).playlists.also { playlists ->
@@ -203,37 +208,40 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
             ACTION_ARTISTS -> gson.fromJson(jsonStr, ArtistsDto::class.java).artists.also { artists ->
                 musicFetcher.artistsFlow.update { oldArtists ->
                     val combined = (oldArtists + artists).distinct()
-                    println("aaaa parseJsonString ACTION_ARTISTS $albumId size ${combined.size}")
+                    println("aaaa parseJsonString ACTION_ARTISTS $entityId size ${combined.size}")
                     combined
                 }
             }
             ACTION_ALBUMS -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
                 musicFetcher.albumsFlow.update { oldAlbums ->
                     val combined = (oldAlbums + albums).distinct()
-                    println("aaaa parseJsonString ACTION_ALBUMS $albumId size ${combined.size}")
+                    println("aaaa parseJsonString ACTION_ALBUMS $entityId size ${combined.size}")
                     combined
                 }
             }
-            ACTION_SONGS_ALBUM -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
-                //println("aaaa ACTION_SONGS_RESPONSE ${albumId}")
-                musicFetcher.albumSongsMapFlow.update { map ->
-                    (map + (albumId!! to songs))
+            ACTION_SONGS_ALBUM -> {
+                val id = entityId ?: return
+                gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
+                    musicFetcher.albumSongsMapFlow.update { map ->
+                        (map + (id to songs))
+                    }
                 }
             }
-            ACTION_SONGS_PLAYLIST -> gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
-                musicFetcher.playlistSongsMapFlow.update { map ->
-                    val newList: LinkedHashSet<Song> = LinkedHashSet(map[albumId] ?: emptyList())
-                    newList.addAll(songs)
-                    //println("aaaa ACTION_SONGS_PLAYLIST ${albumId}  ${newList.size}")
-
-                    (map + (albumId!! to newList.toList()))
+            ACTION_SONGS_PLAYLIST -> {
+                val id = entityId ?: return
+                gson.fromJson(jsonStr, SongsDto::class.java).songs.also { songs ->
+                    musicFetcher.playlistSongsMapFlow.update { map ->
+                        val newList: LinkedHashSet<Song> = LinkedHashSet(map[id] ?: emptyList())
+                        newList.addAll(songs)
+                        (map + (id to newList.toList()))
+                    }
                 }
             }
             "highest_albums" -> gson.fromJson(jsonStr, AlbumsDto::class.java).albums.also { albums ->
                 addToAlbumsList(albums)
                 musicFetcher.highRatedAlbumsFlow.update { oldAlbums ->
                     val combined = (oldAlbums + albums).distinct()
-                    println("aaaa parseJsonString highest_albums $albumId size ${combined.size}")
+                    println("aaaa parseJsonString highest_albums $entityId size ${combined.size}")
                     combined
                 }
             }
@@ -241,7 +249,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                 addToAlbumsList(albums)
                 musicFetcher.favouriteAlbumsFlow.update { oldAlbums ->
                     val combined = (oldAlbums + albums).distinct()
-                    println("aaaa favouriteAlbumsFlow $action $albumId size ${combined.size}")
+                    println("aaaa favouriteAlbumsFlow $action $entityId size ${combined.size}")
                     combined
                 }
             }
@@ -249,7 +257,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                 addToAlbumsList(albums)
                 musicFetcher.recentAlbumsFlow.update { oldAlbums ->
                     val combined = (oldAlbums + albums).distinct()
-                    println("aaaa recentAlbumsFlow $action $albumId size ${combined.size}")
+                    println("aaaa recentAlbumsFlow $action $entityId size ${combined.size}")
                     combined
                 }
             }
@@ -257,7 +265,7 @@ class PA2DataFetchService : Service(), MusicFetcherListener {
                 addToAlbumsList(albums)
                 musicFetcher.latestAlbumsFlow.update { oldAlbums ->
                     val combined = (oldAlbums + albums).distinct()
-                    println("aaaa latestAlbumsFlow $action $albumId size ${combined.size}")
+                    println("aaaa latestAlbumsFlow $action $entityId size ${combined.size}")
                     combined
                 }
             }

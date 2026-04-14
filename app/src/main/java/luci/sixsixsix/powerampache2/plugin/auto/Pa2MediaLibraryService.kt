@@ -12,8 +12,13 @@
  */
 package luci.sixsixsix.powerampache2.plugin.auto
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.net.Uri
+import android.os.IBinder
+import luci.sixsixsix.powerampache2.plugin.PA2DataFetchService
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -56,9 +61,26 @@ class Pa2MediaLibraryService : MediaLibraryService() {
     private var player: ExoPlayer? = null
     private var librarySession: MediaLibrarySession? = null
 
+    /** Keeps [PA2DataFetchService] alive so [MusicFetcher.musicFetcherListener] stays set for host IPC. */
+    private var dataFetchBound: Boolean = false
+    private val dataFetchConnection: ServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            // Listener is registered in [PA2DataFetchService.onCreate]; binding only retains the process.
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            // System may kill the service; [startService] + re-bind on next [onCreate] restores it.
+        }
+    }
+
     @UnstableApi
     override fun onCreate() {
         super.onCreate()
+        // Host binds to this service to push library data; without it [MusicFetcher.musicFetcherListener]
+        // stays unset when the user opens Android Auto before the host has started the fetch service.
+        val fetchIntent = Intent(this, PA2DataFetchService::class.java)
+        startService(fetchIntent)
+        dataFetchBound = bindService(fetchIntent, dataFetchConnection, Context.BIND_AUTO_CREATE)
         val exoPlayer = ExoPlayer.Builder(applicationContext).build().also { player = it }
         val callback = Pa2LibraryCallback()
         librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback).build()
@@ -118,6 +140,10 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         librarySession
 
     override fun onDestroy() {
+        if (dataFetchBound) {
+            runCatching { unbindService(dataFetchConnection) }
+            dataFetchBound = false
+        }
         mainScopeJob.cancel()
         librarySession?.run {
             player?.release()
@@ -160,33 +186,56 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             params: MediaLibraryService.LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
             return when (parentId) {
-                MediaIds.ROOT -> immediateChildren(rootSections(), params)
+                MediaIds.ROOT -> immediateChildren(
+                    sliceForPage(rootSections(), page, pageSize),
+                    params
+                )
                 MediaIds.SECTION_PLAYLISTS -> immediateChildren(
-                    musicFetcher.playlistsFlow.value.map { playlistItem(it) },
+                    sliceForPage(
+                        musicFetcher.playlistsFlow.value.map { playlistItem(it) },
+                        page,
+                        pageSize
+                    ),
                     params
                 )
                 MediaIds.SECTION_FAVOURITE_ALBUMS -> immediateChildren(
-                    musicFetcher.favouriteAlbumsFlow.value.map { albumItem(it) },
+                    sliceForPage(
+                        musicFetcher.favouriteAlbumsFlow.value.map { albumItem(it) },
+                        page,
+                        pageSize
+                    ),
                     params
                 )
                 MediaIds.SECTION_RECENT_ALBUMS -> immediateChildren(
-                    musicFetcher.recentAlbumsFlow.value.map { albumItem(it) },
+                    sliceForPage(
+                        musicFetcher.recentAlbumsFlow.value.map { albumItem(it) },
+                        page,
+                        pageSize
+                    ),
                     params
                 )
                 MediaIds.SECTION_LATEST_ALBUMS -> immediateChildren(
-                    musicFetcher.latestAlbumsFlow.value.map { albumItem(it) },
+                    sliceForPage(
+                        musicFetcher.latestAlbumsFlow.value.map { albumItem(it) },
+                        page,
+                        pageSize
+                    ),
                     params
                 )
                 MediaIds.SECTION_HIGHEST_RATED_ALBUMS -> immediateChildren(
-                    musicFetcher.highRatedAlbumsFlow.value.map { albumItem(it) },
+                    sliceForPage(
+                        musicFetcher.highRatedAlbumsFlow.value.map { albumItem(it) },
+                        page,
+                        pageSize
+                    ),
                     params
                 )
                 else -> {
                     MediaIds.parsePlaylistId(parentId)?.let { pid ->
-                        return playlistChildrenFuture(pid, params)
+                        return playlistChildrenFuture(pid, page, pageSize, params)
                     }
                     MediaIds.parseAlbumId(parentId)?.let { aid ->
-                        return albumChildrenFuture(aid, params)
+                        return albumChildrenFuture(aid, page, pageSize, params)
                     }
                     Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_BAD_VALUE))
                 }
@@ -322,6 +371,24 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 LibraryResult.ofItemList(ImmutableList.copyOf(items), params)
             )
 
+        /**
+         * Media3 [androidx.media3.session.MediaLibrarySessionImpl] validates
+         * `result.value.size <= pageSize` after [onGetChildren]. Android Auto often uses a small
+         * page size (e.g. 4); returning the full list triggers [IllegalStateException] and an empty UI.
+         *
+         * Uses [Long] indices so `page * pageSize` cannot overflow [Int] for large requests.
+         */
+        private fun sliceForPage(items: List<MediaItem>, page: Int, pageSize: Int): List<MediaItem> {
+            if (items.isEmpty()) return emptyList()
+            // Media3 invokes this with pageSize >= 1; if not, only an empty page is valid.
+            if (pageSize <= 0) return emptyList()
+            val safePage = page.coerceAtLeast(0)
+            val start = safePage.toLong() * pageSize.toLong()
+            if (start >= items.size) return emptyList()
+            val end = minOf(start + pageSize, items.size.toLong()).toInt()
+            return items.subList(start.toInt(), end)
+        }
+
         private fun rootSections(): List<MediaItem> = listOf(
             sectionItem(
                 MediaIds.SECTION_PLAYLISTS,
@@ -395,6 +462,8 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
         private fun playlistChildrenFuture(
             playlistId: String,
+            page: Int,
+            pageSize: Int,
             params: MediaLibraryService.LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
             return CallbackToFutureAdapter.getFuture { completer ->
@@ -413,9 +482,11 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                             } ?: emptyList()
                         }
                     }.getOrDefault(emptyList())
+                    val playable = songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }
+                    val paged = sliceForPage(playable, page, pageSize)
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(paged),
                             params
                         )
                     )
@@ -426,6 +497,8 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
         private fun albumChildrenFuture(
             albumId: String,
+            page: Int,
+            pageSize: Int,
             params: MediaLibraryService.LibraryParams?
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
             return CallbackToFutureAdapter.getFuture { completer ->
@@ -444,9 +517,11 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                             } ?: emptyList()
                         }
                     }.getOrDefault(emptyList())
+                    val playable = songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }
+                    val paged = sliceForPage(playable, page, pageSize)
                     completer.set(
                         LibraryResult.ofItemList(
-                            ImmutableList.copyOf(songs.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }),
+                            ImmutableList.copyOf(paged),
                             params
                         )
                     )
