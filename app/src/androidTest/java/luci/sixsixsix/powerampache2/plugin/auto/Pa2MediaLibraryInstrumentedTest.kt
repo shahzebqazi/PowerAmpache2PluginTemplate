@@ -56,6 +56,22 @@ class Pa2MediaLibraryInstrumentedTest {
     }
 
     @Test
+    fun browse_rootChildren_respectsPageSize_media3ValidatesResult() {
+        withBrowser { browser ->
+            val first = browser
+                .getChildren(ROOT, /* page= */ 0, /* pageSize= */ 4, /* params= */ null)
+                .get(TIMEOUT_SEC, TimeUnit.SECONDS)
+            assertEquals(LibraryResult.RESULT_SUCCESS, first.resultCode)
+            assertEquals(4, first.value!!.size)
+            val second = browser
+                .getChildren(ROOT, /* page= */ 1, /* pageSize= */ 4, /* params= */ null)
+                .get(TIMEOUT_SEC, TimeUnit.SECONDS)
+            assertEquals(LibraryResult.RESULT_SUCCESS, second.resultCode)
+            assertEquals(1, second.value!!.size)
+        }
+    }
+
+    @Test
     fun browse_invalidParent_returnsError() {
         withBrowser { browser ->
             val badResult =
