@@ -6,12 +6,10 @@ On branch **`cursor-cloud/dev-main-4dc1`**, development focuses on a **functiona
 
 ## Design reference (DHU)
 
-Static reference images live under **`mockups/assets/`** (same artwork as the design branch). The **head unit** renders now playing; the plugin supplies **Media3** session and metadata — these PNGs are **visual references**, not a promise of pixel-perfect UI on every device.
+A static reference image lives under **`mockups/assets/`** (same artwork family as the design branch). The **head unit** renders now playing; the plugin supplies **Media3** session and metadata — this PNG is a **visual reference**, not a promise of pixel-perfect UI on every device.
 
 | | |
 | --- | --- |
-| ![Hero — Android Auto](mockups/assets/hero-android-auto.png) | *Hero / branding reference* |
-| ![DHU — browse](mockups/assets/dhu-browse.png) | *DHU — browse (reference)* |
 | ![DHU — now playing](mockups/assets/dhu-now-playing.png) | *DHU — now playing (reference)* |
 
 **Full mockups & research** (UX notes, web mockup, agent pack) are on branch **`mockups`** — see that branch’s [`README`](https://github.com/shahzebqazi/PowerAmpache2PluginTemplate/blob/mockups/README.md) and [`docs/README.md`](https://github.com/shahzebqazi/PowerAmpache2PluginTemplate/blob/mockups/docs/README.md) on GitHub.
