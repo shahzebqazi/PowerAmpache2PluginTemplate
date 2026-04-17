@@ -6,6 +6,45 @@
 - **This fork:** development happens on **`cursor-cloud/dev-main-4dc1`** and topic branches under **`cursor-cloud/`**.
 - **Modules:** `domain`, `data`, `app`, `PowerAmpache2Theme` — respect Clean Architecture boundaries; treat **`domain/`** and **`data/`** as **maintainer-only** to change unless a task explicitly says otherwise (see **Handoff** below).
 
+## Contributing upstream (PluginAndroidAuto branch)
+
+Use this when preparing to land **Android Auto–focused** (or related) work on the **upstream** template, targeting a dedicated upstream branch conventionally named **`PluginAndroidAuto`**. Exact branch name and workflow must be **confirmed with the upstream maintainer** (`icefields/PowerAmpache2PluginTemplate`); treat the name below as the **intended** integration branch unless they specify otherwise.
+
+### Before you open a pull request upstream
+
+Work through these **before** contributing; unresolved items block a clean upstream handoff:
+
+1. **Branch exists and is the right base** — Confirm on GitHub that **`PluginAndroidAuto`** exists on `icefields/PowerAmpache2PluginTemplate`, or ask maintainers to create it, or confirm an alternate base (e.g. `main` first, then a maintainer merge). Do not assume the branch exists without checking.
+2. **`upstream` remote** — Ensure `git remote -v` includes `upstream` pointing at the upstream repo (forks usually add `upstream` beside `origin`). Run `git fetch upstream` before rebasing or cherry-picking.
+3. **History alignment** — This fork’s integration branch may **diverge** from upstream (reverts, fork-only commits, Cursor-specific policy). Prefer a **topic branch off `upstream/PluginAndroidAuto`** (or agreed base) with **minimal, reviewable commits** (cherry-picks or reapplied patches), not a blind merge of `cursor-cloud/dev-main-4dc1` unless the maintainer asks for it.
+4. **Scope match** — Upstream may expect stricter boundaries than this fork’s `START_HERE.md` handoff. Re-read upstream `README`/contributing if present; list in the PR what you touched under **`app/`** vs **`domain/`** / **`data/`** and why.
+5. **Tests and build** — Run **`./gradlew :app:assembleDebug`** (and connected tests if applicable) on the **upstream-based** branch before opening the PR. CI on upstream may differ from this fork; fix failures on the branch you push.
+6. **Documentation payload** — Upstream may want a **short** README or changelog snippet for Android Auto; avoid dumping the full `START_HERE.md` unless maintainers want it. Offer a concise “what changed” and “how to verify on DHU/device.”
+7. **Legal / process** — If the upstream repo adds a **Contributor License Agreement**, **DCO**, or **issue-link** requirements, satisfy those before the PR is mergeable.
+
+### Suggested git shape (illustrative)
+
+Adjust names and bases with the maintainer:
+
+```bash
+git fetch upstream
+git checkout -b contribute-aa-pluginandroidauto upstream/PluginAndroidAuto
+# Or, if the branch does not exist yet:
+# git checkout -b PluginAndroidAuto upstream/main
+# Apply commits (cherry-pick, re-apply, or merge selectively — avoid fork-only noise)
+git push -u origin contribute-aa-pluginandroidauto
+```
+
+Open the PR **from your fork** against **`icefields/PowerAmpache2PluginTemplate`** with base **`PluginAndroidAuto`** (or the base the maintainer names).
+
+### Issues to raise with maintainers before contributing
+
+If any of the following are **unknown**, ask upstream **before** investing in a large rebase:
+
+- Whether **`PluginAndroidAuto`** is the agreed long-lived branch for AA work or a one-off PR target.
+- Whether **`domain/`** / **`data/`** changes are acceptable for a given feature, or **app-only** is required for upstream merges.
+- Release tagging and **host app** coordination (this plugin depends on the Power Ampache 2 host binding **`PA2DataFetchService`** — note that in the upstream PR so reviewers understand runtime expectations).
+
 ## Agents
 
 - **Branch policy, commit message format, and module notes:** see [`AGENTS.md`](AGENTS.md).

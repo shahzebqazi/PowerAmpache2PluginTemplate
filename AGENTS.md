@@ -4,6 +4,7 @@
 
 - **`main`:** Tracks **`upstream/main`** only (`icefields/PowerAmpache2PluginTemplate`). It should be a **fresh pull from upstream** — no feature work, no agent commits, no extra commits on top. Sync with `git fetch upstream` and `git reset --hard upstream/main` (then push to `origin/main` as needed).
 - **Development:** All work happens on **`cursor-cloud/dev-main-4dc1`** (or other topic branches). That is the integration branch for this fork.
+- **Upstream Android Auto line:** To contribute Android Auto work **to the upstream repo** (e.g. base branch **`PluginAndroidAuto`** on `icefields/PowerAmpache2PluginTemplate`), follow the checklist in **Contributing upstream (PluginAndroidAuto branch)** in [`START_HERE.md`](START_HERE.md) before opening a PR upstream.
 
 ## Commit messages (required for agents)
 
