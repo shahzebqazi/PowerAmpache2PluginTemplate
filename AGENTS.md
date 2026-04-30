@@ -83,3 +83,21 @@ The script, in order:
 - **Kanban / GitHub Projects:** Agents cannot create or update project boards from this repo. The human maintains the [project board](https://github.com/users/shahzebqazi/projects/7) (or linked issue URLs); agents reference those links in PRs and use PR descriptions as the execution record. **Android Auto guideline alignment:** copy-paste **Kanban cards** and **agent instructions** live under **“Kanban: Android Auto guidelines alignment (Project #7)”** in [`START_HERE.md`](START_HERE.md).
 
 Onboarding detail, log filters, and **what is intentionally not implemented** (e.g. launcher `MainActivity` UI): see [`START_HERE.md`](START_HERE.md).
+
+## Cursor Cloud specific instructions
+
+### Environment
+
+- **Android SDK** is installed at `/opt/android-sdk`. The update script ensures `ANDROID_HOME`, `PATH`, SDK licenses, `platforms;android-36`, `build-tools;36.0.0`, `platform-tools`, and `local.properties` (`sdk.dir=/opt/android-sdk`) are present before each session.
+- **JDK 21** is provided by the VM base image (OpenJDK 21). Gradle 8.11.1 + AGP 8.9.3 work with it.
+
+### Build, test, lint
+
+- **Build:** `./gradlew :app:assembleDebug` — produces `app/build/outputs/apk/debug/app-debug.apk`.
+- **Unit tests:** `./gradlew :domain:test :data:test :PowerAmpache2Theme:test` — these pass. The `:app:test` task has a **pre-existing kapt/Hilt stub error** (`NonExistentClass` in generated test stubs); skip it or fix the Hilt test configuration before relying on it.
+- **Lint:** `./gradlew :app:lintDebug` — runs; pre-existing lint findings exist (e.g. missing `MEDIA_PLAY_FROM_SEARCH` intent filter alignment). Treat as informational unless fixing lint is the task.
+
+### What you cannot do in Cursor Cloud
+
+- **No Android device/emulator** — you cannot run `installDebug`, `adb logcat`, or DHU. For Android Auto / runtime testing, build the APK and document what the human must verify on-device.
+- **No Power Ampache 2 host app** — library data depends on host IPC; browse trees will be empty without it.
