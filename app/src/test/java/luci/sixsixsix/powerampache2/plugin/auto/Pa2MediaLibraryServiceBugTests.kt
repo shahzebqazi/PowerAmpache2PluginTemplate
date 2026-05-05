@@ -1,6 +1,7 @@
 package luci.sixsixsix.powerampache2.plugin.auto
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.withTimeoutOrNull
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcher
 import luci.sixsixsix.powerampache2.plugin.domain.MusicFetcherListener
@@ -373,6 +375,33 @@ class Pa2MediaLibraryServiceBugTests {
         )
     }
 
+    @Test
+    fun bug6_afterFix_waitsBrieflyForHostPushBeforeReturningSectionItems() = runTest {
+        val favouriteAlbums = MutableStateFlow<List<Album>>(emptyList())
+        val expected = listOf(testAlbum("favourite-1", "Favourite Album"))
+        var requests = 0
+
+        val items = async {
+            requestAndReadCachedBrowseItems(
+                itemsFlow = favouriteAlbums,
+                requestIfEmpty = { requests++ }
+            )
+        }
+        runCurrent()
+
+        assertEquals(
+            "The missing section should be requested only because the cache was empty",
+            1,
+            requests
+        )
+        favouriteAlbums.value = expected
+        assertEquals(
+            "The browse response should wait briefly for the host push instead of returning an immediate empty list",
+            expected,
+            items.await()
+        )
+    }
+
     // -----------------------------------------------------------------------
     // Bug 7 — Redundant notifyChildrenChanged(ROOT) from 5 section flows
     //
@@ -491,6 +520,13 @@ class Pa2MediaLibraryServiceBugTests {
         override fun getSongsFromPlaylist(playlistId: String) { getSongsFromPlaylistCalls.add(playlistId) }
         override fun getAlbumsFromArtist(artistId: String) { getAlbumsFromArtistCalls.add(artistId) }
     }
+
+    private fun testAlbum(id: String, name: String): Album =
+        Album(
+            id = id,
+            name = name,
+            artist = MusicAttribute(id = "artist-$id", name = "Artist $id")
+        )
 }
 
 /**
@@ -509,6 +545,7 @@ class FakeMusicFetcher : MusicFetcher {
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val albumSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
     override val playlistSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
+    override val messengerFlow = MutableStateFlow<Boolean?>(null)
 
     override fun getArtists(query: String): Flow<List<Artist>> {
         musicFetcherListener?.getArtists(query)

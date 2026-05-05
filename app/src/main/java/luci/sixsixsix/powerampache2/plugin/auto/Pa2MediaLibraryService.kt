@@ -74,6 +74,20 @@ import luci.sixsixsix.powerampache2.plugin.openPowerAmpache2
 import java.util.Collections.emptyList
 import javax.inject.Inject
 
+internal suspend fun <T> requestAndReadCachedBrowseItems(
+    itemsFlow: StateFlow<List<T>>,
+    requestIfEmpty: (() -> Unit)? = null
+): List<T> {
+    val cached = itemsFlow.value
+    if (cached.isNotEmpty()) return cached
+    requestIfEmpty?.invoke()
+    return withTimeoutOrNull(Pa2MediaLibraryService.FETCH_TIMEOUT_MS) {
+        itemsFlow
+            .filterNot { it.isEmpty() }
+            .first()
+    } ?: emptyList()
+}
+
 @AndroidEntryPoint
 class Pa2MediaLibraryService : MediaLibraryService() {
 
@@ -363,45 +377,43 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     sliceForPage(rootSections(), page, pageSize),
                     params
                 )
-                MediaIds.SECTION_PLAYLISTS -> immediateChildren(
-                    sliceForPage(
-                        playlistsStateFlow().value.map { playlistItem(it) },
-                        page,
-                        pageSize
-                    ),
-                    params
+                MediaIds.SECTION_PLAYLISTS -> sectionChildrenFuture(
+                    playlistsStateFlow(),
+                    page,
+                    pageSize,
+                    params,
+                    ::playlistItem
                 )
-                MediaIds.SECTION_FAVOURITE_ALBUMS -> immediateChildren(
-                    sliceForPage(
-                        favouriteAlbumStateFlow().value.map { albumItem(it) },
-                        page,
-                        pageSize
-                    ),
-                    params
+                MediaIds.SECTION_FAVOURITE_ALBUMS -> sectionChildrenFuture(
+                    favouriteAlbumStateFlow(),
+                    page,
+                    pageSize,
+                    params,
+                    ::albumItem,
+                    requestIfEmpty = { getAlbumsUseCase("favourite_albums") }
                 )
-                MediaIds.SECTION_RECENT_ALBUMS -> immediateChildren(
-                    sliceForPage(
-                        recentAlbumsStateFlow().value.map { albumItem(it) },
-                        page,
-                        pageSize
-                    ),
-                    params
+                MediaIds.SECTION_RECENT_ALBUMS -> sectionChildrenFuture(
+                    recentAlbumsStateFlow(),
+                    page,
+                    pageSize,
+                    params,
+                    ::albumItem,
+                    requestIfEmpty = { getAlbumsUseCase("recent_albums") }
                 )
-                MediaIds.SECTION_LATEST_ALBUMS -> immediateChildren(
-                    sliceForPage(
-                        latestAlbumsStateFlow().value.map { albumItem(it) },
-                        page,
-                        pageSize
-                    ),
-                    params
+                MediaIds.SECTION_LATEST_ALBUMS -> sectionChildrenFuture(
+                    latestAlbumsStateFlow(),
+                    page,
+                    pageSize,
+                    params,
+                    ::albumItem
                 )
-                MediaIds.SECTION_HIGHEST_RATED_ALBUMS -> immediateChildren(
-                    sliceForPage(
-                        highestAlbumsStateFlow().value.map { albumItem(it) },
-                        page,
-                        pageSize
-                    ),
-                    params
+                MediaIds.SECTION_HIGHEST_RATED_ALBUMS -> sectionChildrenFuture(
+                    highestAlbumsStateFlow(),
+                    page,
+                    pageSize,
+                    params,
+                    ::albumItem,
+                    requestIfEmpty = { getAlbumsUseCase("highest_albums") }
                 )
                 else -> {
                     MediaIds.parsePlaylistId(parentId)?.let { pid ->
@@ -543,6 +555,29 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             Futures.immediateFuture(
                 LibraryResult.ofItemList(ImmutableList.copyOf(items), params)
             )
+
+        private fun <T> sectionChildrenFuture(
+            itemsFlow: StateFlow<List<T>>,
+            page: Int,
+            pageSize: Int,
+            params: MediaLibraryService.LibraryParams?,
+            toMediaItem: (T) -> MediaItem,
+            requestIfEmpty: (() -> Unit)? = null,
+        ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
+            return CallbackToFutureAdapter.getFuture { completer ->
+                serviceScope.launch {
+                    val items = runCatching {
+                        requestAndReadCachedBrowseItems(itemsFlow, requestIfEmpty)
+                    }.getOrDefault(emptyList())
+                    val result = LibraryResult.ofItemList(
+                        ImmutableList.copyOf(sliceForPage(items.map(toMediaItem), page, pageSize)),
+                        params
+                    )
+                    completer.set(result)
+                }
+                "sectionChildren"
+            }
+        }
 
         /**
          * Media3 [androidx.media3.session.MediaLibrarySessionImpl] validates
