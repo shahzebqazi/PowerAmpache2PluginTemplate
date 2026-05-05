@@ -374,6 +374,48 @@ class Pa2MediaLibraryServiceBugTests {
     }
 
     // -----------------------------------------------------------------------
+    // AA browse boundary — de-dupe albums / playlists / queue by stable id
+    // -----------------------------------------------------------------------
+
+    @Test
+    fun dedupeAlbums_preservesFirstSeenOrder() {
+        val first = testAlbum("a1", "Alpha")
+        val dup = first.copy(name = "Alpha favourite again")
+        val second = testAlbum("a2", "Beta")
+        val out = dedupeAlbumsByStableIdPreserveOrder(listOf(first, second, dup))
+        assertEquals(
+            listOf(first, second),
+            out
+        )
+    }
+
+    @Test
+    fun dedupePlaylists_preservesFirstSeenOrder() {
+        val p1 = Playlist(id = "pl-1", name = "One")
+        val pOther = Playlist(id = "pl-2", name = "Two")
+        val p1Dup = Playlist(id = "pl-1", name = "One (duplicate row)")
+        val out = dedupePlaylistsByStableIdPreserveOrder(listOf(p1, pOther, p1Dup))
+        assertEquals(listOf(p1, pOther), out)
+    }
+
+    @Test
+    fun dedupeSongs_preservesFirstSeenOrder() {
+        val s1 = Song(mediaId = "s1", id = "s1", title = "Track 1")
+        val s2 = Song(mediaId = "s2", id = "s2", title = "Track 2")
+        val s1Again = Song(mediaId = "s1", id = "s1", title = "Track 1 replay")
+        val out = dedupeSongsByStableIdPreserveOrder(listOf(s1, s2, s1Again))
+        assertEquals(listOf(s1, s2), out)
+    }
+
+    @Test
+    fun dedupeAlbums_emptyIdsAreIncludedWithoutCollapsing() {
+        val noId = testAlbum("", "No id")
+        val alsoNoId = testAlbum("", "Also no id")
+        val out = dedupeAlbumsByStableIdPreserveOrder(listOf(noId, alsoNoId))
+        assertEquals(listOf(noId, alsoNoId), out)
+    }
+
+    // -----------------------------------------------------------------------
     // Bug 7 — Redundant notifyChildrenChanged(ROOT) from 5 section flows
     //
     // Each of the 5 section StateFlows subscribes separately and calls
@@ -491,6 +533,13 @@ class Pa2MediaLibraryServiceBugTests {
         override fun getSongsFromPlaylist(playlistId: String) { getSongsFromPlaylistCalls.add(playlistId) }
         override fun getAlbumsFromArtist(artistId: String) { getAlbumsFromArtistCalls.add(artistId) }
     }
+
+    private fun testAlbum(id: String, name: String): Album =
+        Album(
+            id = id,
+            name = name,
+            artist = MusicAttribute(id = "artist-$id", name = "Artist $id")
+        )
 }
 
 /**
@@ -509,6 +558,7 @@ class FakeMusicFetcher : MusicFetcher {
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val albumSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
     override val playlistSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
+    override val messengerFlow = MutableStateFlow<Boolean?>(null)
 
     override fun getArtists(query: String): Flow<List<Artist>> {
         musicFetcherListener?.getArtists(query)

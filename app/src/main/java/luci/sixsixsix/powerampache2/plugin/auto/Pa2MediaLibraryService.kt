@@ -74,6 +74,39 @@ import luci.sixsixsix.powerampache2.plugin.openPowerAmpache2
 import java.util.Collections.emptyList
 import javax.inject.Inject
 
+/** De-dupe albums for Android Auto browse rows: same [Album.id] only appears once (first wins). */
+internal fun dedupeAlbumsByStableIdPreserveOrder(albums: List<Album>): List<Album> {
+    val seen = HashSet<String>()
+    return albums.filter { album ->
+        val id = album.id
+        if (id.isBlank()) return@filter true
+        if (!seen.add(id)) return@filter false
+        true
+    }
+}
+
+/** De-dupe playlists for Android Auto browse rows: same [Playlist.id] only appears once (first wins). */
+internal fun dedupePlaylistsByStableIdPreserveOrder(playlists: List<Playlist>): List<Playlist> {
+    val seen = HashSet<String>()
+    return playlists.filter { playlist ->
+        val id = playlist.id
+        if (id.isBlank()) return@filter true
+        if (!seen.add(id)) return@filter false
+        true
+    }
+}
+
+/** De-dupe mirrored host queue / resumption lists by song id ([Song.id] / [Song.mediaId]). */
+internal fun dedupeSongsByStableIdPreserveOrder(songs: List<Song>): List<Song> {
+    val seen = HashSet<String>()
+    return songs.filter { song ->
+        val id = song.id.ifBlank { song.mediaId }
+        if (id.isBlank()) return@filter true
+        if (!seen.add(id)) return@filter false
+        true
+    }
+}
+
 @AndroidEntryPoint
 class Pa2MediaLibraryService : MediaLibraryService() {
 
@@ -205,7 +238,11 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 //            )
     }
 
-    private fun addToAlbumCache(albums: List<Album>) = albums.forEach { album -> albumsCache[album.id] = album }
+    private fun addToAlbumCache(albums: List<Album>) {
+        dedupeAlbumsByStableIdPreserveOrder(albums).forEach { album ->
+            if (album.id.isNotBlank()) albumsCache[album.id] = album
+        }
+    }
 
 
     /**
@@ -225,12 +262,18 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 latestAlbumsStateFlow(),
                 highestAlbumsStateFlow()
             ) { playlists, favourites, recent, latest, highest ->
-                SectionSnapshot(playlists, favourites, recent, latest, highest).also {
+                SectionSnapshot(
+                    playlists = dedupePlaylistsByStableIdPreserveOrder(playlists),
+                    favourites = dedupeAlbumsByStableIdPreserveOrder(favourites),
+                    recent = dedupeAlbumsByStableIdPreserveOrder(recent),
+                    latest = dedupeAlbumsByStableIdPreserveOrder(latest),
+                    highest = dedupeAlbumsByStableIdPreserveOrder(highest)
+                ).also {
                     // add all fetched albums to cache
-                    addToAlbumCache(favourites)
-                    addToAlbumCache(recent)
-                    addToAlbumCache(latest)
-                    addToAlbumCache(highest)
+                    addToAlbumCache(it.favourites)
+                    addToAlbumCache(it.recent)
+                    addToAlbumCache(it.latest)
+                    addToAlbumCache(it.highest)
                 }
             }.collectLatest { snapshot ->
                 withContext(Dispatchers.Main) {
@@ -448,7 +491,9 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 else -> {
                     val pid = MediaIds.parsePlaylistId(mediaId)
                     if (pid != null) {
-                        playlistsStateFlow().value.find { it.id == pid }?.let { playlistItem(it) }
+                        dedupePlaylistsByStableIdPreserveOrder(playlistsStateFlow().value)
+                            .find { it.id == pid }
+                            ?.let { playlistItem(it) }
                     } else {
                         val aid = MediaIds.parseAlbumId(mediaId)
                         if (aid != null) {
@@ -718,7 +763,8 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     private fun syncPlayerFromHostQueue(queue: List<Song>) {
         val p = player ?: return
-        if (queue.isEmpty()) {
+        val deduped = dedupeSongsByStableIdPreserveOrder(queue)
+        if (deduped.isEmpty()) {
             if (p.mediaItemCount > 0) {
                 p.stop()
                 p.clearMediaItems()
@@ -726,7 +772,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             return
         }
         // Include every track for Now Playing metadata; stream URL may arrive later from host.
-        val items = queue.map { songToPlayableMediaItem(it) }
+        val items = deduped.map { songToPlayableMediaItem(it) }
         if (items.isEmpty()) return
 
         if (p.playWhenReady) {
