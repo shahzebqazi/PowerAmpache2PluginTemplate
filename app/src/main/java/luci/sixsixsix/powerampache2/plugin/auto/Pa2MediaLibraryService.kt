@@ -22,6 +22,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.widget.Toast
 import androidx.concurrent.futures.CallbackToFutureAdapter
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -73,6 +74,17 @@ import luci.sixsixsix.powerampache2.plugin.domain.usecase.RecentAlbumsStateFlow
 import luci.sixsixsix.powerampache2.plugin.openPowerAmpache2
 import java.util.Collections.emptyList
 import javax.inject.Inject
+
+/** De-dupe resumption lists by song id ([Song.id] / [Song.mediaId]) before restoring playback. */
+internal fun dedupeSongsByStableIdPreserveOrder(songs: List<Song>): List<Song> {
+    val seen = HashSet<String>()
+    return songs.filter { song ->
+        val id = song.id.ifBlank { song.mediaId }
+        if (id.isBlank()) return@filter true
+        if (!seen.add(id)) return@filter false
+        true
+    }
+}
 
 @AndroidEntryPoint
 class Pa2MediaLibraryService : MediaLibraryService() {
@@ -472,6 +484,22 @@ class Pa2MediaLibraryService : MediaLibraryService() {
          * framework strips [MediaItem.localConfiguration] for privacy. ExoPlayer cannot play those
          * until we re-attach the stream URI from our library (see androidx/media issue #156).
          */
+        override fun onPlaybackResumption(
+            mediaSession: MediaSession,
+            controller: MediaSession.ControllerInfo,
+        ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+            val queue = dedupeSongsByStableIdPreserveOrder(queueStateFlow().value)
+            val playableItems = queue.map { this@Pa2MediaLibraryService.songToPlayableMediaItem(it) }
+            val startIndex = if (playableItems.isEmpty()) C.INDEX_UNSET else 0
+            return Futures.immediateFuture(
+                MediaSession.MediaItemsWithStartPosition(
+                    playableItems,
+                    startIndex,
+                    /* startPositionMs= */ 0L
+                )
+            )
+        }
+
         override fun onAddMediaItems(
             mediaSession: MediaSession,
             controller: MediaSession.ControllerInfo,
