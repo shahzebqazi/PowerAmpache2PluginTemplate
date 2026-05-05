@@ -509,6 +509,7 @@ class FakeMusicFetcher : MusicFetcher {
     override val highRatedAlbumsFlow = MutableStateFlow<List<Album>>(emptyList())
     override val albumSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
     override val playlistSongsMapFlow = MutableStateFlow<Map<String, List<Song>>>(emptyMap())
+    override val messengerFlow = MutableStateFlow<Boolean?>(null)
 
     override fun getArtists(query: String): Flow<List<Artist>> {
         musicFetcherListener?.getArtists(query)

@@ -20,7 +20,6 @@ import android.net.Uri
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.widget.Toast
 import androidx.concurrent.futures.CallbackToFutureAdapter
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -207,6 +206,13 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     private fun addToAlbumCache(albums: List<Album>) = albums.forEach { album -> albumsCache[album.id] = album }
 
+    /** Best-effort: bring up the dev host so IPC can register without blocking Android Auto. */
+    private fun ensurePowerAmpache2HostStartedNonBlocking() {
+        Handler(Looper.getMainLooper()).post {
+            openPowerAmpache2()
+        }
+    }
+
 
     /**
      * Subscribe to library changes and notify Android Auto when data arrives.
@@ -322,6 +328,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             session: MediaSession,
             controller: MediaSession.ControllerInfo,
         ): MediaSession.ConnectionResult {
+            this@Pa2MediaLibraryService.ensurePowerAmpache2HostStartedNonBlocking()
             val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
             if (session.isAutomotiveController(controller)) {
                 val withoutSearch =
@@ -343,10 +350,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 MediaIds.ROOT,
                 getString(R.string.media_browse_root_title)
             )
-            Handler(Looper.getMainLooper()).post {
-                openPowerAmpache2()
-                Toast.makeText(applicationContext, "onGetLibraryRoot", Toast.LENGTH_SHORT).show()
-            }
+            this@Pa2MediaLibraryService.ensurePowerAmpache2HostStartedNonBlocking()
             return Futures.immediateFuture(LibraryResult.ofItem(root, params))
         }
 

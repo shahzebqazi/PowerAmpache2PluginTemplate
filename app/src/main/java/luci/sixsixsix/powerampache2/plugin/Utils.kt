@@ -18,14 +18,14 @@ const val PACKAGE_NAME_DOGMAZIC = "luci.sixsixsix.powerampache2.free"
 
 fun Context.openPowerAmpache2() {
     val packagesArray = listOf(
+        PACKAGE_NAME_FDROID_DEBUG,
+        PACKAGE_NAME_GITHUB_DEBUG,
+        PACKAGE_NAME_PLAY_DEBUG,
+        PACKAGE_NAME_DOGMAZIC_DEBUG,
         PACKAGE_NAME_GITHUB,
         PACKAGE_NAME_FDROID,
         PACKAGE_NAME_PLAY,
-        PACKAGE_NAME_DOGMAZIC,
-        PACKAGE_NAME_PLAY_DEBUG,
-        PACKAGE_NAME_GITHUB_DEBUG,
-        PACKAGE_NAME_FDROID_DEBUG,
-        PACKAGE_NAME_DOGMAZIC_DEBUG
+        PACKAGE_NAME_DOGMAZIC
     )
 
     for (packageName in packagesArray) {
