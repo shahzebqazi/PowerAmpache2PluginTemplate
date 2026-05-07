@@ -23,32 +23,48 @@ package luci.sixsixsix.powerampache2.plugin
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
-import luci.sixsixsix.powerampache2.plugin.presentation.SongListScreen
 import luci.sixsixsix.powerampache2.plugin.presentation.delegates.BackPressHandler
 import luci.sixsixsix.powerampache2.plugin.presentation.delegates.BackPressHandlerImpl
 import luci.sixsixsix.powerampache2.ui.theme.PowerAmpache2Theme
-import javax.inject.Inject
+
+object DriveSafeOverlayCopy {
+    const val title = "Drive safe"
+    const val subtitle = "Enjoy your music"
+    const val body = "Please keep your attention on the road while Power Ampache 2 handles the soundtrack."
+    const val primaryAction = "Open Power Ampache 2"
+}
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImpl() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //launchPowerAmpache2()
         handleOnBackPressed(this) // prevent the activity from being destroyed on back-press
 
-        // uncomment for testing, viewModel contains a few examples to get data
-        // testContent()
-    }
-
-    private fun testContent() {
         setContent {
             PowerAmpache2Theme(
                 darkTheme = true,
                 dynamicColor = false
             ) {
-                SongListScreen()
+                DriveSafeOverlayScreen(
+                    onOpenPowerAmpache = ::launchPowerAmpache2
+                )
             }
         }
     }
@@ -60,5 +76,47 @@ class MainActivity : FragmentActivity(), BackPressHandler by BackPressHandlerImp
         // TODO: add all possible package names
         openPowerAmpache2()
         finish()
+    }
+}
+
+@Composable
+private fun DriveSafeOverlayScreen(
+    onOpenPowerAmpache: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(28.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Text(
+                    text = DriveSafeOverlayCopy.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = DriveSafeOverlayCopy.subtitle,
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = DriveSafeOverlayCopy.body,
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                )
+                Button(onClick = onOpenPowerAmpache) {
+                    Text(DriveSafeOverlayCopy.primaryAction)
+                }
+            }
+        }
     }
 }

@@ -499,6 +499,7 @@ class Pa2MediaLibraryServiceBugTests {
  */
 class FakeMusicFetcher : MusicFetcher {
     override var musicFetcherListener: MusicFetcherListener? = null
+    override val messengerFlow = MutableStateFlow<Boolean?>(null)
     override val currentQueueFlow = MutableStateFlow<List<Song>>(emptyList())
     override val playlistsFlow = MutableStateFlow<List<Playlist>>(emptyList())
     override val artistsFlow = MutableStateFlow<List<Artist>>(emptyList())
