@@ -1,14 +1,28 @@
+<div align="center">
+
+<p align="center">
+  <img src="docs/assets/hero.svg" alt="Power Ampache 2 — Android Auto plugin template" width="100%" />
+</p>
+
 # Power Ampache 2 — Plugin Template & Android Auto
 
-This repository is the **Power Ampache 2 plugin template** — a companion app that provides Android Auto browse and playback for a self-hosted [Ampache](https://ampache.org/) music server, powered by [Power Ampache 2](https://github.com/icefields/PowerAmpache2PluginTemplate) as the host app.
+### Kotlin companion app for in-car browse and playback via Power Ampache 2
 
-Built with **Clean Architecture** across four modules: `domain`, `data`, `app`, and `PowerAmpache2Theme`.
+[![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-7F52FF.svg)](https://kotlinlang.org/)
+[![Android](https://img.shields.io/badge/Android-Auto%20%2B%20Media3-3DDC84.svg)](https://developer.android.com/media/media3)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-## How It Works
+**Android Auto plugin template** for self-hosted [Ampache](https://ampache.org/) libraries. The plugin is an **IPC client** of [Power Ampache 2](https://github.com/icefields/PowerAmpache2) — it does not call the Ampache API directly.
 
-### Architecture Overview
+> **Scope:** Template + reference implementation (Clean Architecture: `domain`, `data`, `app`, `PowerAmpache2Theme`). **UX research sandbox:** [pa2-car-plugin on GitHub Pages](https://shahzebqazi.github.io/pa2-car-plugin/).
 
-The plugin is an **IPC client** of the main Power Ampache 2 app. It does not talk to the Ampache server directly — all data comes through the host app via a **Messenger-based IPC bridge**.
+[Architecture](#architecture-overview) · [Data flow](#data-flow) · [Build](#build--run) · [UX demo](#ux-demo) · [Stack](#libraries)
+
+</div>
+
+---
+
+## Architecture overview
 
 ```
 ┌─────────────────────┐    Messenger IPC    ┌──────────────────────────┐
@@ -23,28 +37,72 @@ The plugin is an **IPC client** of the main Power Ampache 2 app. It does not tal
 │                     │                     │   └─ Media3 Session      │
 └─────────────────────┘                     └──────────────────────────┘
                                                       │
-                                              Android Auto (car head unit)
-                                              browses via Media3 library
+                                              Android Auto (head unit)
+                                              browses via MediaLibraryService
 ```
 
-### Data Flow
+---
 
-1. **Plugin binds to host.** When `Pa2MediaLibraryService` starts, it starts and binds to `PA2DataFetchService` (in the `data` module). This service exposes a `Messenger` interface — the host app connects as a client and registers itself via `register_client`.
+## Data flow
 
-2. **Host pushes data.** The host app sends JSON-serialized playlists, albums, artists, and songs through the Messenger. `PA2DataFetchService` parses these with Gson and updates `MusicFetcherImpl`'s `StateFlow`s (`playlistsFlow`, `albumsFlow`, `albumSongsMapFlow`, etc.).
+1. **Plugin binds to host.** `Pa2MediaLibraryService` starts and binds to `PA2DataFetchService`. The host registers via Messenger `register_client`.
 
-3. **Plugin requests data.** When Android Auto drills into a browse node (e.g. an album), `Pa2MediaLibraryService` calls domain use cases (`GetSongsFromAlbumUseCase`, etc.) which flow through `MusicFetcherImpl` → `MusicFetcherListener` → `PA2DataFetchService`, which sends a Messenger request to the host. The host responds asynchronously with the JSON data, which updates the relevant `StateFlow`.
+2. **Host pushes library JSON.** Playlists, albums, artists, and songs arrive as Gson-deserialized payloads into `MusicFetcherImpl` `StateFlow`s.
 
-4. **Auto browses the library.** `Pa2MediaLibraryService` implements Media3's `MediaLibraryService`. Android Auto calls `onGetLibraryRoot`, `onGetChildren`, and `onGetItem` to navigate a browse tree: root → sections (playlists, favourite/recent/latest/highest albums) → items → songs.
+3. **Plugin requests on browse.** Android Auto drill-down triggers domain use cases → `MusicFetcherListener` → Messenger request → host responds asynchronously.
 
-5. **Playback via ExoPlayer.** When a user taps a song on the car display, Android Auto sends a `MediaItem` with only a `mediaId` (no URI — the framework strips `localConfiguration` for privacy). The `onAddMediaItems`/`onSetMediaItems` callbacks resolve the ID back to a `Song` object, re-attach the stream URL from `song.songUrl`, and expand a single song into a full album/playlist queue so skip/next works. ExoPlayer then streams the Ampache URL directly with proper `AudioAttributes`, audio focus handling, and wake lock.
+4. **Media3 browse tree.** `onGetLibraryRoot`, `onGetChildren`, `onGetItem` expose playlists, favourites, recents, and albums to the car UI.
 
-6. **Host queue mirroring.** When the host app plays audio on the phone, it pushes its queue via `MusicFetcher.currentQueueFlow`. The plugin mirrors this queue into ExoPlayer (paused) so Android Auto shows Now Playing metadata without requiring the head unit to have initiated playback.
+5. **ExoPlayer playback.** `onAddMediaItems` / `onSetMediaItems` resolve `mediaId` back to stream URLs; single-song taps expand to album/playlist queues for skip/next.
 
-### Libraries Used
+6. **Queue mirroring.** When the phone plays in the host app, the plugin mirrors the host queue into ExoPlayer (paused) so Android Auto shows Now Playing metadata.
 
-- **Media3 / ExoPlayer** — Android Auto browse tree, playback session, and audio streaming
-- **Dagger Hilt** — dependency injection
-- **Gson** — JSON deserialization of host app data into domain models
-- **Jetpack Compose + Material3** — phone UI
+---
 
+## UX demo
+
+In-car layout and browse UX experiments (no device required):
+
+**→ [shahzebqazi.github.io/pa2-car-plugin/](https://shahzebqazi.github.io/pa2-car-plugin/)**
+
+Use this sandbox when explaining MediaLibraryService navigation without installing the full host + head-unit stack.
+
+---
+
+## Build & run
+
+```bash
+git clone https://github.com/shahzebqazi/PowerAmpache2PluginTemplate.git
+cd PowerAmpache2PluginTemplate
+./gradlew :app:assembleDebug
+```
+
+Install the debug APK alongside a Power Ampache 2 host build that exposes the plugin Messenger API. Android Auto testing: Desktop Head Unit (DHU) or physical head unit with developer mode.
+
+---
+
+## Libraries
+
+| Layer | Technology |
+|-------|------------|
+| Playback / browse | Media3, ExoPlayer, `MediaLibraryService` |
+| DI | Dagger Hilt |
+| Serialization | Gson |
+| Phone UI | Jetpack Compose, Material 3 |
+
+---
+
+## Related
+
+| Resource | URL |
+|----------|-----|
+| Portfolio CV | [sqazi.sh/content.html?page=cv](https://sqazi.sh/content.html?page=cv) |
+| UX sandbox repo | [pa2-car-plugin](https://shahzebqazi.github.io/pa2-car-plugin/) |
+| Upstream host | [icefields/PowerAmpache2](https://github.com/icefields/PowerAmpache2) |
+
+---
+
+## License
+
+MIT — see [LICENSE](LICENSE).  
+Author: [Willy Worst](https://sqazi.sh) · code@sqazi.sh
