@@ -154,16 +154,9 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         player = exoPlayer
         val callback = Pa2LibraryCallback()
         librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback)
-            .setCustomLayout(
-                Pa2ShuffleCommands.buildShuffleCustomLayout(
-                    this,
-                    exoPlayer.shuffleModeEnabled,
-                    Pa2ShuffleCommands.canShuffle(exoPlayer),
-                )
-            )
-            // Reduces Android Auto list scroll reset while position updates (androidx/media#2192).
             .setPeriodicPositionUpdateEnabled(false)
             .build()
+        refreshShuffleTransportUi()
         exoPlayer.addListener(
             object : Player.Listener {
                 override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
@@ -179,7 +172,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         subscribeToHostQueueMirror()
     }
 
-    @OptIn(UnstableApi::class)
     private fun refreshShuffleTransportUi() {
         Pa2ShuffleCommands.refreshSessionShuffleLayout(librarySession, applicationContext, player)
     }
@@ -884,20 +876,21 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     p.setMediaItems(items, idx, p.currentPosition)
                 }
             }
-            applyShuffleAfterQueueSync(p, preserveShuffle)
+            if (!Pa2ShuffleCommands.canShuffle(p)) {
+                p.shuffleModeEnabled = false
+            } else if (preserveShuffle) {
+                p.shuffleModeEnabled = true
+            }
+            refreshShuffleTransportUi()
             return
         }
         p.setMediaItems(items)
         p.seekTo(0, 0)
         p.pause()
-        applyShuffleAfterQueueSync(p, preserveShuffle)
-    }
-
-    private fun applyShuffleAfterQueueSync(player: Player, preserveShuffle: Boolean) {
-        if (!Pa2ShuffleCommands.canShuffle(player)) {
-            player.shuffleModeEnabled = false
+        if (!Pa2ShuffleCommands.canShuffle(p)) {
+            p.shuffleModeEnabled = false
         } else if (preserveShuffle) {
-            player.shuffleModeEnabled = true
+            p.shuffleModeEnabled = true
         }
         refreshShuffleTransportUi()
     }
