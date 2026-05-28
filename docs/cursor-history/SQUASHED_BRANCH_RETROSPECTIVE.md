@@ -18,6 +18,7 @@
 | `cursor-cloud/ux-ui-car-plugin-ux-research-5a36` | #1 | Merged to old `dev-main` only |
 | `mockups` | #2 | Merged to old `dev-main` only |
 | `cursor-cloud/bug-fix-tests-b1c3` | #16 | Closed; **was** merged into `plugin/auto-main` history |
+| `cursor-cloud/dev-main-4dc1` | #15 (base) | **Retired** 2026-05-28 — compacted here (no unique commits) |
 
 ---
 
@@ -48,6 +49,19 @@
 - **Auto-connect side effect:** waking PA2 host from `onConnect` on every controller—racey, untestable in JVM, wrong lifecycle.
 - **Queue scroll bug (#3):** not addressed on these branches; fix path is **diff-guard `syncPlayerFromHostQueue` / `replaceMediaItem`** and try `MediaLibrarySession.Builder.setPeriodicPositionUpdateEnabled(false)` per [androidx/media#2192](https://github.com/androidx/media/issues/2192)—not dedupe or overlay UI.
 - **Launcher contract:** replacing `MainActivity` with a “drive safe” overlay breaks the documented “open host + finish” flow and AGENTS **out-of-scope** rules for routine AA work.
+
+---
+
+## Retired default: `cursor-cloud/dev-main-4dc1`
+
+**Last commit:** 2026-05-01 (`Merge PR #15` from `plugin/auto-dev`).  
+**Status:** Fully contained in **`plugin/auto-main`** (`git merge-base --is-ancestor` holds). No commits on `dev-main` that are not already on `plugin/auto-main`.
+
+**Why retired:** GitHub default was wrongly set to `dev-main` while all icefields integration and May 2026 work landed on **`plugin/auto-main`**. Keeping two “main” lines caused agent and human confusion.
+
+**Compaction:** No code cherry-pick required—only this record plus GitHub default → **`plugin/auto-main`**. Remote branch **`cursor-cloud/dev-main-4dc1`** deleted after default switch.
+
+**Lesson:** One integration branch per fork; name it what upstream expects (`plugin/auto-main` → `icefields/plugin/auto`).
 
 ---
 
@@ -227,7 +241,7 @@ Use this as the correction vector—not the abandoned branches:
 3. **PR checklist:** `./gradlew :app:assembleDebug` + **DHU screenshot or slice** + “not verified on car” if missing.
 4. **Do not touch `data/`/`domain/`** without icefields approval (see closed upstream issue #1).
 5. **Queue scroll (#3):** diff-guard queue mirror; try `setPeriodicPositionUpdateEnabled(false)`; read [androidx/media#2192](https://github.com/androidx/media/issues/2192).
-6. **Default branch:** Point GitHub default at **`plugin/auto-main`**, not stale `cursor-cloud/dev-main-4dc1`.
+6. **Default branch:** **`plugin/auto-main`** (done 2026-05-28). Do not recreate `cursor-cloud/dev-main-4dc1`.
 
 ---
 
