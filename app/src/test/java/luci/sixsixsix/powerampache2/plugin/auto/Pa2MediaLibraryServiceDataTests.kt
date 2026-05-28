@@ -26,7 +26,7 @@ import org.junit.Test
  * Tests for the plugin/auto-data and plugin/auto-emptylist features:
  * - Empty state (no data) shows placeholder items
  * - Section ordering: playlists, favourites, newest, highest rated, recent
- * - Section sorting: playlists by fav/rating, favourites shuffled, highest by rating
+ * - Section sorting: playlists by fav/rating, favourites stable order, highest by rating
  * - Section limits: max 66 items per section
  * - Artist names on album items (setArtist)
  * - MAX_SECTION_ITEMS constant
@@ -132,7 +132,7 @@ class Pa2MediaLibraryServiceDataTests {
     @Test
     fun favouriteAlbums_limitedTo66Items() {
         val albums = (1..100).map { Album(id = "$it", name = "Album $it") }
-        val limited = albums.shuffled().take(66)
+        val limited = albums.take(66)
         assertEquals("Should be limited to 66 items", 66, limited.size)
     }
 

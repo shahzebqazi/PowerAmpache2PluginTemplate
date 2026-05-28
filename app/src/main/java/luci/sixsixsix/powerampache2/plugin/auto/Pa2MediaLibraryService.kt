@@ -153,9 +153,35 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             .build()
         player = exoPlayer
         val callback = Pa2LibraryCallback()
-        librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback).build()
+        librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback)
+            .setCustomLayout(
+                Pa2ShuffleCommands.buildShuffleCustomLayout(
+                    this,
+                    exoPlayer.shuffleModeEnabled,
+                    Pa2ShuffleCommands.canShuffle(exoPlayer),
+                )
+            )
+            // Reduces Android Auto list scroll reset while position updates (androidx/media#2192).
+            .setPeriodicPositionUpdateEnabled(false)
+            .build()
+        exoPlayer.addListener(
+            object : Player.Listener {
+                override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                    refreshShuffleTransportUi()
+                }
+
+                override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) {
+                    refreshShuffleTransportUi()
+                }
+            }
+        )
         subscribeToLibraryChanges()
         subscribeToHostQueueMirror()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun refreshShuffleTransportUi() {
+        Pa2ShuffleCommands.refreshSessionShuffleLayout(librarySession, applicationContext, player)
     }
 
     /**
@@ -351,6 +377,18 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                         .remove(SessionCommand.COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT)
                         .build()
                 builder.setAvailableSessionCommands(withoutSearch)
+                builder.setAvailablePlayerCommands(
+                    Pa2ShuffleCommands.playerCommandsWithShuffle(session.player.availableCommands)
+                )
+                player?.let { p ->
+                    builder.setCustomLayout(
+                        Pa2ShuffleCommands.buildShuffleCustomLayout(
+                            applicationContext,
+                            p.shuffleModeEnabled,
+                            Pa2ShuffleCommands.canShuffle(p),
+                        )
+                    )
+                }
             }
             return builder.build()
         }
@@ -422,7 +460,6 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                 MediaIds.SECTION_FAVOURITE_ALBUMS -> immediateChildren(
                     sliceForPage(
                         favouriteAlbumStateFlow().value
-                            .shuffled()
                             .take(MAX_SECTION_ITEMS)
                             .map { albumItem(it) },
                         page,
@@ -816,11 +853,13 @@ class Pa2MediaLibraryService : MediaLibraryService() {
 
     private fun syncPlayerFromHostQueue(queue: List<Song>) {
         val p = player ?: return
+        val preserveShuffle = p.shuffleModeEnabled
         if (queue.isEmpty()) {
             if (p.mediaItemCount > 0) {
                 p.stop()
                 p.clearMediaItems()
             }
+            refreshShuffleTransportUi()
             return
         }
         // Include every track for Now Playing metadata; stream URL may arrive later from host.
@@ -845,11 +884,22 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                     p.setMediaItems(items, idx, p.currentPosition)
                 }
             }
+            applyShuffleAfterQueueSync(p, preserveShuffle)
             return
         }
         p.setMediaItems(items)
         p.seekTo(0, 0)
         p.pause()
+        applyShuffleAfterQueueSync(p, preserveShuffle)
+    }
+
+    private fun applyShuffleAfterQueueSync(player: Player, preserveShuffle: Boolean) {
+        if (!Pa2ShuffleCommands.canShuffle(player)) {
+            player.shuffleModeEnabled = false
+        } else if (preserveShuffle) {
+            player.shuffleModeEnabled = true
+        }
+        refreshShuffleTransportUi()
     }
 
     /**
