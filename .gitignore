@@ -7,24 +7,16 @@
 # Project-local Android SDK (sdk.dir in local.properties)
 /.android-sdk/
 
-# Per-iteration logcat slices captured by scripts/aa-logcat-slice.sh
-/.cursor/aa-logcat/
-
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
 local.properties
-.idea/deploymentTargetSelector.xml
-.idea/vcs.xml
+AGENTS.md
+.cursor/
+.idea/
 
