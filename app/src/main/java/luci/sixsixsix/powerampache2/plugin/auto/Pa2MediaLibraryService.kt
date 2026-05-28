@@ -154,6 +154,13 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         player = exoPlayer
         val callback = Pa2LibraryCallback()
         librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback)
+            .setMediaButtonPreferences(
+                Pa2ShuffleCommands.buildShuffleMediaButtonPreferences(
+                    this,
+                    exoPlayer.shuffleModeEnabled,
+                    Pa2ShuffleCommands.canShuffle(exoPlayer),
+                )
+            )
             .setPeriodicPositionUpdateEnabled(false)
             .build()
         refreshShuffleTransportUi()
@@ -173,7 +180,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
     }
 
     private fun refreshShuffleTransportUi() {
-        Pa2ShuffleCommands.refreshSessionShuffleLayout(librarySession, applicationContext, player)
+        Pa2ShuffleCommands.refreshSessionShuffleButtons(librarySession, applicationContext, player)
     }
 
     /**
@@ -362,6 +369,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             controller: MediaSession.ControllerInfo,
         ): MediaSession.ConnectionResult {
             val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+            val p = session.player
             if (session.isAutomotiveController(controller)) {
                 val withoutSearch =
                     MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
@@ -369,19 +377,17 @@ class Pa2MediaLibraryService : MediaLibraryService() {
                         .remove(SessionCommand.COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT)
                         .build()
                 builder.setAvailableSessionCommands(withoutSearch)
-                builder.setAvailablePlayerCommands(
-                    Pa2ShuffleCommands.playerCommandsWithShuffle(session.player.availableCommands)
-                )
-                player?.let { p ->
-                    builder.setCustomLayout(
-                        Pa2ShuffleCommands.buildShuffleCustomLayout(
-                            applicationContext,
-                            p.shuffleModeEnabled,
-                            Pa2ShuffleCommands.canShuffle(p),
-                        )
-                    )
-                }
             }
+            builder.setAvailablePlayerCommands(
+                Pa2ShuffleCommands.playerCommandsWithShuffle(p.availableCommands)
+            )
+            builder.setMediaButtonPreferences(
+                Pa2ShuffleCommands.buildShuffleMediaButtonPreferences(
+                    applicationContext,
+                    p.shuffleModeEnabled,
+                    Pa2ShuffleCommands.canShuffle(p),
+                )
+            )
             return builder.build()
         }
 

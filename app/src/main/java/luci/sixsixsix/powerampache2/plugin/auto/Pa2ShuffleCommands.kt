@@ -14,27 +14,30 @@ object Pa2ShuffleCommands {
     fun playerCommandsWithShuffle(base: Player.Commands): Player.Commands =
         base.buildUpon().add(Player.COMMAND_SET_SHUFFLE_MODE).build()
 
-    fun buildShuffleCustomLayout(
+    fun buildShuffleMediaButtonPreferences(
         context: Context,
         shuffleEnabled: Boolean,
         queuePlayable: Boolean,
     ): ImmutableList<CommandButton> {
+        if (!queuePlayable) {
+            return ImmutableList.of()
+        }
         val icon = if (shuffleEnabled) CommandButton.ICON_SHUFFLE_ON else CommandButton.ICON_SHUFFLE_OFF
         return ImmutableList.of(
             CommandButton.Builder(icon)
                 .setPlayerCommand(Player.COMMAND_SET_SHUFFLE_MODE)
                 .setDisplayName(context.getString(R.string.media_action_shuffle))
-                .setEnabled(queuePlayable)
+                .setSlots(CommandButton.SLOT_OVERFLOW)
                 .build()
         )
     }
 
     fun canShuffle(player: Player): Boolean = player.mediaItemCount >= MIN_QUEUE_SIZE_FOR_SHUFFLE
 
-    fun refreshSessionShuffleLayout(session: MediaSession?, context: Context, player: Player?) {
+    fun refreshSessionShuffleButtons(session: MediaSession?, context: Context, player: Player?) {
         val p = player ?: return
-        session?.setCustomLayout(
-            buildShuffleCustomLayout(context, p.shuffleModeEnabled, canShuffle(p))
+        session?.setMediaButtonPreferences(
+            buildShuffleMediaButtonPreferences(context, p.shuffleModeEnabled, canShuffle(p))
         )
     }
 }
