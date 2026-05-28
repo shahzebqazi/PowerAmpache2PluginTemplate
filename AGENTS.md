@@ -11,7 +11,7 @@ Single onboarding doc for **humans** and **autonomous agents** (Cursor, CI bots)
 ## Git
 
 - **`main`** tracks **`upstream/main`** only (`icefields/PowerAmpache2PluginTemplate`). No feature or agent commits there; sync with `git fetch upstream` + `git reset --hard upstream/main` when asked.
-- **Work on** **`cursor-cloud/dev-main-4dc1`** or **`cursor-cloud/<topic>`** branches.
+- **Work on** **`plugin/auto-main`** (default integration branch) or short-lived **`cursor-cloud/<topic>`** branches off it.
 - **Commit subjects (dev branches):** **`<branch-name>: <short imperative summary>`** using the **full** output of `git branch --show-current`. Rebases rewrite hashes; the prefix preserves attribution.
 
 ## Scope (default)
@@ -22,7 +22,7 @@ Single onboarding doc for **humans** and **autonomous agents** (Cursor, CI bots)
 | **`PowerAmpache2Theme`** when the task allows UI/theme work | **`MainActivity`** launcher contract / “open host + finish” flow for routine AA tasks |
 | Coordinated changes **only** when assigned with a real host+plugin spec | Ad-hoc “IPC hardening”, “DTO keys”, **`START_STICKY`** tweaks, or protocol invention in shared layers |
 
-**History:** A batch of commits on **`cursor-cloud/dev-main-4dc1`** (~2026‑04‑12; subjects around IPC / DTO / “harden”) was **reverted** as misaligned. **Do not** recreate that pattern without maintainer direction.
+**History:** A batch of commits on the retired **`cursor-cloud/dev-main-4dc1`** branch (~2026‑04‑12; subjects around IPC / DTO / “harden”) was **reverted** as misaligned. That branch is **retired** (see `docs/cursor-history/` on **`cursor-cloud/history-squashed`**). **Do not** recreate that pattern without maintainer direction.
 
 **Architecture:** Modules `domain`, `data`, `app`, `PowerAmpache2Theme` — respect Clean Architecture boundaries.
 
@@ -105,12 +105,12 @@ One-off PRs to **`icefields/PowerAmpache2PluginTemplate`**:
 
 ## Upstream vs this fork
 
-This fork integrates on **`cursor-cloud/dev-main-4dc1`**. **`main`** stays a clean mirror of **`upstream/main`**.
+This fork integrates on **`plugin/auto-main`** (GitHub default; tracks icefields’ Auto MVP line). **`main`** stays a clean mirror of **`upstream/main`**.
 ---
 
 # Orchestrator handoff — multi-agent loop for production readiness
 
-This section is the entry point for the **AI orchestrator** that drives Power Ampache 2 production readiness on **`cursor-cloud/bug-fix-tests-b1c3`** (or a successor `cursor-cloud/<topic>` branch). It assumes you are an LLM running in Cursor with the **`Task`** tool and access to Cursor's background-agent capability (Composer 2). Read this entire section before acting.
+This section is the entry point for the **AI orchestrator** that drives Power Ampache 2 production readiness on **`plugin/auto-main`** (or a short-lived `cursor-cloud/<topic>` branch off it). It assumes you are an LLM running in Cursor with the **`Task`** tool and access to Cursor's background-agent capability (Composer 2). Read this entire section before acting.
 
 ## Role split
 
