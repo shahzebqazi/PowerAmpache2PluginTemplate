@@ -151,6 +151,7 @@ class Pa2MediaLibraryService : MediaLibraryService() {
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
+        exoPlayer.shuffleModeEnabled = true
         player = exoPlayer
         val callback = Pa2LibraryCallback()
         librarySession = MediaLibrarySession.Builder(this, exoPlayer, callback).build()
@@ -345,12 +346,19 @@ class Pa2MediaLibraryService : MediaLibraryService() {
         ): MediaSession.ConnectionResult {
             val builder = MediaSession.ConnectionResult.AcceptedResultBuilder(session)
             if (session.isAutomotiveController(controller)) {
-                val withoutSearch =
+                // Remove search (not implemented) but keep shuffle and all other playback commands
+                val sessionCommands =
                     MediaSession.ConnectionResult.DEFAULT_SESSION_AND_LIBRARY_COMMANDS.buildUpon()
                         .remove(SessionCommand.COMMAND_CODE_LIBRARY_SEARCH)
                         .remove(SessionCommand.COMMAND_CODE_LIBRARY_GET_SEARCH_RESULT)
                         .build()
-                builder.setAvailableSessionCommands(withoutSearch)
+                // Explicitly include shuffle in player commands so Android Auto shows the button
+                val playerCommands =
+                    MediaSession.ConnectionResult.DEFAULT_PLAYER_COMMANDS.buildUpon()
+                        .add(Player.COMMAND_SET_SHUFFLE_MODE)
+                        .build()
+                builder.setAvailableSessionCommands(sessionCommands)
+                builder.setAvailablePlayerCommands(playerCommands)
             }
             return builder.build()
         }
